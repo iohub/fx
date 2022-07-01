@@ -1,4 +1,4 @@
-# ioc
+# fx
 a c-like toy language for mlir
 
 ## build
@@ -10,7 +10,7 @@ ninja
 ```
 ## run
 ```shell
-./ioc --file ../examples/add.rb
+./fx --file ../examples/demo.rb
 ```
 ## reference
 

@@ -32,6 +32,7 @@ add_executable(fx
     ${FLEX_Scanner_OUTPUTS}
     ${Fmt_INCLUDE_DIR}
     ${CLI11_INCLUDE_DIR}
+    src/type.cc
     src/astnode.cc
     src/typecheck.cc
     src/main.cc

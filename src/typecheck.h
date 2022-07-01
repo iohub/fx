@@ -5,6 +5,7 @@
 #include <string>
 #include <map>
 #include "astnode.h"
+#include "env.h"
 
 namespace fx {
 
@@ -12,21 +13,23 @@ struct TypeCheckResult {
     std::string errmsg;
 
     TypeCheckResult() : errmsg("") {}
-    TypeCheckResult(const char *msg) : errmsg(msg) {}
+    TypeCheckResult(std::string msg) : errmsg(msg) {}
+
+    bool operator==(const TypeCheckResult& b) { return errmsg == b.errmsg; }
+    bool operator!=(const TypeCheckResult& b) { return  errmsg != b.errmsg; }
 };
 
-struct Env : public std::map<std::string, Ty> {
-};
 
 const TypeCheckResult TypeOk = TypeCheckResult("Ok");
 
 class TypeChecker {
-
 public:
-    TypeCheckResult check(Env env, Decls decls);
+    static TypeCheckResult check(Env &env, Decls *decls);
+
 private:
-    bool isSubtype(AstNodePtr a, AstNodePtr b);
-    TypeCheckResult checkBinaryOp(AstNodePtr ptr);
+    static bool isSubtype(AstNodePtr a, AstNodePtr b);
+    static TypeCheckResult checkBinaryOp(AstNodePtr ptr);
+    static TypeCheckResult checkFuncDecl(Env &env, AstNodePtr ptr);
 };
 
 

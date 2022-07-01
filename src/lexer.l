@@ -41,9 +41,9 @@ STRING		\"{print}*\"
 <ML_COMMENT>"\n"		{ lineno += 1; }
 
 
-"str"       	{ return STR; }
-"int"			{ return INT; }
-"float"			{ return FLOAT; }
+"str"       	{ TO_STR; return STR; }
+"int"			{ TO_STR; return INT; }
+"float"			{ TO_STR; return FLOAT; }
 "if"			{ return IF; }
 "else"			{ return ELSE; }
 "while"			{ return WHILE; }

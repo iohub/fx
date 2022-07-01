@@ -5,7 +5,7 @@ namespace fx {
 
 void AstNode::print() {
     std::string tab = "";
-    std::string ctree = str();
+    std::string ctree = sexp();
     std::string out = "";
     for (char c: ctree) {
         if (c == '(') {

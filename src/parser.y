@@ -20,7 +20,7 @@
     std::string *str;
     fx::AstNode *node;
     fx::AstNodePtr *node_ptr;
-    fx::Decls *defs;
+    fx::Decls *decls;
     fx::Exprs *exprs;
     fx::NodeVec *args;
     fx::Args *params;
@@ -36,7 +36,8 @@
 %token <str> IDENT ICONST FCONST CCONST STRING
 %token <str> FN
 
-%type <defs> program decls
+%type <str> var_type primitive_type INT FLOAT STR
+%type <decls> program decls
 %type <exprs> stmts stmts_block
 %type <node> var_decl expr op unary_expr func_call expr_stmt
 %type <func> func_decl
@@ -67,14 +68,13 @@ decl: func_decl | var_decl ;
 func_decl
      : FN IDENT LPAREN def_args RPAREN var_type stmts_block
      {
-         $$ = new fx::FuncDecl();
+         $$ = new fx::FuncDecl($2, $6);
          $$->body = $7;
          $$->args = $4;
-         $$->name = $2;
      }
      | FN IDENT LPAREN RPAREN var_type stmts_block
      {
-         $$ = new fx::FuncDecl(); $$->body = $6; $$->name = $2;
+         $$ = new fx::FuncDecl($2, $5); $$->body = $6;
      }
      ;
 
@@ -108,20 +108,19 @@ expr: op | func_call | unary_expr;
 return_stmt
     : RETURN expr
     {
-        fx::ReturnStmt *n = new fx::ReturnStmt();
+        fx::ReturnStmt *n = new fx::ReturnStmt($2->Type());
         n->stmt = fx::AstNodePtr($2);
         $$ = n;
-
     }
     ;
 
 call_args
-    : op_val
+    : expr
     {
         $$ = new fx::Args();
         $$->push_back(fx::AstNodePtr($1));
     }
-    | call_args COMMA op_val
+    | call_args COMMA expr
     {
         $1->push_back(fx::AstNodePtr($3));
     }
@@ -164,8 +163,8 @@ op
     };
 
 op_val
-      : IDENT { $$ = new fx::Val(fx::NodeKind::Var, $1); }
-      | primitive_val { $$ = $1; }
+      : IDENT { $$ = new fx::Val(fx::NodeKind::VarRef, $1); }
+      | primitive_val { $$ = $1; };
 
 binary_op: ADDOP | MINUSOP | MULOP | DIVOP;
 
@@ -174,7 +173,7 @@ stmts_block
       | LBRACE RBRACE { $$ = new fx::Exprs(); }
       ;
 
-var_decl: var_type IDENT { $$ = new fx::VarDecl(fx::NodeKind::Var, $2); };
+var_decl: var_type IDENT { $$ = new fx::VarDecl($2, $1, nullptr); };
 
 primitive_type: INT | FLOAT | STR;
 

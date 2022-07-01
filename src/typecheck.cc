@@ -8,23 +8,75 @@ bool TypeChecker::isSubtype(AstNodePtr a, AstNodePtr b) {
 
 TypeCheckResult TypeChecker::checkBinaryOp(AstNodePtr ptr) {
     if (!ptr) {
-        return TypeCheckResult("pass nil to checkBinaryOp");
+        return TypeCheckResult("reference to nil");
     }
     BinaryOperator *op = dynamic_cast<BinaryOperator*>(ptr.get());
     if (!op) {
-        return TypeCheckResult("pass nil to checkBinaryOp");
+        return TypeCheckResult("Invalid BinaryOperator");
     }
-    if (!isSubtype(op->lhs, op->rhs)) {
-        return TypeCheckResult("incompatible type in BinaryOperator");
+    AstNodePtr lhs = op->lhs, rhs = op->rhs;
+    if (!isSubtype(lhs, rhs)) {
+        return TypeCheckResult(fmt::format("incompatible type {} with {} in BinaryOperator",
+                    lhs->Type().type_name(), rhs->Type().type_name()));
     }
     return TypeOk;
 }
 
-TypeCheckResult TypeChecker::check(Env env, Decls decls) {
-    for (auto n : decls.decls) {
+TypeCheckResult TypeChecker::check(Env &env, Decls *decls) {
+    TypeCheckResult result = TypeOk;
+    FuncDecl *fn;
+    for (auto n : decls->decls) {
+        switch (n->kind) {
+            case NodeKind::FuncDecl:
+                if (!(fn = dynamic_cast<FuncDecl*>(n.get()))) {
+                    break;
+                }
+                env[fn->nominal()] = fn->Type();
+                result = checkFuncDecl(env, n);
+                if (result != TypeOk) {
+                    Logging::info("Incompatible type {}\n", result.errmsg);
+                }
+                break;
+            default:
+                Logging::info("Unknown AstNode:{}\n", uint8_t(n->kind));
+                break;
+        }
     }
-    return TypeOk;
+    return result;
 }
+
+
+TypeCheckResult TypeChecker::checkFuncDecl(Env &env, AstNodePtr n) {
+    FuncDecl *fn = dynamic_cast<FuncDecl*>(n.get());
+    if (!fn) {
+        return TypeCheckResult("Invalid FuncDecl");
+    }
+    Env nenv = env;
+    if (fn->args != nullptr) {
+        for (auto arg : *(fn->args)) {
+            VarDecl* var = dynamic_cast<VarDecl*>(arg.get());
+            if (var) {
+                nenv[var->name()] = var->Type();
+            }
+        }
+    }
+    bool foundReturn = false;
+    if (fn->body != nullptr) {
+        for (auto n : *(fn->body)) {
+            if (n->is(NodeKind::ReturnStmt)) {
+                foundReturn = true;
+                if (!n->synthesized()) n->synthesize(env);
+                if (n->Type() != fn->Type()) {
+                    return TypeCheckResult(fmt::format("{}: Cann't return {} with {}",
+                                fn->nominal(), fn->tyname(), n->tyname()));
+                }
+            }
+        }
+    }
+    return foundReturn && !fn->Type().is(TypeID::Void) ?
+        TypeOk : TypeCheckResult("No Value return in non-void function");
+}
+
 
 
 }

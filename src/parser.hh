@@ -97,7 +97,7 @@ union YYSTYPE
     std::string *str;
     fx::AstNode *node;
     fx::AstNodePtr *node_ptr;
-    fx::Decls *defs;
+    fx::Decls *decls;
     fx::Exprs *exprs;
     fx::NodeVec *args;
     fx::Args *params;
