@@ -1,0 +1,5 @@
+build_ninja
+src/lexer.cc
+src/parser.cc
+compile_commands.json
+
