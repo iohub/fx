@@ -32,7 +32,6 @@ public:
     Kind kind = Kind::Invalid;
 
     AstNode(Kind k): kind(k) {}
-    AstNode(Kind k, Ty::ID t): kind(k), ty(t) {}
     AstNode(Kind k, Ty ty): kind(k), ty(ty) {}
     AstNode(): kind(Kind::Invalid) {}
 

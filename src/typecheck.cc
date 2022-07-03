@@ -34,7 +34,7 @@ TypeCheckResult TypeChecker::check(Env &env, Decls *decls) {
                 env[fn->nominal()] = fn->Type();
                 result = checkFuncDecl(env, n);
                 if (result != TypeOk) {
-                    Logging::info("Incompatible type {}\n", result.errmsg);
+                    Logging::info("[error]: {}\n", result.errmsg);
                 }
                 break;
             default:
@@ -67,7 +67,7 @@ TypeCheckResult TypeChecker::checkFuncDecl(Env &env, AstNodePtr n) {
                 foundReturn = true;
                 if (!n->synthesized()) n->synthesize(env);
                 if (n->Type() != fn->Type()) {
-                    return TypeCheckResult(fmt::format("{}: Cann't return {} with {}",
+                    return TypeCheckResult(fmt::format("function:{} incompatible type: Cann't return {} with {}",
                                 fn->nominal(), fn->tyname(), n->tyname()));
                 }
             }
