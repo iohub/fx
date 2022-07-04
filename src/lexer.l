@@ -62,9 +62,13 @@ STRING		\"{print}*\"
 "++"|"--"				{ return INCR; }
 "||"					{ return OROP; }
 "&&"					{ return ANDOP; }
-"!"						{ return NOTOP; }
-"=="|"!="				{ return EQUOP; }
-">"|"<"|">="|"<="		{ return RELOP; }
+"!"						{ TO_STR; return NOTOP; }
+"=="				    { TO_STR; return EQOP; }
+"!="				    { TO_STR; return NEQOP; }
+">"				        { TO_STR; return GTOP; }
+">="				    { TO_STR; return GEOP; }
+"<"				        { TO_STR; return LTOP; }
+"<="				    { TO_STR; return LEOP; }
 
 
 "("				{ return LPAREN; }

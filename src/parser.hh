@@ -65,25 +65,30 @@ extern int yydebug;
     OROP = 275,
     ANDOP = 276,
     NOTOP = 277,
-    EQUOP = 278,
-    RELOP = 279,
-    LPAREN = 280,
-    RPAREN = 281,
-    LBRACK = 282,
-    RBRACK = 283,
-    LBRACE = 284,
-    RBRACE = 285,
-    SEMI = 286,
-    DOT = 287,
-    COMMA = 288,
-    ASSIGN = 289,
-    REFER = 290,
-    IDENT = 291,
-    ICONST = 292,
-    FCONST = 293,
-    CCONST = 294,
-    STRING = 295,
-    FN = 296
+    RELOP = 278,
+    LPAREN = 279,
+    RPAREN = 280,
+    LBRACK = 281,
+    RBRACK = 282,
+    LBRACE = 283,
+    RBRACE = 284,
+    SEMI = 285,
+    DOT = 286,
+    COMMA = 287,
+    ASSIGN = 288,
+    REFER = 289,
+    IDENT = 290,
+    ICONST = 291,
+    FCONST = 292,
+    CCONST = 293,
+    STRING = 294,
+    NEQOP = 295,
+    GTOP = 296,
+    GEOP = 297,
+    LTOP = 298,
+    LEOP = 299,
+    EQOP = 300,
+    FN = 301
   };
 #endif
 
@@ -102,11 +107,12 @@ union YYSTYPE
     fx::NodeVec *args;
     fx::Args *params;
     fx::FuncDecl *func;
+    fx::IfStmt *ifnode;
     fx::Val *val;
     fx::Call *call;
-    fx::BinaryOperator *binaryop;
+    fx::Operator *op;
 
-#line 110 "/home/do/cspace/fx/src/parser.hh" /* yacc.c:1909  */
+#line 116 "/home/do/cspace/fx/src/parser.hh" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;

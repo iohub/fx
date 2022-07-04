@@ -10,13 +10,13 @@ TypeCheckResult TypeChecker::checkBinaryOp(AstNodePtr ptr) {
     if (!ptr) {
         return TypeCheckResult("reference to nil");
     }
-    BinaryOperator *op = dynamic_cast<BinaryOperator*>(ptr.get());
+    Operator *op = dynamic_cast<Operator*>(ptr.get());
     if (!op) {
-        return TypeCheckResult("Invalid BinaryOperator");
+        return TypeCheckResult("Invalid Operator");
     }
     AstNodePtr lhs = op->lhs, rhs = op->rhs;
     if (!isSubtype(lhs, rhs)) {
-        return TypeCheckResult(fmt::format("incompatible type {} with {} in BinaryOperator",
+        return TypeCheckResult(fmt::format("incompatible type {} with {} in Operator",
                     lhs->Type().type_name(), rhs->Type().type_name()));
     }
     return TypeOk;
@@ -67,7 +67,7 @@ TypeCheckResult TypeChecker::checkFuncDecl(Env &env, AstNodePtr n) {
                 foundReturn = true;
                 if (!n->synthesized()) n->synthesize(env);
                 if (n->Type() != fn->Type()) {
-                    return TypeCheckResult(fmt::format("function:{} incompatible type: Cann't return {} with {}",
+                    return TypeCheckResult(fmt::format("function:{} incompatible type: Cann't return ({}) with ({})",
                                 fn->nominal(), fn->tyname(), n->tyname()));
                 }
             }

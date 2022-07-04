@@ -26,8 +26,13 @@ class AstNode {
 public:
     enum class Kind : uint8_t {
         Invalid, Nil, CallFunc, Constant,
-        FuncDecl, VarRef, VarDecl, Expr, BinaryOperator,
+        FuncDecl, VarRef, VarDecl, Expr, BinaryOperator, UnaryOperator,
         ReturnStmt, DeclList
+    };
+    enum class OpKind: uint8_t {
+        Invalid,
+        LT, LE, EQ, GT, GE, NEQ, // binaryop
+        MUL, DIV, ADD, SUB // unaryop
     };
     Kind kind = Kind::Invalid;
 
@@ -56,6 +61,7 @@ protected:
 };
 
 typedef AstNode::Kind NodeKind;
+typedef AstNode::OpKind OpKind;
 
 struct Decls: public AstNode {
     Decls(): AstNode(Kind::DeclList) {}
@@ -144,19 +150,20 @@ struct VarDecl: public AstNode {
     }
 };
 
-struct BinaryOperator: public AstNode {
+struct Operator: public AstNode {
     AstNodePtr lhs;
     AstNodePtr rhs;
-    Kind kind  = NodeKind::BinaryOperator;
+    Kind kind;
+    OpKind op;
 
-    BinaryOperator(Val *l, Val *r) : lhs(l), rhs(r) {}
+    Operator(Kind nodeKind, OpKind opKind, AstNode *l, AstNode *r) : lhs(l), rhs(r), op(opKind), kind(nodeKind) {}
 
     virtual std::string dump() {
         return fmt::format("binaryop[{}{}]", eval(lhs), eval(rhs));
     }
 
-    ~BinaryOperator() {
-        Logging::debug("~BinaryOperator({})\n", dump());
+    ~Operator() {
+        Logging::debug("~Operator({})\n", dump());
     }
 };
 
@@ -205,7 +212,7 @@ struct Call: public AstNode {
         if (args != nullptr) {
             for (auto itr: *args) str += itr->sexp();
         }
-        return fmt::format("({})", str);
+        return str;
     }
 
     virtual bool synthesize(const Env &env) {

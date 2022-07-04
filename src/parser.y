@@ -25,15 +25,17 @@
     fx::NodeVec *args;
     fx::Args *params;
     fx::FuncDecl *func;
+    fx::IfStmt *ifnode;
     fx::Val *val;
     fx::Call *call;
-    fx::BinaryOperator *binaryop;
+    fx::Operator *op;
 }
 
 %token STR IF ELSE WHILE FOR CONTINUE BREAK VOID RETURN INT FLOAT COLON
-%token ADDOP MINUSOP MULOP DIVOP INCR OROP ANDOP NOTOP EQUOP RELOP
+%token ADDOP MINUSOP MULOP DIVOP INCR OROP ANDOP NOTOP RELOP
 %token LPAREN RPAREN LBRACK RBRACK LBRACE RBRACE SEMI DOT COMMA ASSIGN REFER
 %token <str> IDENT ICONST FCONST CCONST STRING
+%token <str> NEQOP GTOP GEOP LTOP LEOP EQOP
 %token <str> FN
 
 %type <str> var_type primitive_type INT FLOAT STR
@@ -41,10 +43,11 @@
 %type <exprs> stmts stmts_block
 %type <node> var_decl expr op unary_expr func_call expr_stmt
 %type <func> func_decl
-%type <node> stmt return_stmt for_stmt
+%type <node> stmt return_stmt for_stmt compare_stmt
 %type <args> def_args
 %type <params> call_args
-%type <val> op_val primitive_val
+%type <node> op_val primitive_val
+%type <ifnode> if_stmt
 
 %start program
 
@@ -101,7 +104,7 @@ stmts
     ;
 
 
-stmt: var_decl | expr | return_stmt | for_stmt;
+stmt: var_decl | expr | return_stmt | for_stmt | if_stmt;
 
 expr: op | func_call | unary_expr;
 
@@ -156,15 +159,26 @@ unary_operator
 	| '!'
 	;
 
+compare_operator
+    : EQOP
+    | GTOP
+    | GEOP
+    | LTOP
+    | LEOP
+    | NEQOP
+    ;
+
 op
     : op_val binary_op op_val
     {
-        $$ = new fx::BinaryOperator($1, $3);
+        $$ = new fx::Operator(fx::NodeKind::BinaryOperator, fx::OpKind::ADD, $1, $3);
     };
 
 op_val
       : IDENT { $$ = new fx::Val(fx::NodeKind::VarRef, $1); }
-      | primitive_val { $$ = $1; };
+      | primitive_val { $$ = $1; }
+      | func_call { $$ = $1; } ;
+
 
 binary_op: ADDOP | MINUSOP | MULOP | DIVOP;
 
@@ -206,6 +220,26 @@ for_stmt
         n->body = $7;
         $$ = n;
     };
+
+if_stmt
+    : IF LPAREN compare_stmt RPAREN stmts_block
+    {
+        fx::IfStmt *n = new fx::IfStmt();
+        $$ = n;
+    }
+    | IF LPAREN compare_stmt RPAREN stmts_block ELSE stmts_block
+    {
+        fx::IfStmt *n = new fx::IfStmt();
+        $$ = n;
+    }
+    ;
+
+compare_stmt
+    : op_val compare_operator op_val
+    {
+        $$ = new fx::Operator(fx::NodeKind::BinaryOperator, fx::OpKind::ADD, $1, $3);
+    };
+
 
 expr_stmt
     : SEMI
