@@ -27,11 +27,22 @@ else()
   message(FATAL_ERROR "load CLI11 library failed")
 endif()
 
+# json library
+if(EXISTS "${CMAKE_SOURCE_DIR}/third_party/json/include")
+    message(STATUS "found json library")
+    set(JSON_INCLUDE_DIR third_party/json/include)
+else()
+  message(STATUS "git submodule init && git submodule update")
+  message(FATAL_ERROR "load json library failed")
+endif()
+
+
 add_executable(fx
     ${BISON_Parser_OUTPUTS}
     ${FLEX_Scanner_OUTPUTS}
     ${Fmt_INCLUDE_DIR}
     ${CLI11_INCLUDE_DIR}
+    ${JSON_INCLUDE_DIR}
     src/type.cc
     src/astnode.cc
     src/typecheck.cc
@@ -43,7 +54,9 @@ set_property(TARGET fx PROPERTY CXX_STANDARD 17)
 
 add_subdirectory(${CMAKE_SOURCE_DIR}/third_party/fmt)
 add_subdirectory(${CMAKE_SOURCE_DIR}/third_party/CLI11)
+add_subdirectory(${CMAKE_SOURCE_DIR}/third_party/json)
 include_directories(${CMAKE_SOURCE_DIR}/third_party/CLI11/include)
+include_directories(${CMAKE_SOURCE_DIR}/third_party/json/include)
 
 target_link_libraries(fx PUBLIC fmt)
 

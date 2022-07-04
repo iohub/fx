@@ -38,15 +38,15 @@
 %token <str> NEQOP GTOP GEOP LTOP LEOP EQOP
 %token <str> FN
 
-%type <str> var_type primitive_type INT FLOAT STR
+%type <str> var_type primitive_type INT FLOAT STR compare_operator
 %type <decls> program decls
 %type <exprs> stmts stmts_block
-%type <node> var_decl expr op unary_expr func_call expr_stmt
+%type <node> var_decl expr op unary_expr func_call expr_stmt assignment_expr
 %type <func> func_decl
-%type <node> stmt return_stmt for_stmt compare_stmt
+%type <node> stmt return_stmt for_stmt boolean_stmt
 %type <args> def_args
 %type <params> call_args
-%type <node> op_val primitive_val
+%type <node> op_val primitive_val value_expr
 %type <ifnode> if_stmt
 
 %start program
@@ -104,7 +104,7 @@ stmts
     ;
 
 
-stmt: var_decl | expr | return_stmt | for_stmt | if_stmt;
+stmt: var_decl | expr | return_stmt | for_stmt | if_stmt | assignment_expr;
 
 expr: op | func_call | unary_expr;
 
@@ -149,7 +149,6 @@ unary_expr
        { $$ = dynamic_cast<fx::AstNode*>($2); }
     ;
 
-
 unary_operator
 	: '&'
 	| '*'
@@ -179,6 +178,16 @@ op_val
       | primitive_val { $$ = $1; }
       | func_call { $$ = $1; } ;
 
+value_expr
+    : op_val
+    {
+        $$ = $1;
+    }
+    | op
+    {
+        $$ = $1;
+    }
+    ;
 
 binary_op: ADDOP | MINUSOP | MULOP | DIVOP;
 
@@ -222,19 +231,19 @@ for_stmt
     };
 
 if_stmt
-    : IF LPAREN compare_stmt RPAREN stmts_block
+    : IF LPAREN boolean_stmt RPAREN stmts_block
     {
-        fx::IfStmt *n = new fx::IfStmt();
+        fx::IfStmt *n = new fx::IfStmt($3, $5, nullptr);
         $$ = n;
     }
-    | IF LPAREN compare_stmt RPAREN stmts_block ELSE stmts_block
+    | IF LPAREN boolean_stmt RPAREN stmts_block ELSE stmts_block
     {
-        fx::IfStmt *n = new fx::IfStmt();
+        fx::IfStmt *n = new fx::IfStmt($3, $5, $7);
         $$ = n;
     }
     ;
 
-compare_stmt
+boolean_stmt
     : op_val compare_operator op_val
     {
         $$ = new fx::Operator(fx::NodeKind::BinaryOperator, fx::OpKind::ADD, $1, $3);
@@ -251,6 +260,15 @@ expr_stmt
         $$ = $1;
     }
     ;
+
+assignment_operator
+    : ASSIGN
+
+assignment_expr
+    : IDENT assignment_operator value_expr
+    {
+        $$ = new fx::AssignStmt(new fx::Val(fx::NodeKind::VarRef, $1), $3);
+    };
 
 
 %%

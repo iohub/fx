@@ -1,9 +1,11 @@
 #include <stdio.h>
 #include <fstream>
+#include <iostream>
 #include <memory>
 
 #include <fmt/core.h>
 #include <CLI/CLI.hpp>
+#include <nlohmann/json.hpp>
 
 #include "util.h"
 #include "astnode.h"
@@ -11,6 +13,7 @@
 #include "typecheck.h"
 
 using namespace fx;
+using json = nlohmann::json;
 
 extern FILE *yyin;
 extern fx::AstNode* Program;
@@ -39,8 +42,12 @@ int main(int argc, const char *argv[]) {
     if (int err = parse(fname.c_str()) != 0) {
         fmt::print("parse file:{}, err:{}\n", fname, err);
     } else {
-        fmt::print("parsed ast:\n{}\n", Program->sexp());
         Program->print();
+        json jsonExp = Program->tojson();
+        // print pretty json
+        // std::cout << std::setw(2) << jsonExp << std::endl;
+        // visualize onsite: https://vanya.jp.net/vtree
+        std::cout << jsonExp << std::endl;
     }
     if (Program != nullptr) {
         Env emptyCtx;

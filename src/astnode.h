@@ -8,6 +8,7 @@
 #include <string>
 #include <memory>
 #include <fmt/core.h>
+#include <nlohmann/json.hpp>
 #include "type.h"
 #include "env.h"
 #include "util.h"
@@ -20,6 +21,7 @@ typedef std::vector<AstNodePtr> NodeVec;
 typedef std::vector<AstNodePtr> Args;
 typedef std::vector<AstNodePtr> Exprs;
 
+using json = nlohmann::json;
 
 class AstNode {
 
@@ -45,14 +47,16 @@ public:
     void print();
     virtual ~AstNode() { };
 
-    static std::string eval(AstNodePtr n) {
-        return n && n->kind != Kind::Nil ? n->sexp() : "(Nil)";
-    };
+    static std::string tostr(AstNodePtr n);
+    static json node_tojson(AstNodePtr n);
+    static json vec_tojson(Args *args);
+
     Ty Type() const { return ty; }
     std::string tyname() { return ty.type_name(); }
     bool synthesized() const { return m_synthesized;}
     virtual bool synthesize(const Env &env) { return false; }
-    virtual std::string dump() { return "abstract"; };
+    virtual std::string dump() { return "astnode"; };
+    virtual json tojson(json parent=json()) { return parent; }
 
 protected:
     // type annotation
@@ -65,29 +69,19 @@ typedef AstNode::OpKind OpKind;
 
 struct Decls: public AstNode {
     Decls(): AstNode(Kind::DeclList) {}
+    virtual std::string dump();
+    virtual json tojson(json parent);
 
-    virtual std::string dump() {
-        std::string str;
-        for (auto n : decls) str += n->sexp();
-        return str;
-    }
     ~Decls() {
         Logging::debug("~Decls({})\n", dump());
     }
-    void append(struct AstNode* n) {
-        if (n != nullptr) {
-            decls.push_back(AstNodePtr(n));
-        }
-    }
+    void append(struct AstNode* n);
     NodeVec decls;
 };
 
 struct Expr: public AstNode {
     Expr(): AstNode(Kind::Expr) {}
 
-    virtual std::string dump() {
-        return "expr";
-    }
     ~Expr() {
         Logging::debug("~Expr({})\n", dump());
     }
@@ -102,24 +96,11 @@ struct Val: public AstNode {
 
     ~Val() {
         Logging::debug("~Val({})\n", dump());
-        if (raw_data != nullptr) {
-            delete raw_data;
-        }
+        if (raw_data != nullptr) delete raw_data;
     }
 
-    virtual std::string dump() {
-        std::string str;
-        switch (kind) {
-            case NodeKind::Constant: str = "Constant"; break;
-            case NodeKind::VarRef: str = "VarRef"; break;
-            case NodeKind::VarDecl: str = "VarDecl"; break;
-            default: str = "unknown";
-        }
-        if (raw_data != nullptr) {
-            str = fmt::format("{}@{}@{}", str, *raw_data, Type().type_name());
-        }
-        return str;
-    }
+    virtual std::string dump();
+    virtual json tojson(json parent);
 };
 
 struct VarDecl: public AstNode {
@@ -139,15 +120,9 @@ struct VarDecl: public AstNode {
         return type_name != nullptr ? *type_name: "Nil";
     }
 
-    ~VarDecl() {
-        Logging::debug("~VarDecl({})\n", dump());
-        if (raw_data != nullptr) delete raw_data;
-        if (var_name != nullptr) delete var_name;
-        if (type_name != nullptr) delete type_name;
-    }
-    virtual std::string dump() {
-        return fmt::format("VarDecl@{}@{}", *var_name, Type().type_name());
-    }
+    ~VarDecl();
+    virtual std::string dump();
+    virtual json tojson(json parent);
 };
 
 struct Operator: public AstNode {
@@ -156,11 +131,11 @@ struct Operator: public AstNode {
     Kind kind;
     OpKind op;
 
-    Operator(Kind nodeKind, OpKind opKind, AstNode *l, AstNode *r) : lhs(l), rhs(r), op(opKind), kind(nodeKind) {}
+    Operator(Kind nodeKind, OpKind opKind,AstNode *l, AstNode *r) :
+        lhs(l), rhs(r), op(opKind), kind(nodeKind) {}
 
-    virtual std::string dump() {
-        return fmt::format("binaryop[{}{}]", eval(lhs), eval(rhs));
-    }
+    virtual std::string dump();
+    virtual json tojson(json parent);
 
     ~Operator() {
         Logging::debug("~Operator({})\n", dump());
@@ -168,7 +143,6 @@ struct Operator: public AstNode {
 };
 
 struct FuncDecl: public AstNode {
-    FuncDecl() = delete;
     FuncDecl(std::string *name, std::string *type)
         : AstNode(Kind::FuncDecl, Ty(*type)), name(name) { }
 
@@ -176,28 +150,9 @@ struct FuncDecl: public AstNode {
         return name != nullptr ? *name : "Nil";
     }
 
-    virtual std::string dump() {
-        std::string str = (name != nullptr) ? "FuncDecl@" + *name : "FuncDecl";
-        if (args != nullptr) {
-            for (auto itr: *args) str += itr->sexp();
-        }
-        if (body != nullptr) {
-            for (auto itr: *body) str +=  itr->sexp();
-        }
-        return fmt::format("({})", str);
-    }
-    ~FuncDecl() {
-        Logging::debug("~FuncDecl({})\n", dump());
-        if (args != nullptr) {
-            delete args;
-        }
-        if (body != nullptr) {
-            delete body;
-        }
-        if (name != nullptr) {
-            delete name;
-        }
-    }
+    virtual std::string dump();
+    virtual json tojson(json parent);
+    ~FuncDecl();
 
     NodeVec *args;
     Exprs *body;
@@ -205,29 +160,12 @@ struct FuncDecl: public AstNode {
 };
 
 struct Call: public AstNode {
+    virtual std::string dump();
+    virtual json tojson(json parent);
+    virtual bool synthesize(const Env &env);
+
     Call() : AstNode(Kind::CallFunc) {}
-
-    virtual std::string dump() {
-        std::string str = (name != nullptr) ? "call:" + *name : "call";
-        if (args != nullptr) {
-            for (auto itr: *args) str += itr->sexp();
-        }
-        return str;
-    }
-
-    virtual bool synthesize(const Env &env) {
-        Ty ty = env.lookup(*name);
-        if (!ty.is(TypeID::Nil)) {
-            this->ty = ty;
-        }
-        return !ty.is(TypeID::Nil);
-    };
-
-    ~Call() {
-        Logging::debug("~callNode({})\n", dump());
-        if (args != nullptr) delete args;
-        if (name != nullptr) delete name;
-    }
+    ~Call();
 
     Args *args;
     std::string *name;
@@ -237,31 +175,14 @@ struct ReturnStmt: public AstNode {
     ReturnStmt(): AstNode(Kind::ReturnStmt) {}
     ReturnStmt(Ty ty)
         : AstNode(Kind::ReturnStmt, ty) { }
+    ~ReturnStmt();
 
-    virtual std::string dump() {
-        if (stmt) {
-            return fmt::format("ReturnStmt:{}", stmt->sexp());
-        }
-        return "ReturnStmt";
-    }
-
-    virtual bool synthesize(const Env &env) {
-        if (synthesized()) return true;
-        if (!stmt->synthesized()) {
-           stmt->synthesize(env);
-           ty = stmt->Type();
-        }
-        m_synthesized = true;
-        return true;
-    }
-
-    ~ReturnStmt() {
-        Logging::debug("~ReturnStmt({})\n", dump());
-    }
+    virtual std::string dump();
+    virtual json tojson(json parent);
+    virtual bool synthesize(const Env &env);
 
     AstNodePtr stmt;
 };
-
 
 struct ForStmt: public AstNode {
     AstNodePtr init_stmt;
@@ -269,38 +190,32 @@ struct ForStmt: public AstNode {
     AstNodePtr next_stmt;
     Exprs *body;
 
-    virtual std::string dump() {
-        std::string str;
-        if (body != nullptr) {
-            for (auto n: *body) str += n->sexp();
-        }
-        return fmt::format("ForStmt<{}{}{}>[{}]",
-                eval(init_stmt), eval(cond_stmt), eval(next_stmt), str);
-    }
-    ~ForStmt() {
-        Logging::debug("~ForStmt({})\n", dump());
-        if (body != nullptr) delete body;
-    }
+    virtual std::string dump();
+    virtual json tojson(json parent);
+    ~ForStmt();
 };
 
 struct IfStmt: public AstNode {
-    AstNodePtr cond_stmt;
-    Exprs* then_exprs;
-    Exprs* else_exprs;
+    AstNodePtr cond_;
+    Exprs* then_;
+    Exprs* else_;
+    IfStmt(AstNode* conditional, Exprs* then, Exprs* _else):
+        cond_(conditional), then_(then), else_(_else) {}
+    ~IfStmt();
 
-    virtual std::string dump() {
-        std::string then_str, else_str;
-        if (then_exprs != nullptr) for (auto n: *then_exprs) then_str += n->sexp();
-        if (else_exprs != nullptr) for (auto n: *else_exprs) else_str += n->sexp();
+    virtual std::string dump();
+    virtual json tojson(json parent);
+};
 
-        return fmt::format("IfStmt<{}>,then[{}],else[{}]",
-                eval(cond_stmt), then_str, else_str);
-    }
-    ~IfStmt() {
-        Logging::debug("~IfStmt({})\n", dump());
-        if (then_exprs != nullptr) delete then_exprs;
-        if (else_exprs != nullptr) delete else_exprs;
-    }
+struct AssignStmt: public AstNode {
+    AstNodePtr var_;
+    AstNodePtr val_;
+
+    AssignStmt(AstNode* var, AstNode* val) : var_(var), val_(val) {}
+    ~AssignStmt();
+
+    virtual std::string dump();
+    virtual json tojson(json parent);
 };
 
 }; // end namespace
