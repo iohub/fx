@@ -52,7 +52,7 @@ TypeCheckResult TypeChecker::checkFuncDecl(Env &env, AstNodePtr n) {
         return TypeCheckResult("Invalid FuncDecl");
     }
     Env nenv = env;
-    if (fn->args != nullptr) {
+    if (fn->args) {
         for (auto arg : *(fn->args)) {
             VarDecl* var = dynamic_cast<VarDecl*>(arg.get());
             if (var) {
@@ -61,7 +61,7 @@ TypeCheckResult TypeChecker::checkFuncDecl(Env &env, AstNodePtr n) {
         }
     }
     bool foundReturn = false;
-    if (fn->body != nullptr) {
+    if (fn->body) {
         for (auto n : *(fn->body)) {
             if (n->is(NodeKind::ReturnStmt)) {
                 foundReturn = true;

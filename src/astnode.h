@@ -18,9 +18,8 @@ namespace fx {
 class AstNode;
 typedef std::shared_ptr<AstNode> AstNodePtr;
 typedef std::vector<AstNodePtr> NodeVec;
-typedef std::vector<AstNodePtr> Args;
-typedef std::vector<AstNodePtr> Exprs;
-
+using Args = NodeVec;
+using Exprs = NodeVec;
 using json = nlohmann::json;
 
 class AstNode {
@@ -96,7 +95,7 @@ struct Val: public AstNode {
 
     ~Val() {
         Logging::debug("~Val({})\n", dump());
-        if (raw_data != nullptr) delete raw_data;
+        if (raw_data) delete raw_data;
     }
 
     virtual std::string dump();
@@ -114,10 +113,10 @@ struct VarDecl: public AstNode {
         raw_data(data), var_name(name), type_name(type) { }
 
     std::string name() {
-        return var_name != nullptr ? *var_name: "Nil";
+        return var_name ? *var_name: "Nil";
     }
     std::string type() {
-        return type_name != nullptr ? *type_name: "Nil";
+        return type_name ? *type_name: "Nil";
     }
 
     ~VarDecl();
@@ -147,7 +146,7 @@ struct FuncDecl: public AstNode {
         : AstNode(Kind::FuncDecl, Ty(*type)), name(name) { }
 
     std::string nominal() {
-        return name != nullptr ? *name : "Nil";
+        return name ? *name : "Nil";
     }
 
     virtual std::string dump();

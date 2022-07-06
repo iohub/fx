@@ -1,5 +1,5 @@
 
-def DemoFor(float x, float y) float {
+def ForStmt(float x, float y) float {
     for ( x; y;) {
         if (x > 10) {
             x + 1

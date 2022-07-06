@@ -39,7 +39,7 @@ std::string Val::dump() {
         case NodeKind::VarDecl: str = "VarDecl"; break;
         default: str = "unknown";
     }
-    if (raw_data != nullptr) {
+    if (raw_data) {
         str = fmt::format("{}@{}@{}", str, *raw_data, Type().type_name());
     }
     return str;
@@ -54,7 +54,7 @@ json Val::tojson(json parent) {
         default: str = "unknown";
     }
     json child;
-    child["data"] = raw_data != nullptr ? *raw_data : "Nil";
+    child["data"] = raw_data ? *raw_data : "Nil";
     child["type"] = Type().type_name();
     parent[str] = child;
     return parent;
@@ -62,9 +62,9 @@ json Val::tojson(json parent) {
 
 VarDecl::~VarDecl() {
     Logging::debug("~VarDecl({})\n", dump());
-    if (raw_data != nullptr) delete raw_data;
-    if (var_name != nullptr) delete var_name;
-    if (type_name != nullptr) delete type_name;
+    if (raw_data) delete raw_data;
+    if (var_name) delete var_name;
+    if (type_name) delete type_name;
 }
 
 std::string VarDecl::dump() {
@@ -73,7 +73,7 @@ std::string VarDecl::dump() {
 
 json VarDecl::tojson(json parent) {
     json child;
-    child["varname"] = var_name != nullptr ? *var_name : "Nil";
+    child["varname"] = var_name ? *var_name : "Nil";
     child["type"] = Type().type_name();
     parent["VarDecl"] = child;
     return parent;
@@ -94,11 +94,11 @@ json Operator::tojson(json parent) {
 }
 
 std::string FuncDecl::dump() {
-    std::string str = (name != nullptr) ? "FuncDecl@" + *name : "FuncDecl";
-    if (args != nullptr) {
+    std::string str = name ? "FuncDecl@" + *name : "FuncDecl";
+    if (args) {
         for (auto itr: *args) str += itr->sexp();
     }
-    if (body != nullptr) {
+    if (body) {
         for (auto itr: *body) str +=  itr->sexp();
     }
     return fmt::format("({})", str);
@@ -106,7 +106,7 @@ std::string FuncDecl::dump() {
 
 json FuncDecl::tojson(json parent) {
     json child;
-    child["name"] = name != nullptr ? *name : "Nil";
+    child["name"] = name ? *name : "Nil";
     child["args"] = vec_tojson(args);
     child["body"] = vec_tojson(body);
     parent["FuncDecl"] = child;
@@ -115,14 +115,14 @@ json FuncDecl::tojson(json parent) {
 
 FuncDecl::~FuncDecl() {
     Logging::debug("~FuncDecl({})\n", dump());
-    if (args != nullptr) delete args;
-    if (body != nullptr) delete body;
-    if (name != nullptr) delete name;
+    if (args) delete args;
+    if (body) delete body;
+    if (name) delete name;
 }
 
 std::string Call::dump() {
-    std::string str = (name != nullptr) ? "call:" + *name : "call";
-    if (args != nullptr) {
+    std::string str = name  ? "call:" + *name : "call";
+    if (args) {
         for (auto itr: *args) str += itr->sexp();
     }
     return str;
@@ -145,8 +145,8 @@ bool Call::synthesize(const Env &env) {
 
 Call::~Call() {
     Logging::debug("~callNode({})\n", dump());
-    if (args != nullptr) delete args;
-    if (name != nullptr) delete name;
+    if (args) delete args;
+    if (name) delete name;
 }
 
 std::string Decls::dump() {
@@ -185,7 +185,7 @@ ReturnStmt::~ReturnStmt() {
 
 std::string ForStmt::dump() {
     std::string str;
-    if (body != nullptr) {
+    if (body) {
         for (auto n: *body) str += n->sexp();
     }
     return fmt::format("ForStmt<{}{}{}>[{}]",
@@ -204,13 +204,13 @@ json ForStmt::tojson(json parent) {
 
 ForStmt::~ForStmt() {
     Logging::debug("~ForStmt({})\n", dump());
-    if (body != nullptr) delete body;
+    if (body) delete body;
 }
 
 std::string IfStmt::dump() {
     std::string then_str, else_str;
-    if (then_ != nullptr) for (auto n: *then_) then_str += n->sexp();
-    if (else_ != nullptr) for (auto n: *else_) else_str += n->sexp();
+    if (then_) for (auto n: *then_) then_str += n->sexp();
+    if (else_) for (auto n: *else_) else_str += n->sexp();
 
     return fmt::format("IfStmt<{}>,then[{}],else[{}]",
             tostr(cond_), then_str, else_str);
@@ -227,8 +227,8 @@ json IfStmt::tojson(json parent) {
 
 IfStmt::~IfStmt() {
     Logging::debug("~IfStmt({})\n", dump());
-    if (then_ != nullptr) delete then_;
-    if (else_ != nullptr) delete else_;
+    if (then_) delete then_;
+    if (else_) delete else_;
 }
 
 std::string AstNode::tostr(AstNodePtr n) {
@@ -255,7 +255,7 @@ std::string AssignStmt::dump() {
 
 json AssignStmt::tojson(json parent) {
     json child;
-    child["var"] = node_tojson(val_);
+    child["var"] = node_tojson(var_);
     child["val"] = node_tojson(val_);
     parent["AssignStmt"] = child;
     return parent;

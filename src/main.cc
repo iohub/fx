@@ -49,7 +49,7 @@ int main(int argc, const char *argv[]) {
         // visualize onsite: https://vanya.jp.net/vtree
         std::cout << jsonExp << std::endl;
     }
-    if (Program != nullptr) {
+    if (Program) {
         Env emptyCtx;
         Decls *decls = dynamic_cast<Decls*>(Program);
         fx::TypeCheckResult result = fx::TypeChecker::check(emptyCtx, decls);

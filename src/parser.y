@@ -47,7 +47,7 @@
 %type <args> def_args
 %type <params> call_args
 %type <node> op_val primitive_val value_expr
-%type <ifnode> if_stmt
+%type <node> if_stmt
 
 %start program
 
@@ -104,7 +104,7 @@ stmts
     ;
 
 
-stmt: var_decl | expr | return_stmt | for_stmt | if_stmt | assignment_expr;
+stmt: var_decl | expr | return_stmt | for_stmt | if_stmt | assignment_expr ;
 
 expr: op | func_call | unary_expr;
 
