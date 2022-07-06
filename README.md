@@ -1,5 +1,5 @@
 # fx
-a c-like toy language for mlir
+a go-like language
 
 ## build
 ```shell
@@ -17,11 +17,15 @@ ninja
 
 ## visualize
 ```ruby
+
 def fib(int x) int {
-    if (x == 0) {
+    if (x <= 0) {
+        return 0
+    }
+    if (x == 1) {
         return 1
     }
-    return fib(x-1)
+    return fib(x-1) + fib(x-2)
 }
 
 def main() int {
