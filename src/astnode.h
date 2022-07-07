@@ -27,7 +27,7 @@ public:
     enum class Kind : uint8_t {
         Invalid, Nil, CallFunc, Constant,
         FuncDecl, VarRef, VarDecl, Expr, BinaryOperator, UnaryOperator,
-        ReturnStmt, DeclList
+        ReturnStmt, DeclList, Undefine
     };
     enum class OpKind: uint8_t {
         Invalid,

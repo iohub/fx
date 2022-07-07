@@ -1,8 +1,8 @@
 
 def ForStmt(float x, float y) float {
     for ( x; y;) {
-        if (x > 10) {
-            x + 1
+        if (x > 10.0) {
+            x + 1.0
         } else {
           x = x + 2
         }
@@ -23,7 +23,6 @@ def fib(int x) int {
 
 def main() int {
     int z
-    10 + 2.5
     z + DemoFor(10, 12)
     return fib(8)
 }

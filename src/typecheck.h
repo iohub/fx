@@ -28,13 +28,14 @@ public:
 
 private:
     static bool isSubtype(AstNodePtr a, AstNodePtr b);
-    static TypeCheckResult checkBinaryOp(AstNodePtr ptr);
-    static TypeCheckResult checkFuncDecl(Env &env, AstNodePtr ptr);
+    static TypeCheckResult checkBinaryOp(Env &env, AstNodePtr op);
+    static TypeCheckResult checkFuncDecl(Env &env, AstNodePtr func);
     static TypeCheckResult checkAssign(Env &env, AstNodePtr assign);
 
-    static bool synthesize(const Env &env, AstNodePtr n);
-    static bool synthesize(const Env &env, ReturnStmt *n);
-    static bool synthesize(const Env &env, Call *n);
+    static void synthesize(const Env &env, AstNodePtr n);
+    static void synthesize(const Env &env, ReturnStmt *n);
+    static void synthesize(const Env &env, Call *n);
+    static void synthesize(const Env &env, Val *n);
 };
 
 
