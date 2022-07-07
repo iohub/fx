@@ -9,14 +9,22 @@ namespace fx {
 
 class Env {
 public:
-    Ty lookup(std::string const &nominal) const {
+    Ty lookup_var(std::string const &nominal) const {
         auto itr = vars_.find(nominal);
         return itr == vars_.end() ? Ty(TypeID::Nil) : itr->second;
     }
 
+    Ty lookup_func(std::string const &nominal) const {
+        auto itr = funs_.find(nominal);
+        return itr == funs_.end() ? Ty(TypeID::Nil) : itr->second;
+    }
+
     void put(AstNodePtr node) {
-        std::map<std::string, Ty> &ref = vars_;
-        ref[node->nominal()] = node->Type();
+        if (dynamic_cast<VarDecl*>(node.get())) {
+            vars_[node->nominal()] = node->Type();
+        } else if (dynamic_cast<FuncDecl*>(node.get())) {
+            funs_[node->nominal()] = node->Type();
+        }
     }
 
 

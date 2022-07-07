@@ -29,7 +29,6 @@ TypeCheckResult TypeChecker::check(Env &env, Decls *decls) {
         switch (n->kind) {
             case NodeKind::FuncDecl:
                 if (!(fn = dynamic_cast<FuncDecl*>(n.get()))) break;
-                // env[fn->nominal()] = fn->Type();
                 env.put(n);
                 result = checkFuncDecl(env, n);
                 if (result != TypeOk) {
@@ -87,8 +86,8 @@ bool TypeChecker::synthesize(const Env &env, ReturnStmt *n) {
 }
 
 bool TypeChecker::synthesize(const Env &env, Call *n) {
-    Ty ty = env.lookup(*(n->name));
-    if (!ty.is(TypeID::Nil)) {
+    Ty ty = env.lookup_func(*(n->name));
+    if (!ty.nil()) {
         n->ty = ty;
     }
     n->synthesized = true;
