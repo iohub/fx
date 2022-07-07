@@ -47,7 +47,7 @@ int main(int argc, const char *argv[]) {
         // print pretty json
         // std::cout << std::setw(2) << jsonExp << std::endl;
         // visualize onsite: https://vanya.jp.net/vtree
-        std::cout << jsonExp << std::endl;
+        // std::cout << jsonExp << std::endl;
     }
     if (Program) {
         Env emptyCtx;

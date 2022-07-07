@@ -135,14 +135,6 @@ json Call::tojson(json parent) {
     return parent;
 }
 
-bool Call::synthesize(const Env &env) {
-    Ty ty = env.lookup(*name);
-    if (!ty.is(TypeID::Nil)) {
-        this->ty = ty;
-    }
-    return !ty.is(TypeID::Nil);
-};
-
 Call::~Call() {
     Logging::debug("~callNode({})\n", dump());
     if (args) delete args;
@@ -169,15 +161,6 @@ json ReturnStmt::tojson(json parent) {
     return parent;
 }
 
-bool ReturnStmt::synthesize(const Env &env) {
-    if (synthesized()) return true;
-    if (!stmt->synthesized()) {
-       stmt->synthesize(env);
-       ty = stmt->Type();
-    }
-    m_synthesized = true;
-    return true;
-}
 
 ReturnStmt::~ReturnStmt() {
     Logging::debug("~ReturnStmt({})\n", dump());

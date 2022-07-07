@@ -10,7 +10,6 @@
 #include <fmt/core.h>
 #include <nlohmann/json.hpp>
 #include "type.h"
-#include "env.h"
 #include "util.h"
 
 namespace fx {
@@ -52,15 +51,16 @@ public:
 
     Ty Type() const { return ty; }
     std::string tyname() { return ty.type_name(); }
-    bool synthesized() const { return m_synthesized;}
-    virtual bool synthesize(const Env &env) { return false; }
+    virtual std::string nominal() { return ""; }
     virtual std::string dump() { return "astnode"; };
     virtual json tojson(json parent=json()) { return parent; }
+
+    friend class TypeChecker;
 
 protected:
     // type annotation
     Ty ty;
-    bool m_synthesized;
+    bool synthesized;
 };
 
 typedef AstNode::Kind NodeKind;
@@ -145,7 +145,7 @@ struct FuncDecl: public AstNode {
     FuncDecl(std::string *name, std::string *type)
         : AstNode(Kind::FuncDecl, Ty(*type)), name(name) { }
 
-    std::string nominal() {
+    virtual std::string nominal() {
         return name ? *name : "Nil";
     }
 
@@ -161,7 +161,6 @@ struct FuncDecl: public AstNode {
 struct Call: public AstNode {
     virtual std::string dump();
     virtual json tojson(json parent);
-    virtual bool synthesize(const Env &env);
 
     Call() : AstNode(Kind::CallFunc) {}
     ~Call();
@@ -178,7 +177,6 @@ struct ReturnStmt: public AstNode {
 
     virtual std::string dump();
     virtual json tojson(json parent);
-    virtual bool synthesize(const Env &env);
 
     AstNodePtr stmt;
 };

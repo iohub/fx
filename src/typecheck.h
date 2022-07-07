@@ -30,6 +30,11 @@ private:
     static bool isSubtype(AstNodePtr a, AstNodePtr b);
     static TypeCheckResult checkBinaryOp(AstNodePtr ptr);
     static TypeCheckResult checkFuncDecl(Env &env, AstNodePtr ptr);
+    static TypeCheckResult checkAssign(Env &env, AstNodePtr assign);
+
+    static bool synthesize(const Env &env, AstNodePtr n);
+    static bool synthesize(const Env &env, ReturnStmt *n);
+    static bool synthesize(const Env &env, Call *n);
 };
 
 

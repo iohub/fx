@@ -26,6 +26,7 @@ struct Ty {
     bool operator==(const Ty& b) { return id == b.id; }
     bool operator!=(const Ty& b) { return id != b.id; }
     bool valid() const { return id != ID::Invalid; }
+    bool nil() const { return id == ID::Nil; }
     bool is(ID tid) const { return tid == id; }
     static Ty convert_from_typename(std::string tname);
 };
