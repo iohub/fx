@@ -40,7 +40,7 @@ public:
     AstNode(Kind k, Ty ty): kind(k), ty(ty) {}
     AstNode(): kind(Kind::Invalid) {}
 
-    bool is(Kind k) { return kind == k; }
+    bool is(Kind k) const { return kind == k; }
     std::string sexp() { return  fmt::format("({})", dump()); }
     void print();
     virtual ~AstNode() { };
@@ -100,6 +100,7 @@ struct Val: public AstNode {
 
     virtual std::string dump();
     virtual json tojson(json parent);
+    virtual std::string nominal();
 };
 
 struct VarDecl: public AstNode {
@@ -130,8 +131,10 @@ struct Operator: public AstNode {
     Kind kind;
     OpKind op;
 
-    Operator(Kind nodeKind, OpKind opKind,AstNode *l, AstNode *r) :
+    Operator(Kind nodeKind, OpKind opKind, AstNode *l, AstNode *r) :
         lhs(l), rhs(r), op(opKind), kind(nodeKind) {}
+
+    Operator(Kind nodeKind, Ty ty, std::string *opname, AstNode *l, AstNode *r);
 
     virtual std::string dump();
     virtual json tojson(json parent);
@@ -139,6 +142,21 @@ struct Operator: public AstNode {
     ~Operator() {
         Logging::debug("~Operator({})\n", dump());
     }
+};
+
+namespace detail {
+    const static std::map<std::string, OpKind> OperatorMappings {
+        {"+", OpKind::ADD},
+        {"-", OpKind::SUB},
+        {"*", OpKind::MUL},
+        {"/", OpKind::DIV},
+        {"<", OpKind::LT},
+        {"<=", OpKind::LE},
+        {"==", OpKind::EQ},
+        {"!=", OpKind::NEQ},
+        {">", OpKind::GT},
+        {">=", OpKind::GE},
+    };
 };
 
 struct FuncDecl: public AstNode {

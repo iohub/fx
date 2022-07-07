@@ -45,6 +45,10 @@ std::string Val::dump() {
     return str;
 }
 
+std::string Val::nominal() {
+    return raw_data ? *raw_data : "Nil";
+}
+
 json Val::tojson(json parent) {
     std::string str;
     switch (kind) {
@@ -80,7 +84,7 @@ json VarDecl::tojson(json parent) {
 }
 
 std::string Operator::dump() {
-    return fmt::format("binaryop[{}{}]", tostr(lhs), tostr(rhs));
+    return fmt::format("binaryop@{}[{}{}]", ty.type_name(), tostr(lhs), tostr(rhs));
 }
 
 json Operator::tojson(json parent) {
@@ -91,6 +95,15 @@ json Operator::tojson(json parent) {
     child["op_kind"] = op;
     parent["Operator"] = child;
     return parent;
+}
+
+Operator::Operator(Kind nodeKind, Ty ty, std::string *opname, AstNode *l, AstNode *r) :
+    AstNode(nodeKind, ty), lhs(l), rhs(r), kind(nodeKind) {
+    op = OpKind::Invalid;
+    auto itr = detail::OperatorMappings.find(*opname);
+    if (itr != detail::OperatorMappings.end()) {
+        op = itr->second;
+    }
 }
 
 std::string FuncDecl::dump() {
@@ -243,6 +256,7 @@ json AssignStmt::tojson(json parent) {
     parent["AssignStmt"] = child;
     return parent;
 }
+
 
 
 

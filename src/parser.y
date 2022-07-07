@@ -32,13 +32,13 @@
 }
 
 %token STR IF ELSE WHILE FOR CONTINUE BREAK VOID RETURN INT FLOAT COLON
-%token ADDOP MINUSOP MULOP DIVOP INCR OROP ANDOP NOTOP RELOP
+%token INCR OROP ANDOP NOTOP RELOP
 %token LPAREN RPAREN LBRACK RBRACK LBRACE RBRACE SEMI DOT COMMA ASSIGN REFER
 %token <str> IDENT ICONST FCONST CCONST STRING
-%token <str> NEQOP GTOP GEOP LTOP LEOP EQOP
+%token <str> NEQOP GTOP GEOP LTOP LEOP EQOP ADDOP MINUSOP MULOP DIVOP
 %token <str> FN
 
-%type <str> var_type primitive_type INT FLOAT STR compare_operator
+%type <str> var_type primitive_type INT FLOAT STR compare_operator binary_op
 %type <decls> program decls
 %type <exprs> stmts stmts_block
 %type <node> var_decl expr op unary_expr func_call expr_stmt assignment_expr
@@ -170,7 +170,7 @@ compare_operator
 op
     : op_val binary_op op_val
     {
-        $$ = new fx::Operator(fx::NodeKind::BinaryOperator, fx::OpKind::ADD, $1, $3);
+        $$ = new fx::Operator(fx::NodeKind::BinaryOperator, fx::TypeID::Nil, $2, $1, $3);
     };
 
 op_val
@@ -246,7 +246,7 @@ if_stmt
 boolean_stmt
     : op_val compare_operator op_val
     {
-        $$ = new fx::Operator(fx::NodeKind::BinaryOperator, fx::OpKind::ADD, $1, $3);
+        $$ = new fx::Operator(fx::NodeKind::BinaryOperator, fx::TypeID::Bool, $2, $1, $3);
     };
 
 

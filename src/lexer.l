@@ -55,10 +55,10 @@ STRING		\"{print}*\"
 "return"		{ return RETURN; }
 
 
-"+"					    { return ADDOP; }
-"-"					    { return MINUSOP; }
-"*"						{ return MULOP; }
-"/"						{ return DIVOP; }
+"+"					    { TO_STR; return ADDOP; }
+"-"					    { TO_STR; return MINUSOP; }
+"*"						{ TO_STR; return MULOP; }
+"/"						{ TO_STR; return DIVOP; }
 "++"|"--"				{ return INCR; }
 "||"					{ return OROP; }
 "&&"					{ return ANDOP; }

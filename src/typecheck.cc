@@ -115,6 +115,4 @@ bool TypeChecker::synthesize(const Env &env, AstNodePtr n) {
 
 
 
-
-
 }
