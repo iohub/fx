@@ -69,7 +69,7 @@ typedef AstNode::Kind NodeKind;
 typedef AstNode::OpKind OpKind;
 
 struct Decls: public AstNode {
-    Decls(): AstNode(Kind::DeclList) {}
+    Decls(Loc loc): AstNode(loc, Kind::DeclList) {}
     virtual std::string dump();
     virtual json tojson(json parent);
 
@@ -80,20 +80,11 @@ struct Decls: public AstNode {
     NodeVec decls;
 };
 
-struct Expr: public AstNode {
-    Expr(): AstNode(Kind::Expr) {}
-
-    ~Expr() {
-        Logging::debug("~Expr({})\n", dump());
-    }
-};
-
 struct Val: public AstNode {
     std::string *raw_data;
 
-    Val() = delete;
-    Val(NodeKind kind, std::string *val) : AstNode(kind), raw_data(val) {}
-    Val(NodeKind kind, Ty ty, std::string *val) : AstNode(kind, ty), raw_data(val) {}
+    Val(Loc loc, NodeKind kind, std::string *val) : AstNode(loc, kind), raw_data(val) {}
+    Val(Loc loc, NodeKind kind, Ty ty, std::string *val) : AstNode(loc, kind, ty), raw_data(val) {}
 
     ~Val() {
         Logging::debug("~Val({})\n", dump());
@@ -110,9 +101,8 @@ struct VarDecl: public AstNode {
     std::string *var_name;
     std::string *type_name;
 
-    VarDecl() = delete;
-    VarDecl(std::string *name, std::string *type, std::string *data)
-        : AstNode(NodeKind::VarDecl, Ty(*type)),
+    VarDecl(Loc loc, std::string *name, std::string *type, std::string *data)
+        : AstNode(loc, NodeKind::VarDecl, Ty(*type)),
         raw_data(data), var_name(name), type_name(type) { }
 
     std::string name() {
@@ -133,10 +123,10 @@ struct Operator: public AstNode {
     Kind kind;
     OpKind op;
 
-    Operator(Kind nodeKind, OpKind opKind, AstNode *l, AstNode *r) :
-        lhs(l), rhs(r), op(opKind), kind(nodeKind) {}
+    Operator(Loc loc, Kind nodeKind, OpKind opKind, AstNode *l, AstNode *r) :
+        lhs(l), rhs(r), op(opKind), AstNode(loc, nodeKind) {}
 
-    Operator(Kind nodeKind, Ty ty, std::string *opname, AstNode *l, AstNode *r);
+    Operator(Loc loc, Kind nodeKind, Ty ty, std::string *opname, AstNode *l, AstNode *r);
 
     virtual std::string dump();
     virtual json tojson(json parent);
@@ -162,8 +152,8 @@ namespace detail {
 };
 
 struct FuncDecl: public AstNode {
-    FuncDecl(std::string *name, std::string *type)
-        : AstNode(Kind::FuncDecl, Ty(*type)), name(name) { }
+    FuncDecl(Loc loc, std::string *name, std::string *type)
+        : AstNode(loc, Kind::FuncDecl, Ty(*type)), name(name) { }
 
     virtual std::string nominal() {
         return name ? *name : "Nil";
@@ -182,7 +172,7 @@ struct Call: public AstNode {
     virtual std::string dump();
     virtual json tojson(json parent);
 
-    Call() : AstNode(Kind::CallFunc) {}
+    Call(Loc loc) : AstNode(loc, Kind::CallFunc) {}
     ~Call();
 
     Args *args;
@@ -190,9 +180,9 @@ struct Call: public AstNode {
 };
 
 struct ReturnStmt: public AstNode {
-    ReturnStmt(): AstNode(Kind::ReturnStmt) {}
-    ReturnStmt(Ty ty)
-        : AstNode(Kind::ReturnStmt, ty) { }
+    ReturnStmt(Loc loc): AstNode(loc, Kind::ReturnStmt) {}
+    ReturnStmt(Loc loc, Ty ty)
+        : AstNode(loc, Kind::ReturnStmt, ty) { }
     ~ReturnStmt();
 
     virtual std::string dump();
@@ -206,6 +196,7 @@ struct ForStmt: public AstNode {
     AstNodePtr cond_stmt;
     AstNodePtr next_stmt;
     Exprs *body;
+    ForStmt(Loc loc) : AstNode(loc) {}
 
     virtual std::string dump();
     virtual json tojson(json parent);
@@ -216,8 +207,8 @@ struct IfStmt: public AstNode {
     AstNodePtr cond_;
     Exprs* then_;
     Exprs* else_;
-    IfStmt(AstNode* conditional, Exprs* then, Exprs* _else):
-        cond_(conditional), then_(then), else_(_else) {}
+    IfStmt(Loc loc, AstNode* conditional, Exprs* then, Exprs* _else):
+        AstNode(loc), cond_(conditional), then_(then), else_(_else) {}
     ~IfStmt();
 
     virtual std::string dump();
@@ -228,7 +219,7 @@ struct AssignStmt: public AstNode {
     AstNodePtr var_;
     AstNodePtr val_;
 
-    AssignStmt(AstNode* var, AstNode* val) : var_(var), val_(val) {}
+    AssignStmt(Loc loc, AstNode* var, AstNode* val) : AstNode(loc), var_(var), val_(val) {}
     ~AssignStmt();
 
     virtual std::string dump();

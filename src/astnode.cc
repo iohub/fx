@@ -97,8 +97,8 @@ json Operator::tojson(json parent) {
     return parent;
 }
 
-Operator::Operator(Kind nodeKind, Ty ty, std::string *opname, AstNode *l, AstNode *r) :
-    AstNode(nodeKind, ty), lhs(l), rhs(r), kind(nodeKind) {
+Operator::Operator(Loc loc, Kind nodeKind, Ty ty, std::string *opname, AstNode *l, AstNode *r) :
+    AstNode(loc, nodeKind, ty), lhs(l), rhs(r), kind(nodeKind) {
     op = OpKind::Invalid;
     auto itr = detail::OperatorMappings.find(*opname);
     if (itr != detail::OperatorMappings.end()) {
