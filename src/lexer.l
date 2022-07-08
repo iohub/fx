@@ -12,8 +12,10 @@
 	extern FILE *yyout;
 	int lineno = 1;
     void yyerror (char const*);
+    extern YYLTYPE yylloc;
 
-    #define TO_STR yylval.str = new std::string(yytext, yyleng)
+    #define Text yylval.str = new std::string(yytext, yyleng)
+    #define EatColumn yylloc.first_column = yylloc.last_column; yylloc.last_column += yyleng;
 %}
 
 
@@ -38,65 +40,68 @@ STRING		\"{print}*\"
 <ML_COMMENT>"*/" 		{ BEGIN(INITIAL); }
 <ML_COMMENT>[^*\n]+
 <ML_COMMENT>"*"
-<ML_COMMENT>"\n"		{ lineno += 1; }
+<ML_COMMENT>"\n"		{ ++yylloc.first_line; ++yylloc.last_line; }
 
 
-"str"       	{ TO_STR; return STR; }
-"int"			{ TO_STR; return INT; }
-"float"			{ TO_STR; return FLOAT; }
-"if"			{ return IF; }
-"else"			{ return ELSE; }
-"while"			{ return WHILE; }
-"for"			{ return FOR; }
-"continue"	    { return CONTINUE; }
-"break"			{ return BREAK; }
-"void"			{ return VOID; }
-"def"			{ return FN; }
-"return"		{ return RETURN; }
+"str"       	{ EatColumn; Text; return STR; }
+"int"			{ EatColumn; Text; return INT; }
+"float"			{ EatColumn; Text; return FLOAT; }
+"if"			{ EatColumn; return IF; }
+"else"			{ EatColumn; return ELSE; }
+"while"			{ EatColumn; return WHILE; }
+"for"			{ EatColumn; return FOR; }
+"continue"	    { EatColumn; return CONTINUE; }
+"break"			{ EatColumn; return BREAK; }
+"void"			{ EatColumn; return VOID; }
+"def"			{ EatColumn; return FN; }
+"return"		{ EatColumn; return RETURN; }
 
 
-"+"					    { TO_STR; return ADDOP; }
-"-"					    { TO_STR; return MINUSOP; }
-"*"						{ TO_STR; return MULOP; }
-"/"						{ TO_STR; return DIVOP; }
-"++"|"--"				{ return INCR; }
-"||"					{ return OROP; }
-"&&"					{ return ANDOP; }
-"!"						{ TO_STR; return NOTOP; }
-"=="				    { TO_STR; return EQOP; }
-"!="				    { TO_STR; return NEQOP; }
-">"				        { TO_STR; return GTOP; }
-">="				    { TO_STR; return GEOP; }
-"<"				        { TO_STR; return LTOP; }
-"<="				    { TO_STR; return LEOP; }
+"+"					    { EatColumn; Text; return ADDOP; }
+"-"					    { EatColumn; Text; return MINUSOP; }
+"*"						{ EatColumn; Text; return MULOP; }
+"/"						{ EatColumn; Text; return DIVOP; }
+"++"|"--"				{ EatColumn; return INCR; }
+"||"					{ EatColumn; return OROP; }
+"&&"					{ EatColumn; return ANDOP; }
+"!"						{ EatColumn; Text; return NOTOP; }
+"=="				    { EatColumn; Text; return EQOP; }
+"!="				    { EatColumn; Text; return NEQOP; }
+">"				        { EatColumn; Text; return GTOP; }
+">="				    { EatColumn; Text; return GEOP; }
+"<"				        { EatColumn; Text; return LTOP; }
+"<="				    { EatColumn; Text; return LEOP; }
 
 
-"("				{ return LPAREN; }
-")"				{ return RPAREN; }
-"]"				{ return LBRACK; }
-"["				{ return RBRACK; }
-"{"				{ return LBRACE; }
-"}"				{ return RBRACE; }
-";"				{ return SEMI; }
-":"				{ return COLON; }
-"."				{ return DOT; }
-","				{ return COMMA; }
-"="				{ return ASSIGN; }
-"&"				{ return REFER; }
+"("				{ EatColumn; return LPAREN; }
+")"				{ EatColumn; return RPAREN; }
+"]"				{ EatColumn; return LBRACK; }
+"["				{ EatColumn; return RBRACK; }
+"{"				{ EatColumn; return LBRACE; }
+"}"				{ EatColumn; return RBRACE; }
+";"				{ EatColumn; return SEMI; }
+":"				{ EatColumn; return COLON; }
+"."				{ EatColumn; return DOT; }
+","				{ EatColumn; return COMMA; }
+"="				{ EatColumn; return ASSIGN; }
+"&"				{ EatColumn; return REFER; }
 
 
-{IDENT} 		{ TO_STR; return IDENT; }
+{IDENT} 		{ EatColumn; Text; return IDENT; }
+{ICONST} 		{ EatColumn; Text; return ICONST; }
+{FCONST} 		{ EatColumn; Text; return FCONST; }
+{CCONST} 		{ EatColumn; Text; return CCONST; }
+{STRING} 		{ EatColumn; Text; return STRING; }
 
-{ICONST} 		{ TO_STR; return ICONST; }
-{FCONST} 		{ TO_STR; return FCONST; }
-{CCONST} 		{ return CCONST; }
-{STRING} 		{ TO_STR; return STRING; }
+
+"\n"			{ yylloc.first_column = 0; yylloc.last_column = 0; ++yylloc.last_line; ++yylloc.first_line; }
+[ \t\r\f]+      { yylloc.first_column = yylloc.last_column; ++yylloc.last_column; }
 
 
-"\n"			{ lineno += 1; }
-[ \t\r\f]+      { }
 
 .				{ yyerror("Unrecognized character"); }
+
+
 
 %%
 

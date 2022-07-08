@@ -48,6 +48,7 @@
 %type <params> call_args
 %type <node> op_val primitive_val value_expr
 %type <node> if_stmt
+%locations
 
 %start program
 
@@ -246,7 +247,9 @@ if_stmt
 boolean_stmt
     : op_val compare_operator op_val
     {
-        $$ = new fx::Operator(fx::NodeKind::BinaryOperator, fx::TypeID::Bool, $2, $1, $3);
+        // printf("(boolean_stmt):%d,%d\n", @1.first_line, @1.first_column);
+        $$ = new fx::Operator(fx::Loc(@1.first_line, @1.first_column),
+            fx::NodeKind::BinaryOperator, fx::TypeID::Bool, $2, $1, $3);
     };
 
 

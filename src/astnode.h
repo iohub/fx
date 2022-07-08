@@ -10,6 +10,7 @@
 #include <fmt/core.h>
 #include <nlohmann/json.hpp>
 #include "type.h"
+#include "location.h"
 #include "util.h"
 
 namespace fx {
@@ -36,9 +37,9 @@ public:
     };
     Kind kind = Kind::Invalid;
 
-    AstNode(Kind k): kind(k) {}
-    AstNode(Kind k, Ty ty): kind(k), ty(ty) {}
-    AstNode(): kind(Kind::Invalid) {}
+    AstNode(Loc loc, Kind k): loc(loc), kind(k) {}
+    AstNode(Loc loc, Kind k, Ty ty): loc(loc), kind(k), ty(ty) {}
+    AstNode(Loc loc): loc(loc), kind(Kind::Invalid) {}
 
     bool is(Kind k) const { return kind == k; }
     std::string sexp() { return  fmt::format("({})", dump()); }
@@ -58,6 +59,7 @@ public:
     friend class TypeChecker;
 
 protected:
+    Loc loc;
     // type annotation
     Ty ty;
     bool synthesized;
