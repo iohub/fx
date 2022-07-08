@@ -10,8 +10,9 @@
     extern int lineno;
     extern int yylex();
     void yyerror (char const*);
+    using namespace fx;
 
-    fx::AstNode* Program;
+    AstNode* Program;
 
 %}
 
@@ -61,7 +62,7 @@ program: decls { Program = $1; };
 decls
     : decl
     {
-        $$ = new fx::Decls(fx::Loc(@1.first_line, @1.first_column));
+        $$ = new Decls(Loc(@1.first_line, @1.first_column));
         $$->append($<node>1);
     }
     | decls decl { $1->append($<node>2); }
@@ -72,20 +73,20 @@ decl: func_decl | var_decl ;
 func_decl
      : FN IDENT LPAREN def_args RPAREN var_type stmts_block
      {
-         $$ = new fx::FuncDecl(fx::Loc(@1.first_line, @1.first_column), $2, $6);
+         $$ = new FuncDecl(Loc(@1.first_line, @1.first_column), $2, $6);
          $$->body = $7;
          $$->args = $4;
      }
      | FN IDENT LPAREN RPAREN var_type stmts_block
      {
-         $$ = new fx::FuncDecl(fx::Loc(@1.first_line, @1.first_column), $2, $5); $$->body = $6;
+         $$ = new FuncDecl(Loc(@1.first_line, @1.first_column), $2, $5); $$->body = $6;
      }
      ;
 
 func_call
     : IDENT LPAREN call_args RPAREN
      {
-         fx::Call *n = new fx::Call(fx::Loc(@1.first_line, @1.first_column));
+         Call *n = new Call(Loc(@1.first_line, @1.first_column));
          n->args = $3;
          n->name = $1;
          $$ = n;
@@ -95,12 +96,12 @@ func_call
 stmts
     : stmt
     {
-        $$ = new fx::Exprs();
-        $$->push_back(fx::AstNodePtr($1));
+        $$ = new Exprs();
+        $$->push_back(AstNodePtr($1));
     }
     | stmts stmt
     {
-        $1->push_back(fx::AstNodePtr($2));
+        $1->push_back(AstNodePtr($2));
     }
     ;
 
@@ -112,8 +113,8 @@ expr: op | func_call | unary_expr;
 return_stmt
     : RETURN expr
     {
-        fx::ReturnStmt *n = new fx::ReturnStmt(fx::Loc(@1.first_line, @1.first_column), $2->Type());
-        n->stmt = fx::AstNodePtr($2);
+        ReturnStmt *n = new ReturnStmt(Loc(@1.first_line, @1.first_column), $2->Type());
+        n->stmt = AstNodePtr($2);
         $$ = n;
     }
     ;
@@ -121,12 +122,12 @@ return_stmt
 call_args
     : expr
     {
-        $$ = new fx::Args();
-        $$->push_back(fx::AstNodePtr($1));
+        $$ = new Args();
+        $$->push_back(AstNodePtr($1));
     }
     | call_args COMMA expr
     {
-        $1->push_back(fx::AstNodePtr($3));
+        $1->push_back(AstNodePtr($3));
     }
     ;
 
@@ -134,20 +135,20 @@ call_args
 def_args
     : var_decl
         {
-            $$ = new fx::NodeVec();
-            $$->push_back(fx::AstNodePtr($1));
+            $$ = new NodeVec();
+            $$->push_back(AstNodePtr($1));
         }
     | def_args COMMA var_decl
         {
-            $1->push_back(fx::AstNodePtr($3));
+            $1->push_back(AstNodePtr($3));
         }
     ;
 
 unary_expr
     : op_val
-       { $$ = dynamic_cast<fx::AstNode*>($1); }
+       { $$ = dynamic_cast<AstNode*>($1); }
     | unary_operator op_val
-       { $$ = dynamic_cast<fx::AstNode*>($2); }
+       { $$ = dynamic_cast<AstNode*>($2); }
     ;
 
 unary_operator
@@ -171,11 +172,11 @@ compare_operator
 op
     : op_val binary_op op_val
     {
-        $$ = new fx::Operator(fx::Loc(@1.first_line, @1.first_column), fx::NodeKind::BinaryOperator, fx::TypeID::Nil, $2, $1, $3);
+        $$ = new Operator(Loc(@1.first_line, @1.first_column), NodeKind::BinaryOperator, TypeID::Nil, $2, $1, $3);
     };
 
 op_val
-      : IDENT { $$ = new fx::Val(fx::Loc(@1.first_line, @1.first_column), fx::NodeKind::VarRef, $1); }
+      : IDENT { $$ = new Val(Loc(@1.first_line, @1.first_column), NodeKind::VarRef, $1); }
       | primitive_val { $$ = $1; }
       | func_call { $$ = $1; } ;
 
@@ -194,10 +195,10 @@ binary_op: ADDOP | MINUSOP | MULOP | DIVOP;
 
 stmts_block
       : LBRACE stmts RBRACE { $$ = $2; }
-      | LBRACE RBRACE { $$ = new fx::Exprs(); }
+      | LBRACE RBRACE { $$ = new Exprs(); }
       ;
 
-var_decl: var_type IDENT { $$ = new fx::VarDecl(fx::Loc(@1.first_line, @1.first_column), $2, $1, nullptr); };
+var_decl: var_type IDENT { $$ = new VarDecl(Loc(@1.first_line, @1.first_column), $2, $1, nullptr); };
 
 primitive_type: INT | FLOAT | STR;
 
@@ -205,28 +206,28 @@ var_type: primitive_type | IDENT;
 
 primitive_val
          :ICONST
-             { $$ = new fx::Val(fx::Loc(@1.first_line, @1.first_column), fx::NodeKind::Constant, fx::TypeID::Int, $1); }
+             { $$ = new Val(Loc(@1.first_line, @1.first_column), NodeKind::Constant, TypeID::Int, $1); }
          | FCONST
-             { $$ = new fx::Val(fx::Loc(@1.first_line, @1.first_column), fx::NodeKind::Constant, fx::TypeID::Float, $1); }
+             { $$ = new Val(Loc(@1.first_line, @1.first_column), NodeKind::Constant, TypeID::Float, $1); }
          | STRING
-             { $$ = new fx::Val(fx::Loc(@1.first_line, @1.first_column), fx::NodeKind::Constant, fx::TypeID::Str, $1); }
+             { $$ = new Val(Loc(@1.first_line, @1.first_column), NodeKind::Constant, TypeID::Str, $1); }
          ;
 
 for_stmt
     : FOR LPAREN expr_stmt expr_stmt RPAREN stmts_block
     {
-        fx::ForStmt *n = new fx::ForStmt(fx::Loc(@1.first_line, @1.first_column));
-        n->cond_stmt = fx::AstNodePtr($3);
-        n->next_stmt = fx::AstNodePtr($4);
+        ForStmt *n = new ForStmt(Loc(@1.first_line, @1.first_column));
+        n->cond_stmt = AstNodePtr($3);
+        n->next_stmt = AstNodePtr($4);
         n->body = $6;
         $$ = n;
     }
     | FOR LPAREN expr_stmt expr_stmt expr_stmt RPAREN stmts_block
     {
-        fx::ForStmt *n = new fx::ForStmt(fx::Loc(@1.first_line, @1.first_column));
-        n->init_stmt = fx::AstNodePtr($3);
-        n->cond_stmt = fx::AstNodePtr($4);
-        n->next_stmt = fx::AstNodePtr($5);
+        ForStmt *n = new ForStmt(Loc(@1.first_line, @1.first_column));
+        n->init_stmt = AstNodePtr($3);
+        n->cond_stmt = AstNodePtr($4);
+        n->next_stmt = AstNodePtr($5);
         n->body = $7;
         $$ = n;
     };
@@ -234,12 +235,12 @@ for_stmt
 if_stmt
     : IF LPAREN boolean_stmt RPAREN stmts_block
     {
-        fx::IfStmt *n = new fx::IfStmt(fx::Loc(@1.first_line, @1.first_column), $3, $5, nullptr);
+        IfStmt *n = new IfStmt(Loc(@1.first_line, @1.first_column), $3, $5, nullptr);
         $$ = n;
     }
     | IF LPAREN boolean_stmt RPAREN stmts_block ELSE stmts_block
     {
-        fx::IfStmt *n = new fx::IfStmt(fx::Loc(@1.first_line, @1.first_column), $3, $5, $7);
+        IfStmt *n = new IfStmt(Loc(@1.first_line, @1.first_column), $3, $5, $7);
         $$ = n;
     }
     ;
@@ -247,15 +248,15 @@ if_stmt
 boolean_stmt
     : op_val compare_operator op_val
     {
-        $$ = new fx::Operator(fx::Loc(@1.first_line, @1.first_column),
-            fx::NodeKind::BinaryOperator, fx::TypeID::Bool, $2, $1, $3);
+        $$ = new Operator(Loc(@1.first_line, @1.first_column),
+            NodeKind::BinaryOperator, TypeID::Bool, $2, $1, $3);
     };
 
 
 expr_stmt
     : SEMI
     {
-        $$ = new fx::AstNode(fx::Loc(@1.first_line, @1.first_column), fx::NodeKind::Nil);
+        $$ = new AstNode(Loc(@1.first_line, @1.first_column), NodeKind::Nil);
     }
     | expr SEMI
     {
@@ -269,8 +270,8 @@ assignment_operator
 assignment_expr
     : IDENT assignment_operator value_expr
     {
-        $$ = new fx::AssignStmt(fx::Loc(@1.first_line, @1.first_column),
-            new fx::Val(fx::Loc(@1.first_line, @1.first_column), fx::NodeKind::VarRef, $1), $3);
+        $$ = new AssignStmt(Loc(@1.first_line, @1.first_column),
+            new Val(Loc(@1.first_line, @1.first_column), NodeKind::VarRef, $1), $3);
     };
 
 

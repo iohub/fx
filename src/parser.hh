@@ -97,7 +97,7 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 19 "src/parser.y" /* yacc.c:1909  */
+#line 20 "src/parser.y" /* yacc.c:1909  */
 
     std::string *str;
     fx::AstNode *node;

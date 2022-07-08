@@ -16,7 +16,7 @@ using namespace fx;
 using json = nlohmann::json;
 
 extern FILE *yyin;
-extern fx::AstNode* Program;
+extern AstNode* Program;
 
 int parse(const char* fname) {
     FILE *fobj = fopen(fname, "r");
@@ -29,10 +29,10 @@ int parse(const char* fname) {
     return 0;
 }
 
-fx::Logging::Level fx::Logging::level;
+Logging::Level Logging::level;
 
 int main(int argc, const char *argv[]) {
-    fx::Logging::level = fx::Logging::Level::INFO;
+    Logging::level = Logging::Level::INFO;
 
     CLI::App app{"fx compiler"};
     std::string fname;
@@ -52,7 +52,7 @@ int main(int argc, const char *argv[]) {
     if (Program) {
         Env emptyCtx;
         Decls *decls = dynamic_cast<Decls*>(Program);
-        fx::TypeCheckResult result = fx::TypeChecker::check(emptyCtx, decls);
+        TypeCheckResult result = TypeChecker::check(emptyCtx, decls);
         fmt::print("TypeCheckResult {}\n", result.errmsg);
         delete Program;
     }
