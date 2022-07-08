@@ -42,17 +42,18 @@ int main(int argc, const char *argv[]) {
     if (int err = parse(fname.c_str()) != 0) {
         fmt::print("parse file:{}, err:{}\n", fname, err);
     } else {
-        Program->print();
         json jsonExp = Program->tojson();
         // print pretty json
         // std::cout << std::setw(2) << jsonExp << std::endl;
         // visualize onsite: https://vanya.jp.net/vtree
-        // std::cout << jsonExp << std::endl;
+        std::cout << jsonExp << std::endl;
     }
+
     if (Program) {
         Env emptyCtx;
         Decls *decls = dynamic_cast<Decls*>(Program);
         TypeCheckResult result = TypeChecker::check(emptyCtx, decls);
+        Program->print();
         fmt::print("TypeCheckResult {}\n", result.errmsg);
         delete Program;
     }

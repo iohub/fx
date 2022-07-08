@@ -1,5 +1,5 @@
 
-def ForStmt(float x, float y) float {
+def foo(float x, float y) float {
     for ( x; y;) {
         if (x > 10.0) {
             x + 1.0
@@ -22,8 +22,8 @@ def fib(int x) int {
 }
 
 def main() int {
-    int z
-    z + DemoFor(10, 12)
+    float z
+    z + foo(10, 12)
     return fib(8)
 }
 

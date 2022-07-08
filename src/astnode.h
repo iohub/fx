@@ -43,6 +43,7 @@ public:
 
     bool is(Kind k) const { return kind == k; }
     std::string sexp() { return  fmt::format("({})", dump()); }
+    std::string location() const;
     void print();
     virtual ~AstNode() { };
 
@@ -93,7 +94,7 @@ struct Val: public AstNode {
 
     virtual std::string dump();
     virtual json tojson(json parent);
-    virtual std::string nominal();
+    virtual std::string nominal() { return raw_data ? *raw_data : "Nil"; }
 };
 
 struct VarDecl: public AstNode {
@@ -115,6 +116,7 @@ struct VarDecl: public AstNode {
     ~VarDecl();
     virtual std::string dump();
     virtual json tojson(json parent);
+    virtual std::string nominal() { return var_name? *var_name: "Nil"; }
 };
 
 struct Operator: public AstNode {

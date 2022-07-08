@@ -14,8 +14,8 @@ TypeCheckResult TypeChecker::checkBinaryOp(Env &env, AstNodePtr ptr) {
     AstNodePtr lhs = op->lhs, rhs = op->rhs;
     synthesize(env, lhs); synthesize(env, rhs);
     if (!isSubtype(lhs, rhs)) {
-        return TypeCheckResult(fmt::format("incompatible type ({}) with ({}) in Operator",
-                    lhs->Type().type_name(), rhs->Type().type_name()));
+        return TypeCheckResult(fmt::format("Operator location:{} incompatible type ({}) with ({})",
+                    op->location(), lhs->Type().type_name(), rhs->Type().type_name()));
     }
     if ((op->Type()).nil()) {
         op->ty = lhs->ty;
@@ -64,8 +64,8 @@ TypeCheckResult TypeChecker::checkFuncDecl(Env &env, AstNodePtr n) {
                 synthesize(env, n);
                 foundReturn = true;
                 if (n->Type() != fn->Type()) {
-                    return TypeCheckResult(fmt::format("function:{} incompatible type: Cann't return ({}) with ({})",
-                                fn->nominal(), fn->tyname(), n->tyname()));
+                    return TypeCheckResult(fmt::format("function:{} location:{}, incompatible type: Cann't return ({}) with ({})",
+                                fn->nominal(), fn->location(), fn->tyname(), n->tyname()));
                 }
             } else if (n->is(NodeKind::BinaryOperator)) {
                 auto result = checkBinaryOp(env, n);
@@ -94,7 +94,6 @@ void TypeChecker::synthesize(const Env &env, Val *n) {
     if (n->synthesized) return ;
     if (n->is(NodeKind::VarRef)) {
         n->ty = env.lookup_var(n->nominal());
-        Logging::info("var:{}\n", n->dump());
     }
     n->synthesized = true;
 }

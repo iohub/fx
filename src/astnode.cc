@@ -20,6 +20,10 @@ void AstNode::print() {
     fmt::print("{}\n", out.c_str());
 }
 
+std::string AstNode::location() const {
+    return fmt::format("(lineno:{}, column:{})",  loc.lineno, loc.colmnno);
+}
+
 json Decls::tojson(json parent) {
     for (auto n : decls)
         parent.push_back(n->tojson(json()));
@@ -43,10 +47,6 @@ std::string Val::dump() {
         str = fmt::format("{}@{}@{}", str, *raw_data, Type().type_name());
     }
     return str;
-}
-
-std::string Val::nominal() {
-    return raw_data ? *raw_data : "Nil";
 }
 
 json Val::tojson(json parent) {

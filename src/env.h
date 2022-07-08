@@ -20,9 +20,9 @@ public:
     }
 
     void put(AstNodePtr node) {
-        if (dynamic_cast<VarDecl*>(node.get())) {
-            vars_[node->nominal()] = node->Type();
-        } else if (dynamic_cast<FuncDecl*>(node.get())) {
+        if (VarDecl *nn = dynamic_cast<VarDecl*>(node.get())) {
+            vars_[nn->nominal()] = nn->Type();
+        } else if (FuncDecl *nn = dynamic_cast<FuncDecl*>(node.get())) {
             funs_[node->nominal()] = node->Type();
         }
     }
