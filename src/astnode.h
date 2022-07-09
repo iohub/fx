@@ -29,7 +29,7 @@ public:
     enum class Kind : uint8_t {
         Invalid, Nil, CallFunc, Constant,
         FuncDecl, VarRef, VarDecl, Expr, BinaryOperator, UnaryOperator,
-        ReturnStmt, DeclList, Undefine
+        ReturnStmt, If, DeclList, Undefine
     };
     enum class OpKind: uint8_t {
         Invalid,
@@ -67,7 +67,7 @@ protected:
     bool synthesized;
 };
 
-typedef AstNode::Kind NodeKind;
+typedef AstNode::Kind Kind;
 typedef AstNode::OpKind OpKind;
 
 struct Decls: public AstNode {
@@ -85,8 +85,8 @@ struct Decls: public AstNode {
 struct Val: public AstNode {
     std::string *raw_data;
 
-    Val(Loc loc, NodeKind kind, std::string *val) : AstNode(loc, kind), raw_data(val) {}
-    Val(Loc loc, NodeKind kind, Ty ty, std::string *val) : AstNode(loc, kind, ty), raw_data(val) {}
+    Val(Loc loc, Kind kind, std::string *val) : AstNode(loc, kind), raw_data(val) {}
+    Val(Loc loc, Kind kind, Ty ty, std::string *val) : AstNode(loc, kind, ty), raw_data(val) {}
 
     ~Val() {
         Logging::debug("~Val({})\n", dump());
@@ -104,7 +104,7 @@ struct VarDecl: public AstNode {
     std::string *type_name;
 
     VarDecl(Loc loc, std::string *name, std::string *type, std::string *data)
-        : AstNode(loc, NodeKind::VarDecl, Ty(*type)),
+        : AstNode(loc, Kind::VarDecl, Ty(*type)),
         raw_data(data), var_name(name), type_name(type) { }
 
     std::string name() {
@@ -218,8 +218,8 @@ struct IfStmt: public AstNode {
     AstNodePtr cond_;
     Stmts* then_;
     Stmts* else_;
-    IfStmt(Loc loc, AstNode* conditional, Stmts* then, Stmts* _else):
-        AstNode(loc), cond_(conditional), then_(then), else_(_else) {}
+    IfStmt(Loc loc, Kind kind, AstNode* conditional, Stmts* then, Stmts* _else):
+        AstNode(loc, kind), cond_(conditional), then_(then), else_(_else) {}
     ~IfStmt();
 
     virtual std::string dump();

@@ -35,6 +35,7 @@ private:
     static TypeCheckResult checkReturn(Env &env, AstNodePtr Return);
     static TypeCheckResult checkDecls(Env &env, AstNodePtr declList);
     static TypeCheckResult checkIf(Env &env, AstNodePtr If);
+    static TypeCheckResult checkStmts(Env &env, AstNodePtr stmts);
 
     static void synthesize(const Env &env, AstNodePtr n);
     static void synthesize(const Env &env, ReturnStmt *n);

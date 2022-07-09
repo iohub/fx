@@ -172,11 +172,11 @@ compare_operator
 op
     : op_val binary_op op_val
     {
-        $$ = new Operator(Loc(@1.first_line, @1.first_column), NodeKind::BinaryOperator, TypeID::Nil, $2, $1, $3);
+        $$ = new Operator(Loc(@1.first_line, @1.first_column), Kind::BinaryOperator, TypeID::Nil, $2, $1, $3);
     };
 
 op_val
-      : IDENT { $$ = new Val(Loc(@1.first_line, @1.first_column), NodeKind::VarRef, $1); }
+      : IDENT { $$ = new Val(Loc(@1.first_line, @1.first_column), Kind::VarRef, $1); }
       | primitive_val { $$ = $1; }
       | func_call { $$ = $1; } ;
 
@@ -206,11 +206,11 @@ var_type: primitive_type | IDENT;
 
 primitive_val
          :ICONST
-             { $$ = new Val(Loc(@1.first_line, @1.first_column), NodeKind::Constant, TypeID::Int, $1); }
+             { $$ = new Val(Loc(@1.first_line, @1.first_column), Kind::Constant, TypeID::Int, $1); }
          | FCONST
-             { $$ = new Val(Loc(@1.first_line, @1.first_column), NodeKind::Constant, TypeID::Float, $1); }
+             { $$ = new Val(Loc(@1.first_line, @1.first_column), Kind::Constant, TypeID::Float, $1); }
          | STRING
-             { $$ = new Val(Loc(@1.first_line, @1.first_column), NodeKind::Constant, TypeID::Str, $1); }
+             { $$ = new Val(Loc(@1.first_line, @1.first_column), Kind::Constant, TypeID::Str, $1); }
          ;
 
 for_stmt
@@ -235,12 +235,12 @@ for_stmt
 if_stmt
     : IF LPAREN boolean_stmt RPAREN stmts_block
     {
-        IfStmt *n = new IfStmt(Loc(@1.first_line, @1.first_column), $3, $5, nullptr);
+        IfStmt *n = new IfStmt(Loc(@1.first_line, @1.first_column), Kind::If, $3, $5, nullptr);
         $$ = n;
     }
     | IF LPAREN boolean_stmt RPAREN stmts_block ELSE stmts_block
     {
-        IfStmt *n = new IfStmt(Loc(@1.first_line, @1.first_column), $3, $5, $7);
+        IfStmt *n = new IfStmt(Loc(@1.first_line, @1.first_column), Kind::If, $3, $5, $7);
         $$ = n;
     }
     ;
@@ -249,14 +249,14 @@ boolean_stmt
     : op_val compare_operator op_val
     {
         $$ = new Operator(Loc(@1.first_line, @1.first_column),
-            NodeKind::BinaryOperator, TypeID::Bool, $2, $1, $3);
+            Kind::BinaryOperator, TypeID::Bool, $2, $1, $3);
     };
 
 
 expr_stmt
     : SEMI
     {
-        $$ = new AstNode(Loc(@1.first_line, @1.first_column), NodeKind::Nil);
+        $$ = new AstNode(Loc(@1.first_line, @1.first_column), Kind::Nil);
     }
     | expr SEMI
     {
@@ -271,7 +271,7 @@ assignment_expr
     : IDENT assignment_operator value_expr
     {
         $$ = new AssignStmt(Loc(@1.first_line, @1.first_column),
-            new Val(Loc(@1.first_line, @1.first_column), NodeKind::VarRef, $1), $3);
+            new Val(Loc(@1.first_line, @1.first_column), Kind::VarRef, $1), $3);
     };
 
 

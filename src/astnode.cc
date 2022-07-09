@@ -37,9 +37,9 @@ void Decls::append(AstNode *n) {
 std::string Val::dump() {
     std::string str;
     switch (kind) {
-        case NodeKind::Constant: str = "Constant"; break;
-        case NodeKind::VarRef: str = "VarRef"; break;
-        case NodeKind::VarDecl: str = "VarDecl"; break;
+        case Kind::Constant: str = "Constant"; break;
+        case Kind::VarRef: str = "VarRef"; break;
+        case Kind::VarDecl: str = "VarDecl"; break;
         default: str = "unknown";
     }
     if (raw_data) {
@@ -51,9 +51,9 @@ std::string Val::dump() {
 json Val::tojson(json parent) {
     std::string str;
     switch (kind) {
-        case NodeKind::Constant: str = "Constant"; break;
-        case NodeKind::VarRef: str = "VarRef"; break;
-        case NodeKind::VarDecl: str = "VarDecl"; break;
+        case Kind::Constant: str = "Constant"; break;
+        case Kind::VarRef: str = "VarRef"; break;
+        case Kind::VarDecl: str = "VarDecl"; break;
         default: str = "unknown";
     }
     json child;

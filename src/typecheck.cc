@@ -48,19 +48,21 @@ TypeCheckResult TypeChecker::checkCall(Env &env, AstNodePtr call) {
 
 TypeCheckResult TypeChecker::check(Env &env, AstNodePtr any) {
     switch(any->kind) {
-        case NodeKind::DeclList:
+        case Kind::DeclList:
             return checkDecls(env, any);
-        case NodeKind::CallFunc:
+        case Kind::CallFunc:
             return checkCall(env, any);
-        case NodeKind::ReturnStmt:
+        case Kind::ReturnStmt:
             return checkReturn(env, any);
-        case NodeKind::VarDecl:
+        case Kind::VarDecl:
             return TypeOk;
-        case NodeKind::Constant:
+        case Kind::Constant:
             return TypeOk;
-        case NodeKind::BinaryOperator:
+        case Kind::BinaryOperator:
             return checkBinaryOp(env, any);
-        case NodeKind::VarRef:
+        case Kind::If:
+            return checkIf(env, any);
+        case Kind::VarRef:
             return TypeOk;
         default:
             return TypeCheckResult(fmt::format("{} check Unknown {}", any->loc(), any->dump()));
@@ -74,7 +76,7 @@ TypeCheckResult TypeChecker::checkDecls(Env &env, AstNodePtr declList) {
     FuncDecl *fn;
     for (auto n : decls->decls) {
         switch (n->kind) {
-            case NodeKind::FuncDecl:
+            case Kind::FuncDecl:
                 if (!(fn = dynamic_cast<FuncDecl*>(n.get()))) break;
                 env.put(n);
                 result = checkFuncDecl(env, n);
@@ -94,8 +96,19 @@ TypeCheckResult TypeChecker::checkAssign(Env &env, AstNodePtr assign) {
     return TypeOk;
 }
 
+TypeCheckResult TypeChecker::checkStmts(Env &env, AstNodePtr stmts) {
+    Stmts *nn = dynamic_cast<Stmts*>(stmts.get()); assert(nn);
+    TypeCheckResult result = TypeOk;
+    for (auto n : *nn) {
+        if ((result = check(env, n)) != TypeOk) return result;
+    }
+    return TypeOk;
+}
+
 TypeCheckResult TypeChecker::checkIf(Env &env, AstNodePtr If) {
     IfStmt *nn = dynamic_cast<IfStmt*>(If.get()); assert(nn);
+    TypeCheckResult result = TypeOk;
+    if ((result = check(env, nn->cond_)) != TypeOk) return result;
 
     return TypeOk;
 }
@@ -114,13 +127,13 @@ TypeCheckResult TypeChecker::checkFuncDecl(Env &env, AstNodePtr n) {
     for (auto n : fn->body()) {
         result = TypeOk;
         switch(n->kind) {
-            case NodeKind::ReturnStmt:
+            case Kind::ReturnStmt:
                 synthesize(env, n); foundReturn = true;
                 if ((result = checkReturn(env, n)) != TypeOk) return result;
                 if (fn->Type() != n->Type())
                     return TypeCheckResult(fmt::format("{} incompatible type", n->loc()));
                 break;
-            case NodeKind::VarDecl:
+            case Kind::VarDecl:
                  env.put(n); break;
             default:
                  result = check(env, n);
@@ -142,7 +155,7 @@ void TypeChecker::synthesize(const Env &env, ReturnStmt *n) {
 
 void TypeChecker::synthesize(const Env &env, Val *n) {
     if (n->synthesized) return ;
-    if (n->is(NodeKind::VarRef)) {
+    if (n->is(Kind::VarRef)) {
         if (AstNodePtr decl = env.lookup_var(n->nominal())) {
             n->ty =  decl->Type();
         }
