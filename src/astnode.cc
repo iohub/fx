@@ -108,50 +108,44 @@ Operator::Operator(Loc loc, Kind nodeKind, Ty ty, std::string *opname, AstNode *
 
 std::string FuncDecl::dump() {
     std::string str = name ? "FuncDecl@" + *name : "FuncDecl";
-    if (args) {
-        for (auto itr: *args) str += itr->sexp();
-    }
-    if (body) {
-        for (auto itr: *body) str +=  itr->sexp();
-    }
+    for (auto itr: args()) str += itr->sexp();
+    for (auto itr: body()) str +=  itr->sexp();
     return fmt::format("({})", str);
 }
 
 json FuncDecl::tojson(json parent) {
     json child;
     child["name"] = name ? *name : "Nil";
-    child["args"] = vec_tojson(args);
-    child["body"] = vec_tojson(body);
+    child["args"] = vec_tojson(args_);
+    child["body"] = vec_tojson(body_);
     parent["FuncDecl"] = child;
     return parent;
 }
 
 FuncDecl::~FuncDecl() {
     Logging::debug("~FuncDecl({})\n", dump());
-    if (args) delete args;
-    if (body) delete body;
+    if (args_) delete args_;
+    if (body_) delete body_;
     if (name) delete name;
 }
 
 std::string Call::dump() {
-    std::string str = name  ? "call:" + *name : "call";
-    if (args) {
-        for (auto itr: *args) str += itr->sexp();
-    }
+    std::string str = name_  ? "call:" + *name_ : "call";
+    for (auto itr: args()) str += itr->sexp();
     return str;
 }
 
 json Call::tojson(json parent) {
     json child;
-    child["args"] = vec_tojson(args);
+    child["args"] = vec_tojson(args_);
     parent["Call"] = child;
     return parent;
 }
 
 Call::~Call() {
     Logging::debug("~callNode({})\n", dump());
-    if (args) delete args;
-    if (name) delete name;
+    if (args_) delete args_;
+    if (name_) delete name_;
 }
 
 std::string Decls::dump() {
@@ -181,9 +175,7 @@ ReturnStmt::~ReturnStmt() {
 
 std::string ForStmt::dump() {
     std::string str;
-    if (body) {
-        for (auto n: *body) str += n->sexp();
-    }
+    if (body) for (auto n: *body) str += n->sexp();
     return fmt::format("ForStmt<{}{}{}>[{}]",
             tostr(init_stmt), tostr(cond_stmt), tostr(next_stmt), str);
 }

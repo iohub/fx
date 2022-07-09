@@ -24,6 +24,6 @@ def fib(int x) int {
 def main() int {
     float z
     z + foo(10, 12)
-    return fib(8)
+    return fib(9)
 }
 

@@ -23,6 +23,24 @@ TypeCheckResult TypeChecker::checkBinaryOp(Env &env, AstNodePtr ptr) {
     return TypeOk;
 }
 
+TypeCheckResult TypeChecker::checkCall(Env &env, AstNodePtr call) {
+    Call *nn = dynamic_cast<Call*>(call.get());
+    if (!nn) {
+        return TypeCheckResult("Invalid Call");
+    }
+    Ty ty = env.lookup_func(nn->nominal());
+    if (ty.nil()) {
+        return TypeCheckResult(fmt::format("Undefine Call:{}", nn->nominal()));
+    }
+
+    for (auto arg: nn->args()) {
+        if (env.lookup_var(arg->nominal()).nil()) {
+            return TypeCheckResult(fmt::format("Undefine Call arg:{}{}", arg->nominal(), arg->location()));
+        }
+    }
+    return TypeOk;
+}
+
 TypeCheckResult TypeChecker::check(Env &env, Decls *decls) {
     TypeCheckResult result = TypeOk;
     FuncDecl *fn;
@@ -54,27 +72,23 @@ TypeCheckResult TypeChecker::checkFuncDecl(Env &env, AstNodePtr n) {
         return TypeCheckResult("Invalid FuncDecl");
     }
     Env nenv = env;
-    if (fn->args) {
-        for (auto arg : *(fn->args)) env.put(arg);
-    }
+    for (auto arg : fn->args()) env.put(arg);
     bool foundReturn = false;
-    if (fn->body) {
-        for (auto n : *(fn->body)) {
-            if (n->is(NodeKind::ReturnStmt)) {
-                synthesize(env, n);
-                foundReturn = true;
-                if (n->Type() != fn->Type()) {
-                    return TypeCheckResult(fmt::format("function:{} location:{}, incompatible type: Cann't return ({}) with ({})",
-                                fn->nominal(), fn->location(), fn->tyname(), n->tyname()));
-                }
-            } else if (n->is(NodeKind::BinaryOperator)) {
-                auto result = checkBinaryOp(env, n);
-                if (result != TypeOk) {
-                    return result;
-                }
-            } else if (n->is(NodeKind::VarDecl)) {
-                env.put(n);
+    for (auto n : fn->body()) {
+        if (n->is(NodeKind::ReturnStmt)) {
+            synthesize(env, n);
+            foundReturn = true;
+            if (n->Type() != fn->Type()) {
+                return TypeCheckResult(fmt::format("function:{} location:{}, incompatible type: Cann't return ({}) with ({})",
+                            fn->nominal(), fn->location(), fn->tyname(), n->tyname()));
             }
+        } else if (n->is(NodeKind::BinaryOperator)) {
+            auto result = checkBinaryOp(env, n);
+            if (result != TypeOk) {
+                return result;
+            }
+        } else if (n->is(NodeKind::VarDecl)) {
+            env.put(n);
         }
     }
     return foundReturn && !fn->Type().is(TypeID::Void) ?
@@ -99,7 +113,7 @@ void TypeChecker::synthesize(const Env &env, Val *n) {
 }
 
 void TypeChecker::synthesize(const Env &env, Call *n) {
-    Ty ty = env.lookup_func(*(n->name));
+    Ty ty = env.lookup_func(*(n->name_));
     if (!ty.nil()) {
         n->ty = ty;
     }
@@ -117,8 +131,6 @@ void TypeChecker::synthesize(const Env &env, AstNodePtr n) {
         synthesize(env, nn);
     }
 }
-
-
 
 
 

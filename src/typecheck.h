@@ -31,6 +31,7 @@ private:
     static TypeCheckResult checkBinaryOp(Env &env, AstNodePtr op);
     static TypeCheckResult checkFuncDecl(Env &env, AstNodePtr func);
     static TypeCheckResult checkAssign(Env &env, AstNodePtr assign);
+    static TypeCheckResult checkCall(Env &env, AstNodePtr call);
 
     static void synthesize(const Env &env, AstNodePtr n);
     static void synthesize(const Env &env, ReturnStmt *n);

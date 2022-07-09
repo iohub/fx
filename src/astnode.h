@@ -165,8 +165,11 @@ struct FuncDecl: public AstNode {
     virtual json tojson(json parent);
     ~FuncDecl();
 
-    NodeVec *args;
-    Exprs *body;
+    Exprs body() const { return body_ ? *body_ : Exprs(); }
+    Args args() const { return args_ ? *args_ : Args(); }
+
+    Args *args_;
+    Exprs *body_;
     std::string *name;
 };
 
@@ -177,8 +180,12 @@ struct Call: public AstNode {
     Call(Loc loc) : AstNode(loc, Kind::CallFunc) {}
     ~Call();
 
-    Args *args;
-    std::string *name;
+    Args args() {
+        return args_ ? *args_ : Args();
+    }
+
+    Args *args_;
+    std::string *name_;
 };
 
 struct ReturnStmt: public AstNode {

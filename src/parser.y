@@ -74,12 +74,12 @@ func_decl
      : FN IDENT LPAREN def_args RPAREN var_type stmts_block
      {
          $$ = new FuncDecl(Loc(@1.first_line, @1.first_column), $2, $6);
-         $$->body = $7;
-         $$->args = $4;
+         $$->body_ = $7;
+         $$->args_ = $4;
      }
      | FN IDENT LPAREN RPAREN var_type stmts_block
      {
-         $$ = new FuncDecl(Loc(@1.first_line, @1.first_column), $2, $5); $$->body = $6;
+         $$ = new FuncDecl(Loc(@1.first_line, @1.first_column), $2, $5); $$->body_ = $6;
      }
      ;
 
@@ -87,8 +87,8 @@ func_call
     : IDENT LPAREN call_args RPAREN
      {
          Call *n = new Call(Loc(@1.first_line, @1.first_column));
-         n->args = $3;
-         n->name = $1;
+         n->args_ = $3;
+         n->name_ = $1;
          $$ = n;
      }
      ;
