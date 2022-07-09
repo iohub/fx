@@ -24,7 +24,7 @@ const TypeCheckResult TypeOk = TypeCheckResult("Ok");
 
 class TypeChecker {
 public:
-    static TypeCheckResult check(Env &env, Decls *decls);
+    static TypeCheckResult check(Env &env, AstNodePtr any);
 
 private:
     static bool isSubtype(AstNodePtr a, AstNodePtr b);
@@ -32,6 +32,8 @@ private:
     static TypeCheckResult checkFuncDecl(Env &env, AstNodePtr func);
     static TypeCheckResult checkAssign(Env &env, AstNodePtr assign);
     static TypeCheckResult checkCall(Env &env, AstNodePtr call);
+    static TypeCheckResult checkReturn(Env &env, AstNodePtr Return);
+    static TypeCheckResult checkDecls(Env &env, AstNodePtr declList);
 
     static void synthesize(const Env &env, AstNodePtr n);
     static void synthesize(const Env &env, ReturnStmt *n);

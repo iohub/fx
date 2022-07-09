@@ -7,10 +7,7 @@ bool TypeChecker::isSubtype(AstNodePtr a, AstNodePtr b) {
 }
 
 TypeCheckResult TypeChecker::checkBinaryOp(Env &env, AstNodePtr ptr) {
-    Operator *op = dynamic_cast<Operator*>(ptr.get());
-    if (!op) {
-        return TypeCheckResult("Invalid Operator");
-    }
+    Operator *op = dynamic_cast<Operator*>(ptr.get()); assert(op);
     AstNodePtr lhs = op->lhs, rhs = op->rhs;
     synthesize(env, lhs); synthesize(env, rhs);
     if (!isSubtype(lhs, rhs)) {
@@ -24,28 +21,48 @@ TypeCheckResult TypeChecker::checkBinaryOp(Env &env, AstNodePtr ptr) {
 }
 
 TypeCheckResult TypeChecker::checkCall(Env &env, AstNodePtr call) {
-    Call *nn = dynamic_cast<Call*>(call.get());
-    if (!nn) {
-        return TypeCheckResult("Invalid Call");
-    }
+    Call *nn = dynamic_cast<Call*>(call.get()); assert(nn);
     AstNodePtr fndecl = env.lookup_func(nn->nominal());
     if (!fndecl) {
-        return TypeCheckResult(fmt::format("Undefine Call:{}", nn->nominal()));
+        return TypeCheckResult(fmt::format("{} Undefine Call:{}#", call->location(), call->nominal()));
     }
     FuncDecl *fn = dynamic_cast<FuncDecl*>(fndecl.get());
-    if ((fn->args()).size() != (nn->args()).size()) {
-        return TypeCheckResult(fmt::format("Call {} {} missing params", nn->nominal(), nn->location()));
+    auto sArgs = fn->args(), dArgs = nn->args();
+    if (sArgs.size() != dArgs.size()) {
+        return TypeCheckResult(fmt::format("{} Call {} unmatch params", nn->location(), nn->nominal()));
     }
-    for (auto arg: nn->args()) {
-        AstNodePtr decl = env.lookup_var(arg->nominal());
-        if (!decl) {
-            return TypeCheckResult(fmt::format("Undefine Call arg:{}{}", arg->nominal(), arg->location()));
+    for (size_t idx = 0; idx < sArgs.size(); idx++) {
+        auto sArg = sArgs[idx], dArg = dArgs[idx];
+        if (dArg->is(NodeKind::VarRef)) {
+            synthesize(env, dArg);
+        }
+        if (sArg->Type() != dArg->Type()) {
+            return TypeCheckResult(fmt::format("{} Call {} unmatch type", nn->location(), nn->nominal()));
         }
     }
     return TypeOk;
 }
 
-TypeCheckResult TypeChecker::check(Env &env, Decls *decls) {
+TypeCheckResult TypeChecker::check(Env &env, AstNodePtr any) {
+    switch(any->kind) {
+        case NodeKind::DeclList:
+            return checkDecls(env, any);
+        case NodeKind::CallFunc:
+            return checkCall(env, any);
+        case NodeKind::ReturnStmt:
+            return checkReturn(env, any);
+        case NodeKind::VarDecl:
+            return TypeOk;
+        case NodeKind::Constant:
+            return TypeOk;
+        default:
+            return TypeCheckResult(fmt::format("{} Unknown {}", any->location(), any->dump()));
+    }
+    return TypeOk;
+}
+
+TypeCheckResult TypeChecker::checkDecls(Env &env, AstNodePtr declList) {
+    Decls *decls = dynamic_cast<Decls*>(declList.get()); assert(decls);
     TypeCheckResult result = TypeOk;
     FuncDecl *fn;
     for (auto n : decls->decls) {
@@ -70,11 +87,13 @@ TypeCheckResult TypeChecker::checkAssign(Env &env, AstNodePtr assign) {
     return TypeOk;
 }
 
+TypeCheckResult TypeChecker::checkReturn(Env &env, AstNodePtr Return) {
+    ReturnStmt *nn = dynamic_cast<ReturnStmt*>(Return.get()); assert(nn);
+    return check(env, nn->stmt);
+}
+
 TypeCheckResult TypeChecker::checkFuncDecl(Env &env, AstNodePtr n) {
-    FuncDecl *fn = dynamic_cast<FuncDecl*>(n.get());
-    if (!fn) {
-        return TypeCheckResult("Invalid FuncDecl");
-    }
+    FuncDecl *fn = dynamic_cast<FuncDecl*>(n.get()); assert(fn);
     Env nenv = env;
     for (auto arg : fn->args()) env.put(arg);
     bool foundReturn = false;
@@ -82,11 +101,12 @@ TypeCheckResult TypeChecker::checkFuncDecl(Env &env, AstNodePtr n) {
     for (auto n : fn->body()) {
         result = TypeOk;
         if (n->is(NodeKind::ReturnStmt)) {
-            synthesize(env, n);
-            foundReturn = true;
-            if (n->Type() != fn->Type()) {
-                result = TypeCheckResult(fmt::format("function:{} location:{}, incompatible type: Cann't return ({}) with ({})",
-                            fn->nominal(), fn->location(), fn->tyname(), n->tyname()));
+            synthesize(env, n); foundReturn = true;
+            if ((result = checkReturn(env, n)) != TypeOk) {
+                return result;
+            }
+            if (fn->Type() != n->Type()) {
+                result = TypeCheckResult(fmt::format("{} unmatch type", n->location()));
             }
         } else if (n->is(NodeKind::BinaryOperator)) {
             result = checkBinaryOp(env, n);

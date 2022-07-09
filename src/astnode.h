@@ -20,6 +20,7 @@ typedef std::shared_ptr<AstNode> AstNodePtr;
 typedef std::vector<AstNodePtr> NodeVec;
 using Args = NodeVec;
 using Exprs = NodeVec;
+using DeclList = NodeVec;
 using json = nlohmann::json;
 
 class AstNode {
@@ -78,7 +79,7 @@ struct Decls: public AstNode {
         Logging::debug("~Decls({})\n", dump());
     }
     void append(struct AstNode* n);
-    NodeVec decls;
+    DeclList decls;
 };
 
 struct Val: public AstNode {
@@ -176,6 +177,7 @@ struct FuncDecl: public AstNode {
 struct Call: public AstNode {
     virtual std::string dump();
     virtual json tojson(json parent);
+    virtual std::string nominal() { return name_ ? *name_ : "Nil"; }
 
     Call(Loc loc) : AstNode(loc, Kind::CallFunc) {}
     ~Call();

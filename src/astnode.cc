@@ -21,12 +21,11 @@ void AstNode::print() {
 }
 
 std::string AstNode::location() const {
-    return fmt::format("(lineno:{}, column:{})",  loc.lineno, loc.colmnno);
+    return fmt::format("(lineno:{},column:{})",  loc.lineno, loc.colmnno);
 }
 
 json Decls::tojson(json parent) {
-    for (auto n : decls)
-        parent.push_back(n->tojson(json()));
+    for (auto n : decls) parent.push_back(n->tojson(json()));
     return parent;
 }
 

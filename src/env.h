@@ -11,12 +11,12 @@ class Env {
 public:
     AstNodePtr lookup_var(std::string const &nominal) const {
         auto itr = vars_.find(nominal);
-        return itr == vars_.end() ? AstNodePtr(nullptr): itr->second;
+        return itr == vars_.end() ? nullptr : itr->second;
     }
 
     AstNodePtr lookup_func(std::string const &nominal) const {
         auto itr = funs_.find(nominal);
-        return itr == funs_.end() ? AstNodePtr(nullptr) : itr->second;
+        return itr == funs_.end() ? nullptr : itr->second;
     }
 
     void put(AstNodePtr node) {

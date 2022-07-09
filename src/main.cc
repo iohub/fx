@@ -51,11 +51,10 @@ int main(int argc, const char *argv[]) {
 
     if (Program) {
         Env emptyCtx;
-        Decls *decls = dynamic_cast<Decls*>(Program);
-        TypeCheckResult result = TypeChecker::check(emptyCtx, decls);
-        Program->print();
+        AstNodePtr p(Program);
+        TypeCheckResult result = TypeChecker::check(emptyCtx, p);
+        p->print();
         fmt::print("TypeCheckResult {}\n", result.errmsg);
-        delete Program;
     }
 }
 
