@@ -28,13 +28,17 @@ TypeCheckResult TypeChecker::checkCall(Env &env, AstNodePtr call) {
     if (!nn) {
         return TypeCheckResult("Invalid Call");
     }
-    Ty ty = env.lookup_func(nn->nominal());
-    if (ty.nil()) {
+    AstNodePtr fndecl = env.lookup_func(nn->nominal());
+    if (!fndecl) {
         return TypeCheckResult(fmt::format("Undefine Call:{}", nn->nominal()));
     }
-
+    FuncDecl *fn = dynamic_cast<FuncDecl*>(fndecl.get());
+    if ((fn->args()).size() != (nn->args()).size()) {
+        return TypeCheckResult(fmt::format("Call {} {} missing params", nn->nominal(), nn->location()));
+    }
     for (auto arg: nn->args()) {
-        if (env.lookup_var(arg->nominal()).nil()) {
+        AstNodePtr decl = env.lookup_var(arg->nominal());
+        if (!decl) {
             return TypeCheckResult(fmt::format("Undefine Call arg:{}{}", arg->nominal(), arg->location()));
         }
     }
@@ -74,22 +78,25 @@ TypeCheckResult TypeChecker::checkFuncDecl(Env &env, AstNodePtr n) {
     Env nenv = env;
     for (auto arg : fn->args()) env.put(arg);
     bool foundReturn = false;
+    TypeCheckResult result;
     for (auto n : fn->body()) {
+        result = TypeOk;
         if (n->is(NodeKind::ReturnStmt)) {
             synthesize(env, n);
             foundReturn = true;
             if (n->Type() != fn->Type()) {
-                return TypeCheckResult(fmt::format("function:{} location:{}, incompatible type: Cann't return ({}) with ({})",
+                result = TypeCheckResult(fmt::format("function:{} location:{}, incompatible type: Cann't return ({}) with ({})",
                             fn->nominal(), fn->location(), fn->tyname(), n->tyname()));
             }
         } else if (n->is(NodeKind::BinaryOperator)) {
-            auto result = checkBinaryOp(env, n);
-            if (result != TypeOk) {
-                return result;
-            }
+            result = checkBinaryOp(env, n);
         } else if (n->is(NodeKind::VarDecl)) {
             env.put(n);
+        } else if (n->is(NodeKind::CallFunc)) {
+            result = checkCall(env, n);
         }
+
+        if (result != TypeOk) return result;
     }
     return foundReturn && !fn->Type().is(TypeID::Void) ?
         TypeOk : TypeCheckResult("No Value return in non-void function");
@@ -107,15 +114,16 @@ void TypeChecker::synthesize(const Env &env, ReturnStmt *n) {
 void TypeChecker::synthesize(const Env &env, Val *n) {
     if (n->synthesized) return ;
     if (n->is(NodeKind::VarRef)) {
-        n->ty = env.lookup_var(n->nominal());
+        if (AstNodePtr decl = env.lookup_var(n->nominal())) {
+            n->ty =  decl->Type();
+        }
     }
     n->synthesized = true;
 }
 
 void TypeChecker::synthesize(const Env &env, Call *n) {
-    Ty ty = env.lookup_func(*(n->name_));
-    if (!ty.nil()) {
-        n->ty = ty;
+    if (AstNodePtr decl = env.lookup_func(*(n->name_))) {
+        n->ty = decl->Type();
     }
     n->synthesized = true;
 }
