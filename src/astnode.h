@@ -19,7 +19,7 @@ class AstNode;
 typedef std::shared_ptr<AstNode> AstNodePtr;
 typedef std::vector<AstNodePtr> NodeVec;
 using Args = NodeVec;
-using Exprs = NodeVec;
+using Stmts = NodeVec;
 using DeclList = NodeVec;
 using json = nlohmann::json;
 
@@ -166,11 +166,11 @@ struct FuncDecl: public AstNode {
     virtual json tojson(json parent);
     ~FuncDecl();
 
-    Exprs body() const { return body_ ? *body_ : Exprs(); }
+    Stmts body() const { return body_ ? *body_ : Stmts(); }
     Args args() const { return args_ ? *args_ : Args(); }
 
     Args *args_;
-    Exprs *body_;
+    Stmts *body_;
     std::string *name;
 };
 
@@ -206,7 +206,7 @@ struct ForStmt: public AstNode {
     AstNodePtr init_stmt;
     AstNodePtr cond_stmt;
     AstNodePtr next_stmt;
-    Exprs *body;
+    Stmts *body;
     ForStmt(Loc loc) : AstNode(loc) {}
 
     virtual std::string dump();
@@ -216,9 +216,9 @@ struct ForStmt: public AstNode {
 
 struct IfStmt: public AstNode {
     AstNodePtr cond_;
-    Exprs* then_;
-    Exprs* else_;
-    IfStmt(Loc loc, AstNode* conditional, Exprs* then, Exprs* _else):
+    Stmts* then_;
+    Stmts* else_;
+    IfStmt(Loc loc, AstNode* conditional, Stmts* then, Stmts* _else):
         AstNode(loc), cond_(conditional), then_(then), else_(_else) {}
     ~IfStmt();
 

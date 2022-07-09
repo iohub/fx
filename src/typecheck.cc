@@ -63,7 +63,7 @@ TypeCheckResult TypeChecker::check(Env &env, AstNodePtr any) {
         case NodeKind::VarRef:
             return TypeOk;
         default:
-            return TypeCheckResult(fmt::format("{} Unknown {}", any->loc(), any->dump()));
+            return TypeCheckResult(fmt::format("{} check Unknown {}", any->loc(), any->dump()));
     }
     return TypeOk;
 }
@@ -83,7 +83,7 @@ TypeCheckResult TypeChecker::checkDecls(Env &env, AstNodePtr declList) {
                 }
                 break;
             default:
-                Logging::error("Unknown AstNode:{}\n", uint8_t(n->kind));
+                Logging::error("{} Unknown AstNode:{}\n", n->loc(), n->dump());
                 break;
         }
     }
@@ -91,6 +91,12 @@ TypeCheckResult TypeChecker::checkDecls(Env &env, AstNodePtr declList) {
 }
 
 TypeCheckResult TypeChecker::checkAssign(Env &env, AstNodePtr assign) {
+    return TypeOk;
+}
+
+TypeCheckResult TypeChecker::checkIf(Env &env, AstNodePtr If) {
+    IfStmt *nn = dynamic_cast<IfStmt*>(If.get()); assert(nn);
+
     return TypeOk;
 }
 
@@ -107,22 +113,18 @@ TypeCheckResult TypeChecker::checkFuncDecl(Env &env, AstNodePtr n) {
     TypeCheckResult result;
     for (auto n : fn->body()) {
         result = TypeOk;
-        if (n->is(NodeKind::ReturnStmt)) {
-            synthesize(env, n); foundReturn = true;
-            if ((result = checkReturn(env, n)) != TypeOk) {
-                return result;
-            }
-            if (fn->Type() != n->Type()) {
-                result = TypeCheckResult(fmt::format("{} incompatible type", n->loc()));
-            }
-        } else if (n->is(NodeKind::BinaryOperator)) {
-            result = checkBinaryOp(env, n);
-        } else if (n->is(NodeKind::VarDecl)) {
-            env.put(n);
-        } else if (n->is(NodeKind::CallFunc)) {
-            result = checkCall(env, n);
+        switch(n->kind) {
+            case NodeKind::ReturnStmt:
+                synthesize(env, n); foundReturn = true;
+                if ((result = checkReturn(env, n)) != TypeOk) return result;
+                if (fn->Type() != n->Type())
+                    return TypeCheckResult(fmt::format("{} incompatible type", n->loc()));
+                break;
+            case NodeKind::VarDecl:
+                 env.put(n); break;
+            default:
+                 result = check(env, n);
         }
-
         if (result != TypeOk) return result;
     }
     return foundReturn && !fn->Type().is(TypeID::Void) ?

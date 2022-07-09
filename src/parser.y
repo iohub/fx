@@ -22,7 +22,7 @@
     fx::AstNode *node;
     fx::AstNodePtr *node_ptr;
     fx::Decls *decls;
-    fx::Exprs *exprs;
+    fx::Stmts *exprs;
     fx::NodeVec *args;
     fx::Args *params;
     fx::FuncDecl *func;
@@ -96,7 +96,7 @@ func_call
 stmts
     : stmt
     {
-        $$ = new Exprs();
+        $$ = new Stmts();
         $$->push_back(AstNodePtr($1));
     }
     | stmts stmt
@@ -195,7 +195,7 @@ binary_op: ADDOP | MINUSOP | MULOP | DIVOP;
 
 stmts_block
       : LBRACE stmts RBRACE { $$ = $2; }
-      | LBRACE RBRACE { $$ = new Exprs(); }
+      | LBRACE RBRACE { $$ = new Stmts(); }
       ;
 
 var_decl: var_type IDENT { $$ = new VarDecl(Loc(@1.first_line, @1.first_column), $2, $1, nullptr); };

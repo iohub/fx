@@ -103,7 +103,7 @@ union YYSTYPE
     fx::AstNode *node;
     fx::AstNodePtr *node_ptr;
     fx::Decls *decls;
-    fx::Exprs *exprs;
+    fx::Stmts *exprs;
     fx::NodeVec *args;
     fx::Args *params;
     fx::FuncDecl *func;
