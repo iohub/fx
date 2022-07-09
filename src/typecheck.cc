@@ -11,8 +11,8 @@ TypeCheckResult TypeChecker::checkBinaryOp(Env &env, AstNodePtr ptr) {
     AstNodePtr lhs = op->lhs, rhs = op->rhs;
     synthesize(env, lhs); synthesize(env, rhs);
     if (!isSubtype(lhs, rhs)) {
-        return TypeCheckResult(fmt::format("Operator location:{} incompatible type ({}) with ({})",
-                    op->location(), lhs->Type().type_name(), rhs->Type().type_name()));
+        return TypeCheckResult(fmt::format("Operator loc:{} incompatible type ({}) with ({})",
+                    op->loc(), lhs->TyStr(), rhs->TyStr()));
     }
     if ((op->Type()).nil()) {
         op->ty = lhs->ty;
@@ -24,12 +24,12 @@ TypeCheckResult TypeChecker::checkCall(Env &env, AstNodePtr call) {
     Call *nn = dynamic_cast<Call*>(call.get()); assert(nn);
     AstNodePtr fndecl = env.lookup_func(nn->nominal());
     if (!fndecl) {
-        return TypeCheckResult(fmt::format("{} Undefine Call:{}#", call->location(), call->nominal()));
+        return TypeCheckResult(fmt::format("{} Undefine Call:{}", call->loc(), call->nominal()));
     }
     FuncDecl *fn = dynamic_cast<FuncDecl*>(fndecl.get());
     auto sArgs = fn->args(), dArgs = nn->args();
     if (sArgs.size() != dArgs.size()) {
-        return TypeCheckResult(fmt::format("{} Call {} unmatch params", nn->location(), nn->nominal()));
+        return TypeCheckResult(fmt::format("{} Call {} unmatch params", nn->loc(), nn->nominal()));
     }
     for (size_t idx = 0; idx < sArgs.size(); idx++) {
         auto sArg = sArgs[idx], dArg = dArgs[idx];
@@ -37,7 +37,8 @@ TypeCheckResult TypeChecker::checkCall(Env &env, AstNodePtr call) {
             synthesize(env, dArg);
         }
         if (sArg->Type() != dArg->Type()) {
-            return TypeCheckResult(fmt::format("{} Call {} unmatch type", nn->location(), nn->nominal()));
+            return TypeCheckResult(fmt::format("{} Call {} unmatch type ({}) ({})",
+                        nn->loc(), nn->nominal(), sArg->TyStr(), dArg->TyStr()));
         }
     }
     return TypeOk;
@@ -56,7 +57,7 @@ TypeCheckResult TypeChecker::check(Env &env, AstNodePtr any) {
         case NodeKind::Constant:
             return TypeOk;
         default:
-            return TypeCheckResult(fmt::format("{} Unknown {}", any->location(), any->dump()));
+            return TypeCheckResult(fmt::format("{} Unknown {}", any->loc(), any->dump()));
     }
     return TypeOk;
 }
@@ -106,7 +107,7 @@ TypeCheckResult TypeChecker::checkFuncDecl(Env &env, AstNodePtr n) {
                 return result;
             }
             if (fn->Type() != n->Type()) {
-                result = TypeCheckResult(fmt::format("{} unmatch type", n->location()));
+                result = TypeCheckResult(fmt::format("{} unmatch type", n->loc()));
             }
         } else if (n->is(NodeKind::BinaryOperator)) {
             result = checkBinaryOp(env, n);

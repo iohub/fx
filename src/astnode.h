@@ -38,13 +38,13 @@ public:
     };
     Kind kind = Kind::Invalid;
 
-    AstNode(Loc loc, Kind k): loc(loc), kind(k) {}
-    AstNode(Loc loc, Kind k, Ty ty): loc(loc), kind(k), ty(ty) {}
-    AstNode(Loc loc): loc(loc), kind(Kind::Invalid) {}
+    AstNode(Loc loc, Kind k): loc_(loc), kind(k) {}
+    AstNode(Loc loc, Kind k, Ty ty): loc_(loc), kind(k), ty(ty) {}
+    AstNode(Loc loc): loc_(loc), kind(Kind::Invalid) {}
 
     bool is(Kind k) const { return kind == k; }
     std::string sexp() { return  fmt::format("({})", dump()); }
-    std::string location() const;
+    std::string loc() const;
     void print();
     virtual ~AstNode() { };
 
@@ -53,7 +53,7 @@ public:
     static json vec_tojson(Args *args);
 
     Ty Type() const { return ty; }
-    std::string tyname() { return ty.type_name(); }
+    std::string TyStr() { return ty.str(); }
     virtual std::string nominal() { return ""; }
     virtual std::string dump() { return "astnode"; };
     virtual json tojson(json parent=json()) { return parent; }
@@ -61,7 +61,7 @@ public:
     friend class TypeChecker;
 
 protected:
-    Loc loc;
+    Loc loc_;
     // type annotation
     Ty ty;
     bool synthesized;

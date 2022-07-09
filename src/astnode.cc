@@ -20,8 +20,8 @@ void AstNode::print() {
     fmt::print("{}\n", out.c_str());
 }
 
-std::string AstNode::location() const {
-    return fmt::format("(lineno:{},column:{})",  loc.lineno, loc.colmnno);
+std::string AstNode::loc() const {
+    return fmt::format("line:{},column:{}",  loc_.lineno, loc_.colmnno);
 }
 
 json Decls::tojson(json parent) {
@@ -43,7 +43,7 @@ std::string Val::dump() {
         default: str = "unknown";
     }
     if (raw_data) {
-        str = fmt::format("{}@{}@{}", str, *raw_data, Type().type_name());
+        str = fmt::format("{}@{}@{}", str, *raw_data, TyStr());
     }
     return str;
 }
@@ -58,7 +58,7 @@ json Val::tojson(json parent) {
     }
     json child;
     child["data"] = raw_data ? *raw_data : "Nil";
-    child["type"] = Type().type_name();
+    child["type"] = TyStr();
     parent[str] = child;
     return parent;
 }
@@ -71,19 +71,19 @@ VarDecl::~VarDecl() {
 }
 
 std::string VarDecl::dump() {
-    return fmt::format("VarDecl@{}@{}", *var_name, Type().type_name());
+    return fmt::format("VarDecl@{}@{}", *var_name, TyStr());
 }
 
 json VarDecl::tojson(json parent) {
     json child;
     child["varname"] = var_name ? *var_name : "Nil";
-    child["type"] = Type().type_name();
+    child["type"] = Type().str();
     parent["VarDecl"] = child;
     return parent;
 }
 
 std::string Operator::dump() {
-    return fmt::format("binaryop@{}[{}{}]", ty.type_name(), tostr(lhs), tostr(rhs));
+    return fmt::format("binaryop@{}[{}{}]", ty.str(), tostr(lhs), tostr(rhs));
 }
 
 json Operator::tojson(json parent) {

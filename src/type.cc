@@ -21,7 +21,7 @@ Ty::Ty(std::string tname) {
     id = tid;
 }
 
-std::string Ty::type_name() {
+std::string Ty::str() {
     auto itr  = detail::TypeNameMappings.find(id);
     return itr != detail::TypeNameMappings.end() ? itr->second : "Nil";
 }

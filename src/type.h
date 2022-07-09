@@ -21,7 +21,7 @@ struct Ty {
     Ty(ID k): id(k) {}
     Ty(): id(ID::Invalid) {}
     Ty(std::string tname);
-    std::string type_name();
+    std::string str();
 
     bool operator==(const Ty& b) { return id == b.id; }
     bool operator!=(const Ty& b) { return id != b.id; }
