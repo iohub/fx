@@ -51,9 +51,9 @@ int main(int argc, const char *argv[]) {
 
     if (Program) {
         Env emptyCtx;
-        AstNodePtr p(Program);
-        TypeCheckResult result = TypeChecker::check(emptyCtx, p);
-        p->print();
+        AstNodePtr ptr(Program);
+        TypeCheckResult result = TypeChecker::check(emptyCtx, ptr);
+        ptr->print();
         fmt::print("TypeCheckResult {}\n", result.errmsg);
     }
 }

@@ -22,7 +22,7 @@ public:
         if (level >= Level::DEBUG) fmt::print(fmt, args...);
     }
     template <typename... T>
-    static void ERROR(fmt::format_string<T...> fmt, T&&... args) {
+    static void error(fmt::format_string<T...> fmt, T&&... args) {
         if (level >= Level::ERROR) fmt::print(fmt, args...);
     }
 
