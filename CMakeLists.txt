@@ -13,7 +13,7 @@ ADD_FLEX_BISON_DEPENDENCY(Scanner Parser)
 
 # llvm library
 if(NOT CMAKE_LLVM_CONFIG)
-	set(CMAKE_LLVM_CONFIG llvm-config-8)
+	set(CMAKE_LLVM_CONFIG llvm-config-10)
 endif()
 
 exec_program(${CMAKE_LLVM_CONFIG} ARGS --includedir OUTPUT_VARIABLE LLVM_INCDIR)
