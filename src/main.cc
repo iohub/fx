@@ -11,6 +11,7 @@
 #include "astnode.h"
 #include "parser.hh"
 #include "typecheck.h"
+#include "codegen.h"
 
 using namespace fx;
 using json = nlohmann::json;
@@ -55,6 +56,7 @@ int main(int argc, const char *argv[]) {
         TypeCheckResult result = TypeChecker::check(emptyCtx, ptr);
         ptr->print();
         fmt::print("TypeCheckResult {}\n", result.errmsg);
+        CodeGen gen;
     }
 }
 
