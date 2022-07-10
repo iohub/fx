@@ -33,7 +33,6 @@ void Decls::append(AstNode *n) {
     if (n) decls.push_back(AstNodePtr(n));
 }
 
-
 std::string Val::dump() {
     std::string str;
     switch (kind) {

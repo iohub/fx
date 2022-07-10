@@ -29,7 +29,7 @@ public:
     enum class Kind : uint8_t {
         Invalid, Nil, CallFunc, Constant,
         FuncDecl, VarRef, VarDecl, Expr, BinaryOperator, UnaryOperator,
-        ReturnStmt, If, DeclList, Undefine
+        ReturnStmt, If, Assign, DeclList, Undefine
     };
     enum class OpKind: uint8_t {
         Invalid,
@@ -218,8 +218,8 @@ struct IfStmt: public AstNode {
     AstNodePtr cond_;
     Stmts* then_;
     Stmts* else_;
-    IfStmt(Loc loc, Kind kind, AstNode* conditional, Stmts* then, Stmts* _else):
-        AstNode(loc, kind), cond_(conditional), then_(then), else_(_else) {}
+    IfStmt(Loc loc, AstNode* conditional, Stmts* then, Stmts* _else):
+        AstNode(loc, Kind::If), cond_(conditional), then_(then), else_(_else) {}
     ~IfStmt();
 
     virtual std::string dump();
@@ -230,7 +230,8 @@ struct AssignStmt: public AstNode {
     AstNodePtr var_;
     AstNodePtr val_;
 
-    AssignStmt(Loc loc, AstNode* var, AstNode* val) : AstNode(loc), var_(var), val_(val) {}
+    AssignStmt(Loc loc, AstNode* var, AstNode* val) :
+        AstNode(loc, Kind::Assign), var_(var), val_(val) {}
     ~AssignStmt();
 
     virtual std::string dump();

@@ -62,6 +62,8 @@ TypeCheckResult TypeChecker::check(Env &env, AstNodePtr any) {
             return checkBinaryOp(env, any);
         case Kind::If:
             return checkIf(env, any);
+        case Kind::Assign:
+            return checkAssign(env, any);
         case Kind::VarRef:
             return TypeOk;
         default:
@@ -93,6 +95,19 @@ TypeCheckResult TypeChecker::checkDecls(Env &env, AstNodePtr declList) {
 }
 
 TypeCheckResult TypeChecker::checkAssign(Env &env, AstNodePtr assign) {
+    AssignStmt* nn = dynamic_cast<AssignStmt*>(assign.get()); assert(nn);
+    synthesize(env, nn->var_); synthesize(env, nn->var_);
+    if (!(nn->var_)->is(Kind::VarRef)) {
+        return TypeCheckResult(fmt::format("{} only allow assign to variable", nn->var_->loc()));
+    }
+    TypeCheckResult result;
+    if ((result = check(env, nn->val_)) != TypeOk) {
+        return result;
+    }
+    if (nn->var_->Type() != nn->val_->Type()) {
+        return TypeCheckResult(fmt::format("{} cann't assign {} with {}",
+                    nn->var_->loc(), nn->var_->TyStr(), nn->val_->TyStr()));
+    }
     return TypeOk;
 }
 

@@ -235,12 +235,12 @@ for_stmt
 if_stmt
     : IF LPAREN boolean_stmt RPAREN stmts_block
     {
-        IfStmt *n = new IfStmt(Loc(@1.first_line, @1.first_column), Kind::If, $3, $5, nullptr);
+        IfStmt *n = new IfStmt(Loc(@1.first_line, @1.first_column), $3, $5, nullptr);
         $$ = n;
     }
     | IF LPAREN boolean_stmt RPAREN stmts_block ELSE stmts_block
     {
-        IfStmt *n = new IfStmt(Loc(@1.first_line, @1.first_column), Kind::If, $3, $5, $7);
+        IfStmt *n = new IfStmt(Loc(@1.first_line, @1.first_column), $3, $5, $7);
         $$ = n;
     }
     ;
