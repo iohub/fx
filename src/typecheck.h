@@ -42,6 +42,7 @@ private:
     static Ty synthesize(const Env &env, ReturnStmt *n);
     static Ty synthesize(const Env &env, Call *n);
     static Ty synthesize(const Env &env, Val *n);
+    static Ty synthesize(const Env &env, Operator *n);
 };
 
 

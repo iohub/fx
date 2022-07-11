@@ -78,6 +78,8 @@ TypeCheckResult TypeChecker::check(Env &env, AstNodePtr any) {
         case Kind::For:
             return checkFor(env, any);
         case Kind::VarRef:
+            synthesize(env, dynamic_cast<Val*>(any.get()));
+        case Kind::Nil:
             return TypeOk;
         default:
             return TypeCheckResult(fmt::format("{} check Unknown kind:{},{}",
@@ -110,7 +112,7 @@ TypeCheckResult TypeChecker::checkDecls(Env &env, AstNodePtr declList) {
 
 TypeCheckResult TypeChecker::checkAssign(Env &env, AstNodePtr assign) {
     AssignStmt* nn = dynamic_cast<AssignStmt*>(assign.get()); assert(nn);
-    synthesize(env, nn->var_); synthesize(env, nn->var_);
+    synthesize(env, nn->var_); synthesize(env, nn->val_);
     if (!(nn->var_)->is(Kind::VarRef)) {
         return TypeCheckResult(fmt::format("{} only allow assign to variable", nn->var_->loc()));
     }
@@ -203,17 +205,30 @@ Ty TypeChecker::synthesize(const Env &env, Call *n) {
     return n->ty;
 }
 
+Ty TypeChecker::synthesize(const Env &env, Operator *n) {
+    if (n->synthesized) return n->ty;
+    if (!(n->ty).nil()) return n->ty;
+    Ty lty = synthesize(env, n->lhs);
+    Ty rty = synthesize(env, n->rhs);
+    n->ty = lty.unresolved() ? lty : rty;
+    n->synthesized = true;
+    return n->ty;
+}
+
 Ty TypeChecker::synthesize(const Env &env, AstNodePtr n) {
     if (Call* nn = dynamic_cast<Call*>(n.get())) {
-        synthesize(env, nn);
+        return synthesize(env, nn);
     }
     if (ReturnStmt *nn = dynamic_cast<ReturnStmt*>(n.get())) {
-        synthesize(env, nn);
+        return synthesize(env, nn);
     }
     if (Val* nn = dynamic_cast<Val*>(n.get())) {
-        synthesize(env, nn);
+        return synthesize(env, nn);
     }
-    return Ty(TypeID::Nil);
+    if (Operator* nn = dynamic_cast<Operator*>(n.get())) {
+        return synthesize(env, nn);
+    }
+    return TypeID::UnResolved;
 }
 
 

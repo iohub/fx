@@ -3,8 +3,8 @@
 
 namespace fx {
 
-Ty Ty::convert_from_typename(std::string tname) {
-    ID tid = ID::Invalid;
+Ty Ty::from_typename(std::string tname) {
+    ID tid = ID::Nil;
     auto itr = detail::TypeIDMappings.find(tname);
     if (itr != detail::TypeIDMappings.end()) {
         tid = itr->second;
@@ -13,7 +13,7 @@ Ty Ty::convert_from_typename(std::string tname) {
 }
 
 Ty::Ty(std::string tname) {
-    ID tid = ID::Invalid;
+    ID tid = ID::Nil;
     auto itr = detail::TypeIDMappings.find(tname);
     if (itr != detail::TypeIDMappings.end()) {
         tid = itr->second;
