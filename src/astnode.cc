@@ -128,7 +128,7 @@ FuncDecl::~FuncDecl() {
 }
 
 std::string Call::dump() {
-    std::string str = name_  ? "call:" + *name_ : "call";
+    std::string str = fmt::format("Call:{}@{}", nominal(), TyStr());
     for (auto itr: args()) str += itr->sexp();
     return str;
 }
