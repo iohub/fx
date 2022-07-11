@@ -43,6 +43,8 @@ TypeCheckResult TypeChecker::checkCall(Env &env, AstNodePtr call) {
                         nn->loc(), nn->nominal(), sArg->TyStr(), dArg->TyStr()));
         }
     }
+    nn->ty = fndecl->Type();
+    nn->synthesized = true;
     return TypeOk;
 }
 
@@ -52,6 +54,20 @@ TypeCheckResult TypeChecker::checkFor(Env &env, AstNodePtr For) {
     if ((result = check(env, nn->init_stmt)) != TypeOk) return result;
     if ((result = check(env, nn->cond_stmt)) != TypeOk) return result;
     if ((result = check(env, nn->next_stmt)) != TypeOk) return result;
+
+    if (nn->cond_stmt && nn->cond_stmt->ty != TypeID::Bool &&
+            !(nn->cond_stmt->is(Kind::Nil))) {
+        return TypeCheckResult(fmt::format("{} incompatible conditional type:{} bool",
+                    nn->loc(), nn->cond_stmt->TyStr()));
+    }
+
+    return TypeOk;
+}
+
+TypeCheckResult TypeChecker::checkVarRef(Env &env, AstNodePtr val) {
+    Val *nn = dynamic_cast<Val*>(val.get()); assert(nn);
+    TypeCheckResult result;
+    Ty ty = synthesize(env, nn);
 
     return TypeOk;
 }
@@ -78,7 +94,7 @@ TypeCheckResult TypeChecker::check(Env &env, AstNodePtr any) {
         case Kind::For:
             return checkFor(env, any);
         case Kind::VarRef:
-            synthesize(env, dynamic_cast<Val*>(any.get()));
+            return checkVarRef(env, any);
         case Kind::Nil:
             return TypeOk;
         default:
@@ -112,7 +128,14 @@ TypeCheckResult TypeChecker::checkDecls(Env &env, AstNodePtr declList) {
 
 TypeCheckResult TypeChecker::checkAssign(Env &env, AstNodePtr assign) {
     AssignStmt* nn = dynamic_cast<AssignStmt*>(assign.get()); assert(nn);
-    synthesize(env, nn->var_); synthesize(env, nn->val_);
+    Ty varty, valty;
+    if ((varty = synthesize(env, nn->var_)).unresolved()) {
+        return TypeCheckResult(fmt::format("{} variable unresolved type", nn->var_->loc()));
+    }
+    if ((valty = synthesize(env, nn->var_)).unresolved()) {
+        return TypeCheckResult(fmt::format("{} value unresolved type", nn->val_->loc()));
+    }
+    synthesize(env, nn->val_);
     if (!(nn->var_)->is(Kind::VarRef)) {
         return TypeCheckResult(fmt::format("{} only allow assign to variable", nn->var_->loc()));
     }
@@ -188,9 +211,8 @@ Ty TypeChecker::synthesize(const Env &env, ReturnStmt *n) {
 Ty TypeChecker::synthesize(const Env &env, Val *n) {
     if (n->synthesized) return n->ty;
     if (n->is(Kind::VarRef)) {
-        if (AstNodePtr decl = env.lookup_var(n->nominal())) {
-            n->ty =  decl->Type();
-        }
+        AstNodePtr decl = env.lookup_var(n->nominal());
+        n->ty =  decl ? decl->Type() : TypeID::UnResolved;
     }
     n->synthesized = true;
     return n->ty;
@@ -198,7 +220,7 @@ Ty TypeChecker::synthesize(const Env &env, Val *n) {
 
 Ty TypeChecker::synthesize(const Env &env, Call *n) {
     if (n->synthesized) return n->ty;
-    if (AstNodePtr decl = env.lookup_func(*(n->name_))) {
+    if (AstNodePtr decl = env.lookup_func(n->nominal())) {
         n->ty = decl->Type();
     }
     n->synthesized = true;

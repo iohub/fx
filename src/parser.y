@@ -108,7 +108,7 @@ stmts
 
 stmt: var_decl | expr | return_stmt | for_stmt | if_stmt | assignment_expr ;
 
-expr: op | func_call | unary_expr;
+expr: op | func_call | unary_expr | boolean_stmt;
 
 return_stmt
     : RETURN expr
