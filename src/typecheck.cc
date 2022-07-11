@@ -46,7 +46,18 @@ TypeCheckResult TypeChecker::checkCall(Env &env, AstNodePtr call) {
     return TypeOk;
 }
 
+TypeCheckResult TypeChecker::checkFor(Env &env, AstNodePtr For) {
+    ForStmt *nn = dynamic_cast<ForStmt*>(For.get()); assert(nn);
+    TypeCheckResult result;
+    if ((result = check(env, nn->init_stmt)) != TypeOk) return result;
+    if ((result = check(env, nn->cond_stmt)) != TypeOk) return result;
+    if ((result = check(env, nn->next_stmt)) != TypeOk) return result;
+
+    return TypeOk;
+}
+
 TypeCheckResult TypeChecker::check(Env &env, AstNodePtr any) {
+    if (!any) return TypeOk;
     switch(any->kind) {
         case Kind::DeclList:
             return checkDecls(env, any);
@@ -64,10 +75,13 @@ TypeCheckResult TypeChecker::check(Env &env, AstNodePtr any) {
             return checkIf(env, any);
         case Kind::Assign:
             return checkAssign(env, any);
+        case Kind::For:
+            return checkFor(env, any);
         case Kind::VarRef:
             return TypeOk;
         default:
-            return TypeCheckResult(fmt::format("{} check Unknown {}", any->loc(), any->dump()));
+            return TypeCheckResult(fmt::format("{} check Unknown kind:{},{}",
+                        any->loc(), uint16_t(any->kind), any->dump()));
     }
     return TypeOk;
 }
@@ -159,33 +173,37 @@ TypeCheckResult TypeChecker::checkFuncDecl(Env &env, AstNodePtr n) {
         TypeOk : TypeCheckResult("No Value return in non-void function");
 }
 
-void TypeChecker::synthesize(const Env &env, ReturnStmt *n) {
-    if (n->synthesized) return ;
+Ty TypeChecker::synthesize(const Env &env, ReturnStmt *n) {
+    if (n->synthesized) return n->ty;
     if (!n->stmt->synthesized) {
         synthesize(env, n->stmt);
         n->ty = n->stmt->Type();
     }
     n->synthesized = true;
+    return n->ty;
 }
 
-void TypeChecker::synthesize(const Env &env, Val *n) {
-    if (n->synthesized) return ;
+Ty TypeChecker::synthesize(const Env &env, Val *n) {
+    if (n->synthesized) return n->ty;
     if (n->is(Kind::VarRef)) {
         if (AstNodePtr decl = env.lookup_var(n->nominal())) {
             n->ty =  decl->Type();
         }
     }
     n->synthesized = true;
+    return n->ty;
 }
 
-void TypeChecker::synthesize(const Env &env, Call *n) {
+Ty TypeChecker::synthesize(const Env &env, Call *n) {
+    if (n->synthesized) return n->ty;
     if (AstNodePtr decl = env.lookup_func(*(n->name_))) {
         n->ty = decl->Type();
     }
     n->synthesized = true;
+    return n->ty;
 }
 
-void TypeChecker::synthesize(const Env &env, AstNodePtr n) {
+Ty TypeChecker::synthesize(const Env &env, AstNodePtr n) {
     if (Call* nn = dynamic_cast<Call*>(n.get())) {
         synthesize(env, nn);
     }
@@ -195,6 +213,7 @@ void TypeChecker::synthesize(const Env &env, AstNodePtr n) {
     if (Val* nn = dynamic_cast<Val*>(n.get())) {
         synthesize(env, nn);
     }
+    return Ty(TypeID::Nil);
 }
 
 

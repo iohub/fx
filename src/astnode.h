@@ -29,7 +29,7 @@ public:
     enum class Kind : uint8_t {
         Invalid, Nil, CallFunc, Constant,
         FuncDecl, VarRef, VarDecl, Expr, BinaryOperator, UnaryOperator,
-        ReturnStmt, If, Assign, DeclList, Undefine
+        ReturnStmt, If, Assign, For, DeclList, Undefine
     };
     enum class OpKind: uint8_t {
         Invalid,
@@ -203,15 +203,15 @@ struct ReturnStmt: public AstNode {
 };
 
 struct ForStmt: public AstNode {
-    AstNodePtr init_stmt;
-    AstNodePtr cond_stmt;
-    AstNodePtr next_stmt;
+    AstNodePtr init_stmt; // maybe nullptr
+    AstNodePtr cond_stmt; // maybe nullptr
+    AstNodePtr next_stmt; // maybe nullptr
     Stmts *body;
-    ForStmt(Loc loc) : AstNode(loc) {}
+    ForStmt(Loc loc) : AstNode(loc, Kind::For) {}
+    ~ForStmt();
 
     virtual std::string dump();
     virtual json tojson(json parent);
-    ~ForStmt();
 };
 
 struct IfStmt: public AstNode {
