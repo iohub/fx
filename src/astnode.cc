@@ -81,21 +81,21 @@ json VarDecl::tojson(json parent) {
     return parent;
 }
 
-std::string Operator::dump() {
+std::string BinaryExpr::dump() {
     return fmt::format("binaryop@{}[{}{}]", ty.str(), tostr(lhs), tostr(rhs));
 }
 
-json Operator::tojson(json parent) {
+json BinaryExpr::tojson(json parent) {
     json child;
     child["lhs"] = node_tojson(lhs);
     child["rhs"] = node_tojson(rhs);
     child["node_kind"] = kind;
     child["op_kind"] = op;
-    parent["Operator"] = child;
+    parent["BinaryExpr"] = child;
     return parent;
 }
 
-Operator::Operator(Loc loc, Kind nodeKind, Ty ty, std::string *opname, AstNode *l, AstNode *r) :
+BinaryExpr::BinaryExpr(Loc loc, Kind nodeKind, Ty ty, std::string *opname, AstNode *l, AstNode *r) :
     AstNode(loc, nodeKind, ty), lhs(l), rhs(r), kind(nodeKind) {
     op = OpKind::Invalid;
     auto itr = detail::OperatorMappings.find(*opname);
@@ -154,7 +154,7 @@ std::string Decls::dump() {
 
 std::string ReturnStmt::dump() {
     if (stmt) {
-        return fmt::format("ReturnStmt:{}", stmt->sexp());
+        return fmt::format("ReturnStmt {}", stmt->sexp());
     }
     return "ReturnStmt";
 }

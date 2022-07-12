@@ -9,11 +9,10 @@ def foo(float x, float y) float {
   }
 
   for ( ; ; ) {}
-  for (x; y; z;) {}
   return 10.5
 }
 
-def ErrType() float { return "ok" }
+// def ErrType() float { return "ok" }
 
 def fib(int x) int {
   if (x == 0) {

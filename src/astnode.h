@@ -120,22 +120,22 @@ struct VarDecl: public AstNode {
     virtual std::string nominal() { return var_name? *var_name: "Nil"; }
 };
 
-struct Operator: public AstNode {
+struct BinaryExpr: public AstNode {
     AstNodePtr lhs;
     AstNodePtr rhs;
     Kind kind;
     OpKind op;
 
-    Operator(Loc loc, Kind nodeKind, OpKind opKind, AstNode *l, AstNode *r) :
+    BinaryExpr(Loc loc, Kind nodeKind, OpKind opKind, AstNode *l, AstNode *r) :
         lhs(l), rhs(r), op(opKind), AstNode(loc, nodeKind) {}
 
-    Operator(Loc loc, Kind nodeKind, Ty ty, std::string *opname, AstNode *l, AstNode *r);
+    BinaryExpr(Loc loc, Kind nodeKind, Ty ty, std::string *opname, AstNode *l, AstNode *r);
 
     virtual std::string dump();
     virtual json tojson(json parent);
 
-    ~Operator() {
-        Logging::debug("~Operator({})\n", dump());
+    ~BinaryExpr() {
+        Logging::debug("~BinaryExpr({})\n", dump());
     }
 };
 

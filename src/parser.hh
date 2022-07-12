@@ -110,7 +110,7 @@ union YYSTYPE
     fx::IfStmt *ifnode;
     fx::Val *val;
     fx::Call *call;
-    fx::Operator *op;
+    fx::BinaryExpr *op;
 
 #line 116 "/home/do/cspace/fx/src/parser.hh" /* yacc.c:1909  */
 };

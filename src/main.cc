@@ -56,7 +56,7 @@ int main(int argc, const char *argv[]) {
         TypeCheckResult result = TypeChecker::check(emptyCtx, ptr);
         ptr->print();
         fmt::print("TypeCheckResult {}\n", result.errmsg);
-        CodeGen gen("main");
+        CodeGen gen(fname);
     }
 }
 

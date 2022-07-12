@@ -7,7 +7,7 @@ bool TypeChecker::isSubtype(AstNodePtr a, AstNodePtr b) {
 }
 
 TypeCheckResult TypeChecker::checkBinaryOp(Env &env, AstNodePtr ptr) {
-    Operator *op = dynamic_cast<Operator*>(ptr.get()); assert(op);
+    BinaryExpr *op = dynamic_cast<BinaryExpr*>(ptr.get()); assert(op);
     AstNodePtr lhs = op->lhs, rhs = op->rhs;
     synthesize(env, lhs); synthesize(env, rhs);
     if (!isSubtype(lhs, rhs)) {
@@ -59,6 +59,13 @@ TypeCheckResult TypeChecker::checkFor(Env &env, AstNodePtr For) {
             !(nn->cond_stmt->is(Kind::Nil))) {
         return TypeCheckResult(fmt::format("{} incompatible conditional type:{} bool",
                     nn->loc(), nn->cond_stmt->TyStr()));
+    }
+    if (nn->body) {
+        for (AstNodePtr p : *(nn->body)) {
+            if ((result = check(env, p)) != TypeOk) {
+                return result;
+            }
+        }
     }
 
     return TypeOk;
@@ -132,10 +139,9 @@ TypeCheckResult TypeChecker::checkAssign(Env &env, AstNodePtr assign) {
     if ((varty = synthesize(env, nn->var_)).unresolved()) {
         return TypeCheckResult(fmt::format("{} variable unresolved type", nn->var_->loc()));
     }
-    if ((valty = synthesize(env, nn->var_)).unresolved()) {
+    if ((valty = synthesize(env, nn->val_)).unresolved()) {
         return TypeCheckResult(fmt::format("{} value unresolved type", nn->val_->loc()));
     }
-    synthesize(env, nn->val_);
     if (!(nn->var_)->is(Kind::VarRef)) {
         return TypeCheckResult(fmt::format("{} only allow assign to variable", nn->var_->loc()));
     }
@@ -150,10 +156,10 @@ TypeCheckResult TypeChecker::checkAssign(Env &env, AstNodePtr assign) {
     return TypeOk;
 }
 
-TypeCheckResult TypeChecker::checkStmts(Env &env, AstNodePtr stmts) {
-    Stmts *nn = dynamic_cast<Stmts*>(stmts.get()); assert(nn);
+TypeCheckResult TypeChecker::checkStmts(Env &env, Stmts *stmts) {
+    if (!stmts) return TypeOk;
     TypeCheckResult result = TypeOk;
-    for (auto n : *nn) {
+    for (auto n : *stmts) {
         if ((result = check(env, n)) != TypeOk) return result;
     }
     return TypeOk;
@@ -163,6 +169,8 @@ TypeCheckResult TypeChecker::checkIf(Env &env, AstNodePtr If) {
     IfStmt *nn = dynamic_cast<IfStmt*>(If.get()); assert(nn);
     TypeCheckResult result = TypeOk;
     if ((result = check(env, nn->cond_)) != TypeOk) return result;
+    if ((result = checkStmts(env, nn->then_)) != TypeOk) return result;
+    if ((result = checkStmts(env, nn->else_)) != TypeOk) return result;
 
     return TypeOk;
 }
@@ -227,7 +235,7 @@ Ty TypeChecker::synthesize(const Env &env, Call *n) {
     return n->ty;
 }
 
-Ty TypeChecker::synthesize(const Env &env, Operator *n) {
+Ty TypeChecker::synthesize(const Env &env, BinaryExpr *n) {
     if (n->synthesized) return n->ty;
     if (!(n->ty).nil()) return n->ty;
     Ty lty = synthesize(env, n->lhs);
@@ -247,7 +255,7 @@ Ty TypeChecker::synthesize(const Env &env, AstNodePtr n) {
     if (Val* nn = dynamic_cast<Val*>(n.get())) {
         return synthesize(env, nn);
     }
-    if (Operator* nn = dynamic_cast<Operator*>(n.get())) {
+    if (BinaryExpr * nn = dynamic_cast<BinaryExpr*>(n.get())) {
         return synthesize(env, nn);
     }
     return TypeID::UnResolved;
