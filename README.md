@@ -47,3 +47,4 @@ http://www.cse.chalmers.se/edu/year/2011/course/CompFun/lecture4.pdf
 https://www.lysator.liu.se/c/ANSI-C-grammar-y.html
 3. **Type checker** https://jaked.org/blog/2021-09-15-Reconstructing-TypeScript-part-1
 4. **Bidirectional Type Checking** https://www.youtube.com/watch?v=utyBNDj7s2w
+5. **Mapping High Level Constructs to LLVM IR** https://mapping-high-level-constructs-to-llvm-ir.readthedocs.io/en/latest/README.html
