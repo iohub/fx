@@ -9,6 +9,13 @@ CodeGen::CodeGen(std::string name) {
     builder_ = std::unique_ptr<llvm::IRBuilder<>>(new llvm::IRBuilder<>(*ctx_));
 }
 
+void CodeGen::print() const {
+    std::string out;
+    llvm::raw_string_ostream os{out};
+    mod_->print(os, nullptr);
+    Logging::info("llvm ir:\n{}\n", os.str());
+}
+
 void CodeGen::emit(FuncDecl *fn) {
     llvm::Function *Fn = mod_->getFunction(llvm::StringRef(fn->nominal()));
     Fn = Fn ? Fn : emit_func_prototype(fn);
@@ -19,7 +26,25 @@ void CodeGen::emit(FuncDecl *fn) {
         Fn->eraseFromParent(); return;
     }
     if (ty->isVoidTy()) {
-        // builder_->CreateRetVoid();
+        builder_->CreateRetVoid();
+    }
+}
+
+void CodeGen::emit(AstNodePtr n) {
+    switch (n->kind) {
+        case Kind::DeclList:
+            emit(dynamic_cast<Decls*>(n.get())); break;
+        case Kind::FuncDecl:
+            emit(dynamic_cast<FuncDecl*>(n.get())); break;
+        default:
+            Logging::info("emit unknown AstNode {}{}", n->loc(), n->dump());
+    }
+}
+
+void CodeGen::emit(Decls *decls) {
+    if (!decls) return;
+    for (auto p: decls->decls) {
+        emit(p);
     }
 }
 

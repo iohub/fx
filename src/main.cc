@@ -57,6 +57,8 @@ int main(int argc, const char *argv[]) {
         ptr->print();
         fmt::print("TypeCheckResult {}\n", result.errmsg);
         CodeGen gen(fname);
+        gen.emit(ptr);
+        gen.print();
     }
 }
 

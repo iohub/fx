@@ -24,7 +24,11 @@ class CodeGen {
 
 public:
     CodeGen(std::string name);
+    void emit(AstNodePtr n);
+    void print() const;
+
     void emit(FuncDecl *fn);
+    void emit(Decls *decls);
 
 private:
     llvm::Function *emit_func_prototype(FuncDecl *fn);
