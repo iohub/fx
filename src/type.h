@@ -17,6 +17,7 @@ struct Ty {
         UnResolved,
     };
     ID id = ID::Nil;
+    std::string class_name;
 
     Ty(ID k): id(k) {}
     Ty(): id(ID::Nil) {}
@@ -30,20 +31,21 @@ struct Ty {
     bool unresolved() const { return id == ID::UnResolved; }
     bool nil() const { return id == ID::Nil; }
     bool is(ID tid) const { return tid == id; }
+    ID kind() const { return id; }
     static Ty from_typename(std::string tname);
 };
 
 typedef Ty::ID TypeID;
 
 namespace detail {
-    const static std::map<std::string, TypeID> TypeIDMappings = {
+    const static std::map<std::string, TypeID> BasicTypeIDMappings = {
         {"int", TypeID::Int},
         {"str", TypeID::Str},
         {"bool", TypeID::Bool},
         {"void", TypeID::Void},
         {"float", TypeID::Float},
     };
-    const static std::map<TypeID, std::string> TypeNameMappings = {
+    const static std::map<TypeID, std::string> BasicTypeNameMappings = {
         {TypeID::Int, "int"},
         {TypeID::Str, "str"},
         {TypeID::Bool, "bool"},

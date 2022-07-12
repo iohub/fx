@@ -59,6 +59,7 @@ public:
     virtual json tojson(json parent=json()) { return parent; }
 
     friend class TypeChecker;
+    friend class CodeGen;
 
 protected:
     Loc loc_;
