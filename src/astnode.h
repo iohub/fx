@@ -23,7 +23,14 @@ using Stmts = NodeVec;
 using DeclList = NodeVec;
 using json = nlohmann::json;
 
-class AstNode {
+class VisitorResult {};
+
+class Visitor {
+public:
+    virtual VisitorResult visit(AstNodePtr n) { return VisitorResult(); } ;
+};
+
+class AstNode : std::enable_shared_from_this<AstNode> {
 
 public:
     enum class Kind : uint8_t {
@@ -36,7 +43,6 @@ public:
         LT, LE, EQ, GT, GE, NEQ, // binaryop
         MUL, DIV, ADD, SUB // unaryop
     };
-    Kind kind = Kind::Invalid;
 
     AstNode(Loc loc, Kind k): loc_(loc), kind(k) {}
     AstNode(Loc loc, Kind k, Ty ty): loc_(loc), kind(k), ty(ty) {}
@@ -45,6 +51,8 @@ public:
     bool is(Kind k) const { return kind == k; }
     std::string sexp() { return  fmt::format("({})", dump()); }
     std::string loc() const;
+    VisitorResult visit();
+    void set_visitor(Visitor *v) { visitor = v; }
     void print();
     virtual ~AstNode() { };
 
@@ -62,10 +70,13 @@ public:
     friend class CodeGen;
 
 protected:
+    Kind kind = Kind::Invalid;
     Loc loc_;
     // type annotation
     Ty ty;
+    // type synthesized ?
     bool synthesized;
+    Visitor *visitor;
 };
 
 typedef AstNode::Kind Kind;

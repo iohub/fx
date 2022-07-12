@@ -30,6 +30,12 @@ void CodeGen::emit(FuncDecl *fn) {
     }
 }
 
+void CodeGen::emit(IfStmt *If) {
+}
+
+void CodeGen::emit(BinaryExpr *expr) {
+}
+
 void CodeGen::emit(AstNodePtr n) {
     switch (n->kind) {
         case Kind::DeclList:

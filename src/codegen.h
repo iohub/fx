@@ -29,6 +29,8 @@ public:
 
     void emit(FuncDecl *fn);
     void emit(Decls *decls);
+    void emit(IfStmt *If);
+    void emit(BinaryExpr *BinExpr);
 
 private:
     llvm::Function *emit_func_prototype(FuncDecl *fn);
