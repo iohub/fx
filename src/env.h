@@ -2,37 +2,72 @@
 #ifndef FXENV_H
 #define FXENV_H
 
+#include <stack>
 #include "type.h"
 #include "astnode.h"
 
 namespace fx {
 
-class Env {
+template<class T>
+class Scope {
 public:
-    AstNodePtr lookup_var(std::string const &nominal) const {
-        auto itr = vars_.find(nominal);
-        return itr == vars_.end() ? nullptr : itr->second;
-    }
+    Scope() { scope_.push_back(std::map<std::string, T>()); }
 
-    AstNodePtr lookup_func(std::string const &nominal) const {
-        auto itr = funs_.find(nominal);
-        return itr == funs_.end() ? nullptr : itr->second;
-    }
+    void enter() { scope_.push_back(std::map<std::string, T>()); }
+    void leave() { scope_.pop_back(); }
 
-    void put(AstNodePtr node) {
-        if (VarDecl *nn = dynamic_cast<VarDecl*>(node.get())) {
-            vars_[nn->nominal()] = node;
-        } else if (FuncDecl *nn = dynamic_cast<FuncDecl*>(node.get())) {
-            funs_[node->nominal()] =  node;
+    T lookup(std::string const &k) {
+        if (scope_.size() == 0) return T();
+        for (size_t i = scope_.size()-1; i >= 0; i--){
+            std::map<std::string, T> &current = scope_[i];
+            if (current.find(k) != current.end()) {
+                return current[k];
+            }
         }
+        return T();
     }
 
+    void put(std::string k, T v) {
+        if (scope_.size() == 0) { enter(); }
+        std::map<std::string, T> &current = scope_.back();
+        current[k] = v;
+    }
 
 private:
-    std::map<std::string, AstNodePtr> vars_;
-    std::map<std::string, AstNodePtr> funs_;
-
+    std::vector<std::map<std::string, T> > scope_;
 };
+
+class Env {
+public:
+    AstNodePtr lookup_var(std::string const &nominal) {
+        return vars_.lookup(nominal);
+    }
+
+    AstNodePtr lookup_func(std::string const &nominal) {
+        return funs_.lookup(nominal);
+    }
+
+    void put_var(AstNodePtr node) {
+        vars_.put(node->nominal(), node);
+    }
+
+    void put_func(AstNodePtr node) {
+        funs_.put(node->nominal(), node);
+    }
+
+    void enter() {
+        vars_.enter(); funs_.enter();
+    }
+
+    void leave() {
+        vars_.leave(); funs_.leave();
+    }
+
+private:
+    Scope<AstNodePtr> vars_;
+    Scope<AstNodePtr> funs_;
+};
+
 
 
 

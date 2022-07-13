@@ -3,8 +3,25 @@
 
 #include <stdint.h>
 #include <fmt/core.h>
+#include <functional>
 
 namespace fx {
+
+class Defer {
+public:
+    Defer(std::function<void()> &&init, std::function<void()> &&finish) :
+        finish_(std::move(finish))
+    {
+        if (init) init();
+    }
+
+    ~Defer() {
+        if (finish_) finish_();
+    }
+
+private:
+    std::function<void()> finish_;
+};
 
 class Logging {
 public:

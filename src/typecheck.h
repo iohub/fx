@@ -39,11 +39,11 @@ private:
     static TypeCheckResult checkFor(Env &env, AstNodePtr For);
     static TypeCheckResult checkStmts(Env &env, Stmts *stmts);
 
-    static Ty synthesize(const Env &env, AstNodePtr n);
-    static Ty synthesize(const Env &env, ReturnStmt *n);
-    static Ty synthesize(const Env &env, Call *n);
-    static Ty synthesize(const Env &env, Val *n);
-    static Ty synthesize(const Env &env, BinaryExpr *n);
+    static Ty synthesize(Env &env, AstNodePtr n);
+    static Ty synthesize(Env &env, ReturnStmt *n);
+    static Ty synthesize(Env &env, Call *n);
+    static Ty synthesize(Env &env, Val *n);
+    static Ty synthesize(Env &env, BinaryExpr *n);
 };
 
 

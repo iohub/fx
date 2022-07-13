@@ -46,6 +46,11 @@ llvm::Value* CodeGen::emit(IfStmt *If) {
     return nullptr;
 }
 
+llvm::Value* CodeGen::emit(ReturnStmt *Return) {
+    llvm::Value *val = emit(Return->stmt);
+    return builder_->CreateRet(val);
+}
+
 llvm::Value* CodeGen::emit_const_value(Val *v) {
     if (!v || !(v->is(Kind::Constant))) return nullptr;
     std::string num = v->raw_data ? *(v->raw_data) : "0";
@@ -80,11 +85,11 @@ llvm::Value* CodeGen::emit(BinaryExpr *expr) {
     llvm::Value *rhs = emit(expr->rhs);
     switch (expr->op) {
         case OpKind::ADD:
-            return builder_->CreateAdd(lhs, rhs, "add"); break;
+            return builder_->CreateAdd(lhs, rhs, "add");
         case OpKind::SUB:
-            return builder_->CreateAdd(lhs, rhs, "sub"); break;
+            return builder_->CreateSub(lhs, rhs, "sub");
         default:
-            Logging::error("emit unknown BinaryExpr {}\n", expr->loc());
+            Logging::error("emit unknown BinaryExpr {} {}\n", expr->loc(), expr->dump());
     }
     return nullptr;
 }
@@ -98,6 +103,12 @@ llvm::Value* CodeGen::emit(AstNodePtr n) {
         case Kind::CallFunc:
             return emit(dynamic_cast<Call*>(n.get()));
         case Kind::Constant:
+            return emit(dynamic_cast<Val*>(n.get()));
+        case Kind::ReturnStmt:
+            return emit(dynamic_cast<ReturnStmt*>(n.get()));
+        case Kind::BinaryOperator:
+            return emit(dynamic_cast<BinaryExpr*>(n.get()));
+        case Kind::VarRef:
             return emit(dynamic_cast<Val*>(n.get()));
         default:
             Logging::info("emit unknown AstNode {} {}\n", n->loc(), n->dump());
@@ -127,13 +138,12 @@ llvm::Value* CodeGen::emit(Call *call) {
         AstNodePtr arg = argList[i];
         llvm::Value *val = emit(arg);
         if (val == nullptr) {
-            throw new CodeGenException(fmt::format("Not found arg {} {}", arg->loc(), arg->nominal()));
+            throw new CodeGenException(fmt::format("Not found arg {} {} {}", arg->loc(), arg->nominal(), int(arg->kind)));
         }
         llvm::Type *ty = FT->getParamType(i);
         llvm::Value *bitcast = builder_->CreateBitCast(val, ty);
         argVals.push_back(bitcast);
     }
-
     return builder_->CreateCall(F, argVals);
 }
 
