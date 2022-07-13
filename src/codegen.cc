@@ -16,27 +16,75 @@ void CodeGen::print() const {
     Logging::info("llvm ir:\n{}\n", os.str());
 }
 
-void CodeGen::emit(FuncDecl *fn) {
+llvm::Value* CodeGen::emit(FuncDecl *fn) {
     llvm::Function *Fn = mod_->getFunction(llvm::StringRef(fn->nominal()));
     Fn = Fn ? Fn : emit_func_prototype(fn);
     llvm::BasicBlock *block = llvm::BasicBlock::Create(*ctx_, "entry", Fn);
     builder_->SetInsertPoint(block);
     llvm::Type *ty = lltypeof(fn->ty);
     if (!ty) {
-        Fn->eraseFromParent(); return;
+        Fn->eraseFromParent(); return nullptr;
     }
     if (ty->isVoidTy()) {
         builder_->CreateRetVoid();
+    } else {
+        builder_->CreateRet(emit(fn->body_));
     }
+    return nullptr;
 }
 
-void CodeGen::emit(IfStmt *If) {
+llvm::Value* CodeGen::emit(Stmts *stmts) {
+    return nullptr;
 }
 
-void CodeGen::emit(BinaryExpr *expr) {
+llvm::Value* CodeGen::emit(IfStmt *If) {
+    return nullptr;
 }
 
-void CodeGen::emit(AstNodePtr n) {
+llvm::Value* CodeGen::emit_const_value(Val *v) {
+    if (!v || !(v->is(Kind::Constant))) return nullptr;
+    std::string num = v->raw_data ? *(v->raw_data) : "0";
+    switch ((v->Type()).kind()) {
+        case TypeID::Float:
+            return llvm::ConstantFP::get(*ctx_, llvm::APFloat(std::stof(num)));
+        case TypeID::Int:
+            return llvm::ConstantInt::get(*ctx_, llvm::APInt(32, std::stoll(num)));
+        case TypeID::Bool:
+            return llvm::ConstantInt::get(*ctx_, llvm::APInt(8, std::stoi(num)));
+        default:
+            return nullptr;
+    }
+    return nullptr;
+}
+
+llvm::Value* CodeGen::emit(Val *v) {
+    if (!v) return nullptr;
+    llvm::Value *retval = nullptr;
+    switch (v->kind) {
+        case Kind::Constant:
+            return emit_const_value(v);
+        default:
+            retval = nullptr;
+    }
+    return retval;
+}
+
+llvm::Value* CodeGen::emit(BinaryExpr *expr) {
+    if (!expr || !expr->is(Kind::BinaryOperator)) return nullptr;
+    llvm::Value *lhs = emit(expr->lhs);
+    llvm::Value *rhs = emit(expr->rhs);
+    switch (expr->op) {
+        case OpKind::ADD:
+            return builder_->CreateAdd(lhs, rhs, "add"); break;
+        case OpKind::SUB:
+            return builder_->CreateAdd(lhs, rhs, "sub"); break;
+        default:
+            Logging::error("emit unknown BinaryExpr {}\n", expr->loc());
+    }
+    return nullptr;
+}
+
+llvm::Value* CodeGen::emit(AstNodePtr n) {
     switch (n->kind) {
         case Kind::DeclList:
             emit(dynamic_cast<Decls*>(n.get())); break;
@@ -45,13 +93,15 @@ void CodeGen::emit(AstNodePtr n) {
         default:
             Logging::info("emit unknown AstNode {}{}", n->loc(), n->dump());
     }
+    return nullptr;
 }
 
-void CodeGen::emit(Decls *decls) {
-    if (!decls) return;
+llvm::Value* CodeGen::emit(Decls *decls) {
+    if (!decls) return nullptr;
     for (auto p: decls->decls) {
         emit(p);
     }
+    return nullptr;
 }
 
 llvm::Function* CodeGen::emit_func_prototype(FuncDecl *fn) {

@@ -24,16 +24,19 @@ class CodeGen {
 
 public:
     CodeGen(std::string name);
-    void emit(AstNodePtr n);
+    llvm::Value* emit(AstNodePtr n);
     void print() const;
 
-    void emit(FuncDecl *fn);
-    void emit(Decls *decls);
-    void emit(IfStmt *If);
-    void emit(BinaryExpr *BinExpr);
+    llvm::Value* emit(FuncDecl *fn);
+    llvm::Value* emit(Decls *decls);
+    llvm::Value* emit(IfStmt *If);
+    llvm::Value* emit(BinaryExpr *BinExpr);
+    llvm::Value* emit(Val *v);
+    llvm::Value* emit(Stmts *stmts);
 
 private:
     llvm::Function *emit_func_prototype(FuncDecl *fn);
+    llvm::Value *emit_const_value(Val *v);
     llvm::Type* lltypeof(Ty ty);
 
 private:
