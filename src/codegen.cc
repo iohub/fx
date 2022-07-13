@@ -1,4 +1,5 @@
 #include "codegen.h"
+#include "exception.h"
 
 
 namespace fx {
@@ -34,6 +35,10 @@ llvm::Value* CodeGen::emit(FuncDecl *fn) {
 }
 
 llvm::Value* CodeGen::emit(Stmts *stmts) {
+    if (!stmts) return nullptr;
+    for (AstNodePtr p: *stmts) {
+        emit(p);
+    }
     return nullptr;
 }
 
@@ -87,11 +92,15 @@ llvm::Value* CodeGen::emit(BinaryExpr *expr) {
 llvm::Value* CodeGen::emit(AstNodePtr n) {
     switch (n->kind) {
         case Kind::DeclList:
-            emit(dynamic_cast<Decls*>(n.get())); break;
+            return emit(dynamic_cast<Decls*>(n.get()));
         case Kind::FuncDecl:
-            emit(dynamic_cast<FuncDecl*>(n.get())); break;
+            return emit(dynamic_cast<FuncDecl*>(n.get()));
+        case Kind::CallFunc:
+            return emit(dynamic_cast<Call*>(n.get()));
+        case Kind::Constant:
+            return emit(dynamic_cast<Val*>(n.get()));
         default:
-            Logging::info("emit unknown AstNode {}{}", n->loc(), n->dump());
+            Logging::info("emit unknown AstNode {} {}\n", n->loc(), n->dump());
     }
     return nullptr;
 }
@@ -102,6 +111,30 @@ llvm::Value* CodeGen::emit(Decls *decls) {
         emit(p);
     }
     return nullptr;
+}
+
+llvm::Value* CodeGen::emit(Call *call) {
+    if (!call) return nullptr;
+    llvm::Function *F = mod_->getFunction(llvm::StringRef(call->nominal()));
+    if (!F) {
+        throw new CodeGenException(fmt::format("Not found Function {} {}",
+                    call->loc(), call->nominal()));
+    }
+    llvm::FunctionType *FT = F->getFunctionType();
+    std::vector<llvm::Value*> argVals;
+    Args argList = call->args();
+    for (size_t i=0; i < argList.size(); i++) {
+        AstNodePtr arg = argList[i];
+        llvm::Value *val = emit(arg);
+        if (val == nullptr) {
+            throw new CodeGenException(fmt::format("Not found arg {} {}", arg->loc(), arg->nominal()));
+        }
+        llvm::Type *ty = FT->getParamType(i);
+        llvm::Value *bitcast = builder_->CreateBitCast(val, ty);
+        argVals.push_back(bitcast);
+    }
+
+    return builder_->CreateCall(F, argVals);
 }
 
 llvm::Function* CodeGen::emit_func_prototype(FuncDecl *fn) {
@@ -134,7 +167,7 @@ llvm::Type* CodeGen::lltypeof(Ty ty) {
         case TypeID::Void:
             return llvm::Type::getVoidTy(*ctx_);
         case TypeID::Object:
-            return mod_->getTypeByName(llvm::StringRef("nil"))->getPointerTo();
+            return mod_->getTypeByName(llvm::StringRef(ty.class_name))->getPointerTo();
         default: return nullptr;
     }
 }

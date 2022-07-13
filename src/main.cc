@@ -7,6 +7,7 @@
 #include <CLI/CLI.hpp>
 #include <nlohmann/json.hpp>
 
+#include "exception.h"
 #include "util.h"
 #include "astnode.h"
 #include "parser.hh"
@@ -57,8 +58,12 @@ int main(int argc, const char *argv[]) {
         ptr->print();
         fmt::print("TypeCheckResult {}\n", result.errmsg);
         CodeGen gen(fname);
-        gen.emit(ptr);
-        gen.print();
+        try {
+            gen.emit(ptr);
+            gen.print();
+        } catch (CodeGenException *ex) {
+            Logging::error("catch codegen exception {}", ex->what());
+        }
     }
 }
 

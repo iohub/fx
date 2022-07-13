@@ -33,6 +33,7 @@ public:
     llvm::Value* emit(BinaryExpr *BinExpr);
     llvm::Value* emit(Val *v);
     llvm::Value* emit(Stmts *stmts);
+    llvm::Value* emit(Call *call);
 
 private:
     llvm::Function *emit_func_prototype(FuncDecl *fn);
