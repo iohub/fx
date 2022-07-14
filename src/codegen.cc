@@ -26,8 +26,23 @@ llvm::Value* CodeGen::emit(FuncDecl *fn) {
     if (!ty) {
         Fn->eraseFromParent(); return nullptr;
     }
+    Defer defer([&]() { env_.enter(); }, [&]() { env_.leave(); });
+
+    auto FArgs = fn->args();
+    size_t idx = 0;
+    // alloc args
+    for (auto &arg : Fn->args()) {
+        llvm::AllocaInst *inst = emit_block_alloca(Fn->getEntryBlock(), FArgs[idx++]);
+        builder_->CreateStore(&arg, inst);
+        // env_.put_var(std::string(arg.getName()), nullptr);
+    }
     llvm::Value* retval = emit(fn->body_);
     return retval ? builder_->CreateRet(retval) : builder_->CreateRetVoid();
+}
+
+llvm::AllocaInst* CodeGen::emit_block_alloca(llvm::BasicBlock &block, AstNodePtr var) {
+    llvm::IRBuilder<> bbuilder(&block, block.begin());
+    return bbuilder.CreateAlloca(lltypeof(var->Type()), 0, var->nominal());
 }
 
 llvm::Value* CodeGen::emit(Stmts *stmts) {
@@ -86,6 +101,9 @@ llvm::Value* CodeGen::emit(BinaryExpr *expr) {
             return builder_->CreateAdd(lhs, rhs, "add");
         case OpKind::SUB:
             return builder_->CreateSub(lhs, rhs, "sub");
+        case OpKind::GT:
+            Logging::info("builder_ CreateICmpSGT\n");
+            // return builder_->CreateICmpSGT(lhs, rhs, "gt");
         default:
             Logging::error("emit unknown BinaryExpr {} {}\n", expr->loc(), expr->dump());
     }

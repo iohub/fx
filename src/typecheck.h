@@ -27,32 +27,7 @@ public:
     TypeCheckResult check(AstNodePtr any);
 
 private:
-    class Env {
-    public:
-        AstNodePtr lookup_var(std::string const &nominal) {
-            return vars_.lookup(nominal);
-        }
-        AstNodePtr lookup_func(std::string const &nominal) {
-            return funs_.lookup(nominal);
-        }
-        void put_var(AstNodePtr node) {
-            vars_.put(node->nominal(), node);
-        }
-        void put_func(AstNodePtr node) {
-            funs_.put(node->nominal(), node);
-        }
-        void enter() {
-            vars_.enter(); funs_.enter();
-        }
-        void leave() {
-            vars_.leave(); funs_.leave();
-        }
-    private:
-        Scope<AstNodePtr> vars_;
-        Scope<AstNodePtr> funs_;
-    };
-
-    Env env;
+    Env<AstNodePtr, AstNodePtr> env;
     bool isSubtype(AstNodePtr a, AstNodePtr b);
     TypeCheckResult checkBinaryOp(AstNodePtr op);
     TypeCheckResult checkFuncDecl(AstNodePtr func);

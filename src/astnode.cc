@@ -70,7 +70,6 @@ VarDecl::~VarDecl() {
     Logging::debug("~VarDecl({})\n", dump());
     if (raw_data) delete raw_data;
     if (var_name) delete var_name;
-    if (type_name) delete type_name;
 }
 
 std::string VarDecl::dump() {

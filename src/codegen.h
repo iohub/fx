@@ -15,6 +15,7 @@
 #include <llvm/IR/Verifier.h>
 
 #include "astnode.h"
+#include "env.h"
 
 
 namespace fx {
@@ -24,8 +25,14 @@ class CodeGen {
 
 public:
     CodeGen(std::string name);
-    llvm::Value* emit(AstNodePtr n);
     void print() const;
+    llvm::Value* emit(AstNodePtr n);
+
+private:
+    llvm::Function *emit_func_prototype(FuncDecl *fn);
+    llvm::AllocaInst* emit_block_alloca(llvm::BasicBlock &block, AstNodePtr var);
+    llvm::Value *emit_const_value(Val *v);
+    llvm::Type* lltypeof(Ty ty);
 
     llvm::Value* emit(FuncDecl *fn);
     llvm::Value* emit(Decls *decls);
@@ -37,15 +44,10 @@ public:
     llvm::Value* emit(ReturnStmt *Return);
 
 private:
-    llvm::Function *emit_func_prototype(FuncDecl *fn);
-    llvm::Value *emit_const_value(Val *v);
-    llvm::Type* lltypeof(Ty ty);
-
-private:
     std::unique_ptr<llvm::LLVMContext> ctx_;
     std::unique_ptr<llvm::Module> mod_;
     std::unique_ptr<llvm::IRBuilder<> > builder_;
-
+    Env<llvm::Value*, llvm::Function*> env_;
 };
 
 

@@ -120,7 +120,7 @@ TypeCheckResult TypeChecker::checkDecls(AstNodePtr declList) {
         switch (n->kind) {
             case Kind::FuncDecl:
                 if (!(fn = dynamic_cast<FuncDecl*>(n.get()))) break;
-                env.put_func(n);
+                env.put_func(n->nominal(), n);
                 result = checkFuncDecl(n);
                 if (result != TypeOk) {
                     Logging::info("[error]: {}\n", result.errmsg);
@@ -185,7 +185,7 @@ TypeCheckResult TypeChecker::checkFuncDecl(AstNodePtr n) {
     FuncDecl *fn = dynamic_cast<FuncDecl*>(n.get()); assert(fn);
     Defer defer([&]() { env.enter(); }, [&]() { env.leave(); });
 
-    for (auto arg : fn->args()) env.put_var(arg);
+    for (auto arg : fn->args()) env.put_var(arg->nominal(), arg);
     bool foundReturn = false;
     TypeCheckResult result;
     for (auto n : fn->body()) {
@@ -198,7 +198,7 @@ TypeCheckResult TypeChecker::checkFuncDecl(AstNodePtr n) {
                     return TypeCheckResult(fmt::format("{} incompatible type", n->loc()));
                 break;
             case Kind::VarDecl:
-                 env.put_var(n); break;
+                 env.put_var(n->nominal(), n); break;
             default:
                  result = check(n);
         }

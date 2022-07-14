@@ -113,17 +113,13 @@ struct Val: public AstNode {
 struct VarDecl: public AstNode {
     std::string *raw_data;
     std::string *var_name;
-    std::string *type_name;
 
     VarDecl(Loc loc, std::string *name, std::string *type, std::string *data)
         : AstNode(loc, Kind::VarDecl, Ty(*type)),
-        raw_data(data), var_name(name), type_name(type) { }
+        raw_data(data), var_name(name) { }
 
     std::string name() {
         return var_name ? *var_name: "Nil";
-    }
-    std::string type() {
-        return type_name ? *type_name: "Nil";
     }
 
     ~VarDecl();

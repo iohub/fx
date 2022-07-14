@@ -37,6 +37,32 @@ private:
     std::vector<std::map<std::string, T> > scope_;
 };
 
+template<class V, class F>
+class Env {
+public:
+    V lookup_var(std::string const &nominal) {
+        return vars_.lookup(nominal);
+    }
+    F lookup_func(std::string const &nominal) {
+        return funs_.lookup(nominal);
+    }
+    void put_var(const std::string &varname, V value) {
+        vars_.put(varname, value);
+    }
+    void put_func(const std::string &fnname, F value) {
+        funs_.put(fnname, value);
+    }
+    void enter() {
+        vars_.enter(); funs_.enter();
+    }
+    void leave() {
+        vars_.leave(); funs_.leave();
+    }
+private:
+    Scope<V> vars_;
+    Scope<F> funs_;
+};
+
 
 
 

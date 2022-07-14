@@ -44,6 +44,7 @@ namespace detail {
         {"bool", TypeID::Bool},
         {"void", TypeID::Void},
         {"float", TypeID::Float},
+        {"unresolved", TypeID::UnResolved},
     };
     const static std::map<TypeID, std::string> BasicTypeNameMappings = {
         {TypeID::Int, "int"},
@@ -51,6 +52,7 @@ namespace detail {
         {TypeID::Bool, "bool"},
         {TypeID::Float, "float"},
         {TypeID::Void, "void"},
+        {TypeID::UnResolved, "unresolved"},
     };
 };
 
