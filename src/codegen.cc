@@ -34,10 +34,10 @@ llvm::Value* CodeGen::emit(FuncDecl *fn) {
     for (auto &arg : Fn->args()) {
         llvm::AllocaInst *inst = emit_block_alloca(Fn->getEntryBlock(), FArgs[idx++]);
         builder_->CreateStore(&arg, inst);
-        // env_.put_var(std::string(arg.getName()), nullptr);
+        env_.put_var(std::string(arg.getName()), &arg);
     }
-    llvm::Value* retval = emit(fn->body_);
-    return retval ? builder_->CreateRet(retval) : builder_->CreateRetVoid();
+    emit(fn->body_);
+    return nullptr;
 }
 
 llvm::AllocaInst* CodeGen::emit_block_alloca(llvm::BasicBlock &block, AstNodePtr var) {
@@ -47,21 +47,58 @@ llvm::AllocaInst* CodeGen::emit_block_alloca(llvm::BasicBlock &block, AstNodePtr
 
 llvm::Value* CodeGen::emit(Stmts *stmts) {
     if (!stmts) return nullptr;
-    llvm::Value* retval = nullptr;
+    llvm::Value* retval = nullptr, *tmp;
     for (AstNodePtr p: *stmts) {
+        tmp = emit(p);
         if (p->is(Kind::ReturnStmt)) {
-            retval = emit(p);
+            retval = tmp;
         }
     }
     return retval;
 }
 
 llvm::Value* CodeGen::emit(IfStmt *If) {
-    return nullptr;
+    llvm::Value* cond = emit(If->cond_);
+    if (!cond) {
+        throw new CodeGenException(fmt::format("{} null conditional", If->loc()));
+    }
+    llvm::Function *pF = builder_->GetInsertBlock()->getParent();
+
+    llvm::BasicBlock *then = llvm::BasicBlock::Create(*ctx_, "then", pF);
+    llvm::BasicBlock *else_ = llvm::BasicBlock::Create(*ctx_, "else");
+    llvm::BasicBlock *merge = llvm::BasicBlock::Create(*ctx_, "ifcont");
+
+    builder_->CreateCondBr(cond, then, else_);
+    // then
+    builder_->SetInsertPoint(then);
+    llvm::Value* thenV = emit(If->then_);
+    if (!thenV) return nullptr;
+
+    builder_->CreateBr(merge);
+    // CodeGen of 'Then' changed the current block, update it.
+    then = builder_->GetInsertBlock();
+    // emit else block
+    pF->getBasicBlockList().push_back(else_);
+    builder_->SetInsertPoint(else_);
+    llvm::Value *elseV = emit(If->else_);
+    if (!elseV) return nullptr;
+    builder_->CreateBr(merge);
+    else_ = builder_->GetInsertBlock();
+    // emit merge block
+    pF->getBasicBlockList().push_back(merge);
+    builder_->SetInsertPoint(merge);
+
+    llvm::PHINode *phi = builder_->CreatePHI(thenV->getType(), 2, "iftmp");
+    phi->addIncoming(thenV, then);
+    phi->addIncoming(elseV, else_);
+
+    return phi;
 }
 
 llvm::Value* CodeGen::emit(ReturnStmt *Return) {
-    return emit(Return->stmt);
+    llvm::Value* retval = emit(Return->stmt);
+    builder_->CreateRet(retval);
+    return retval;
 }
 
 llvm::Value* CodeGen::emit_const_value(Val *v) {
@@ -86,6 +123,8 @@ llvm::Value* CodeGen::emit(Val *v) {
     switch (v->kind) {
         case Kind::Constant:
             return emit_const_value(v);
+        case Kind::VarRef:
+            return env_.lookup_var(v->nominal());
         default:
             retval = nullptr;
     }
@@ -102,8 +141,11 @@ llvm::Value* CodeGen::emit(BinaryExpr *expr) {
         case OpKind::SUB:
             return builder_->CreateSub(lhs, rhs, "sub");
         case OpKind::GT:
-            Logging::info("builder_ CreateICmpSGT\n");
-            // return builder_->CreateICmpSGT(lhs, rhs, "gt");
+            return builder_->CreateICmpSGT(lhs, rhs, "gt");
+        case OpKind::EQ:
+            return builder_->CreateICmpEQ(lhs, rhs, "eq");
+        case OpKind::LE:
+            return builder_->CreateICmpSLE(lhs, rhs, "le");
         default:
             Logging::error("emit unknown BinaryExpr {} {}\n", expr->loc(), expr->dump());
     }
@@ -126,6 +168,8 @@ llvm::Value* CodeGen::emit(AstNodePtr n) {
             return emit(dynamic_cast<BinaryExpr*>(n.get()));
         case Kind::VarRef:
             return emit(dynamic_cast<Val*>(n.get()));
+        case Kind::If:
+            return emit(dynamic_cast<IfStmt*>(n.get()));
         default:
             Logging::info("emit unknown AstNode {} {}\n", n->loc(), n->dump());
     }
@@ -154,7 +198,8 @@ llvm::Value* CodeGen::emit(Call *call) {
         AstNodePtr arg = argList[i];
         llvm::Value *val = emit(arg);
         if (val == nullptr) {
-            throw new CodeGenException(fmt::format("Not found arg {} {} {}", arg->loc(), arg->nominal(), int(arg->kind)));
+            throw new CodeGenException(fmt::format("Not found arg {} {} {}",
+                        arg->loc(), arg->nominal(), int(arg->kind)));
         }
         llvm::Type *ty = FT->getParamType(i);
         llvm::Value *bitcast = builder_->CreateBitCast(val, ty);
@@ -171,7 +216,8 @@ llvm::Function* CodeGen::emit_func_prototype(FuncDecl *fn) {
     }
     llvm::Type *retTy = lltypeof(fn->Type());
     llvm::FunctionType *fnTy = llvm::FunctionType::get(retTy, argsTy, false);
-    llvm::Function *F = llvm::Function::Create(fnTy, llvm::Function::ExternalLinkage, fn->nominal(), *mod_);
+    llvm::Function *F = llvm::Function::Create(fnTy,
+            llvm::Function::ExternalLinkage, fn->nominal(), *mod_);
     unsigned idx = 0;
     for (auto &arg : F->args()) {
         arg.setName((args[idx++])->nominal());

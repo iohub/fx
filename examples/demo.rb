@@ -5,7 +5,7 @@ def conditional(float x) bool {
 
 def foo(float x, float y) float {
   for ( conditional(x); y;) {
-      if (x > 10.0) { x = x + 1.0 } else { x = x + 2 }
+      if (x > 10.0) { x = x + 1.0 } else { x = x + 2.0 }
   }
 
   for ( ; ; ) {}
@@ -15,10 +15,13 @@ def foo(float x, float y) float {
 def ErrType() float { return "ok" }
 
 def fib(int x) int {
-  if (x == 0) {
+  if (x <= 0) {
+      return 0
+  }
+  if (x == 1) {
       return 1
   }
-  return fib(19-1)
+  return fib(x-1) + fib(x-2)
 }
 
 def main() int {
