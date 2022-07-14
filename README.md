@@ -1,5 +1,5 @@
 # fx
-a go-like language
+a static strong typed language
 
 ## build
 ```shell
@@ -38,6 +38,53 @@ def main() int {
 
 * simple typed ast
 <img src="./imgs/fib.svg">
+
+* llvm IR
+
+```asm
+; ModuleID = '../examples/fib.rb'
+source_filename = "../examples/fib.rb"
+
+define i32 @fib(i32 %x) {
+entry:
+  %x1 = alloca i32
+  store i32 %x, i32* %x1
+  %le = icmp sle i32 %x, 0
+  br i1 %le, label %then, label %else
+
+then:                                             ; preds = %entry
+  ret i32 0
+  br label %ifcont
+
+else:                                             ; preds = %entry
+  %eq = icmp eq i32 %x, 1
+  br i1 %eq, label %then2, label %else3
+
+then2:                                            ; preds = %else
+  ret i32 1
+  br label %ifcont
+
+else3:                                            ; preds = %else
+  %sub = sub i32 %x, 1
+  %0 = call i32 @fib(i32 %sub)
+  %sub4 = sub i32 %x, 2
+  %1 = call i32 @fib(i32 %sub4)
+  %add = add i32 %0, %1
+  ret i32 %add
+}
+
+define i32 @main() {
+entry:
+  %z = alloca i32
+  store i32 8, i32* %z
+  %0 = call i32 @fib(i32 5)
+  %add = add i32* %z, i32 %0
+  store i32* %add, i32* %z
+  %1 = bitcast i32* %z to i32
+  %2 = call i32 @fib(i32 %1)
+  ret i32 %2
+}
+```
 
 ## reference
 
