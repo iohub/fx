@@ -43,19 +43,19 @@ int main(int argc, const char *argv[]) {
 
     if (int err = parse(fname.c_str()) != 0) {
         fmt::print("parse file:{}, err:{}\n", fname, err);
-    } else {
-        json jsonExp = Program->tojson();
-        // print pretty json
-        // std::cout << std::setw(2) << jsonExp << std::endl;
-        // visualize onsite: https://vanya.jp.net/vtree
-        std::cout << jsonExp << std::endl;
+        return -1;
     }
+    // print pretty json
+    // std::cout << std::setw(2) << jsonExp << std::endl;
+    // visualize onsite: https://vanya.jp.net/vtree
 
     if (Program) {
         AstNodePtr ptr(Program);
         TypeChecker checker;
         TypeCheckResult result = checker.check(ptr);
         fmt::print("typed ast:\n");
+        json jsonExp = Program->tojson();
+        std::cout << jsonExp << std::endl;
         ptr->print();
         fmt::print("TypeCheckResult {}\n", result.errmsg);
         CodeGen gen(fname);
@@ -66,5 +66,6 @@ int main(int argc, const char *argv[]) {
             Logging::error("catch codegen exception {}", ex->what());
         }
     }
+    return 0;
 }
 
