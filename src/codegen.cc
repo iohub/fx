@@ -36,6 +36,12 @@ llvm::Value* CodeGen::emit(FuncDecl *fn) {
         builder_->CreateStore(&arg, inst);
         env_.put_var(std::string(arg.getName()), &arg);
     }
+    for (auto &b : fn->body()) {
+        if (b->is(Kind::VarDecl)) {
+            llvm::AllocaInst *inst = emit_block_alloca(Fn->getEntryBlock(), b);
+            env_.put_var(b->nominal(), inst);
+        }
+    }
     emit(fn->body_);
     return nullptr;
 }
@@ -43,6 +49,16 @@ llvm::Value* CodeGen::emit(FuncDecl *fn) {
 llvm::AllocaInst* CodeGen::emit_block_alloca(llvm::BasicBlock &block, AstNodePtr var) {
     llvm::IRBuilder<> bbuilder(&block, block.begin());
     return bbuilder.CreateAlloca(lltypeof(var->Type()), 0, var->nominal());
+}
+
+llvm::Value* CodeGen::emit(AssignStmt *assign) {
+    llvm::Value* valV = emit(assign->val_);
+    llvm::Value* varV = env_.lookup_var(assign->var_->nominal());
+    if (!varV) {
+        throw new CodeGenException(fmt::format("{} not found variable", assign->loc()));
+    }
+    builder_->CreateStore(valV, varV);
+    return valV;
 }
 
 llvm::Value* CodeGen::emit(Stmts *stmts) {
@@ -168,6 +184,8 @@ llvm::Value* CodeGen::emit(AstNodePtr n) {
             return emit(dynamic_cast<BinaryExpr*>(n.get()));
         case Kind::VarRef:
             return emit(dynamic_cast<Val*>(n.get()));
+        case Kind::Assign:
+            return emit(dynamic_cast<AssignStmt*>(n.get()));
         case Kind::If:
             return emit(dynamic_cast<IfStmt*>(n.get()));
         default:

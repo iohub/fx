@@ -42,6 +42,7 @@ private:
     llvm::Value* emit(Stmts *stmts);
     llvm::Value* emit(Call *call);
     llvm::Value* emit(ReturnStmt *Return);
+    llvm::Value* emit(AssignStmt *assign);
 
 private:
     std::unique_ptr<llvm::LLVMContext> ctx_;
