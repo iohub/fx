@@ -52,9 +52,10 @@ int main(int argc, const char *argv[]) {
     }
 
     if (Program) {
-        Env emptyCtx;
         AstNodePtr ptr(Program);
-        TypeCheckResult result = TypeChecker::check(emptyCtx, ptr);
+        TypeChecker checker;
+        TypeCheckResult result = checker.check(ptr);
+        fmt::print("typed ast:\n");
         ptr->print();
         fmt::print("TypeCheckResult {}\n", result.errmsg);
         CodeGen gen(fname);

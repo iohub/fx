@@ -26,20 +26,19 @@ llvm::Value* CodeGen::emit(FuncDecl *fn) {
     if (!ty) {
         Fn->eraseFromParent(); return nullptr;
     }
-    if (ty->isVoidTy()) {
-        builder_->CreateRetVoid();
-    } else {
-        builder_->CreateRet(emit(fn->body_));
-    }
-    return nullptr;
+    llvm::Value* retval = emit(fn->body_);
+    return retval ? builder_->CreateRet(retval) : builder_->CreateRetVoid();
 }
 
 llvm::Value* CodeGen::emit(Stmts *stmts) {
     if (!stmts) return nullptr;
+    llvm::Value* retval = nullptr;
     for (AstNodePtr p: *stmts) {
-        emit(p);
+        if (p->is(Kind::ReturnStmt)) {
+            retval = emit(p);
+        }
     }
-    return nullptr;
+    return retval;
 }
 
 llvm::Value* CodeGen::emit(IfStmt *If) {
@@ -47,8 +46,7 @@ llvm::Value* CodeGen::emit(IfStmt *If) {
 }
 
 llvm::Value* CodeGen::emit(ReturnStmt *Return) {
-    llvm::Value *val = emit(Return->stmt);
-    return builder_->CreateRet(val);
+    return emit(Return->stmt);
 }
 
 llvm::Value* CodeGen::emit_const_value(Val *v) {
