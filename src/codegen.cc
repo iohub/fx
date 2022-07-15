@@ -14,7 +14,7 @@ void CodeGen::print() const {
     std::string out;
     llvm::raw_string_ostream os{out};
     mod_->print(os, nullptr);
-    Logging::info("llvm ir:\n{}\n", os.str());
+    fmt::print("llvm ir:\n{}\n", os.str());
 }
 
 llvm::Value* CodeGen::emit(FuncDecl *fn) {

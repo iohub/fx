@@ -19,19 +19,36 @@ using json = nlohmann::json;
 
 extern FILE *yyin;
 extern AstNode* Program;
+Logging::Level Logging::level;
 
-int parse(const char* fname) {
-    FILE *fobj = fopen(fname, "r");
-    if (!fobj) return -1;
+
+void compile(const std::string &fname) {
+    FILE *fobj = fopen(fname.c_str(), "r");
+    if (!fobj) {
+        throw new ParseException(fmt::format("open {} err", fname));
+    }
     yyin = fobj;
-    do {
-        yyparse();
-    } while (!feof(yyin));
+    do { yyparse(); } while (!feof(yyin));
+    if (!Program) {
+        throw new ParseException(fmt::format("parse {} err", fname));
+    }
+    AstNodePtr ptr(Program);
+    TypeChecker checker;
 
-    return 0;
+    TypeCheckResult result = checker.check(ptr);
+    json jsonExp = Program->tojson();
+    Logging::info("typed ast (json format):\n{}\n", jsonExp.dump());
+    ptr->print();
+    fmt::print("TypeCheckResult {}\n", result.errmsg);
+    CodeGen gen(fname);
+    try {
+        gen.emit(ptr);
+        gen.print();
+    } catch (CodeGenException *ex) {
+        Logging::error("catch codegen exception {}", ex->what());
+    }
 }
 
-Logging::Level Logging::level;
 
 int main(int argc, const char *argv[]) {
     Logging::level = Logging::Level::INFO;
@@ -41,31 +58,15 @@ int main(int argc, const char *argv[]) {
     app.add_option("-f,--file", fname, "source file");
     CLI11_PARSE(app, argc, argv);
 
-    if (int err = parse(fname.c_str()) != 0) {
-        fmt::print("parse file:{}, err:{}\n", fname, err);
-        return -1;
-    }
     // print pretty json
     // std::cout << std::setw(2) << jsonExp << std::endl;
     // visualize onsite: https://vanya.jp.net/vtree
-
-    if (Program) {
-        AstNodePtr ptr(Program);
-        TypeChecker checker;
-        TypeCheckResult result = checker.check(ptr);
-        fmt::print("typed ast:\n");
-        json jsonExp = Program->tojson();
-        std::cout << jsonExp << std::endl;
-        ptr->print();
-        fmt::print("TypeCheckResult {}\n", result.errmsg);
-        CodeGen gen(fname);
-        try {
-            gen.emit(ptr);
-            gen.print();
-        } catch (CodeGenException *ex) {
-            Logging::error("catch codegen exception {}", ex->what());
-        }
+    try {
+        compile(fname);
+    } catch (ParseException *ex) {
+        Logging::error("catch parse exception {}", ex->what());
     }
+
     return 0;
 }
 

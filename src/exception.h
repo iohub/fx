@@ -6,14 +6,16 @@
 
 namespace fx {
 
-class CodeGenException : public std::exception {
+class FxException : public std::exception {
 private:
     std::string errMsg;
 public:
-    CodeGenException(std::string msg) : errMsg(msg) {}
+    FxException(std::string msg) : errMsg(msg) {}
     const char* what() const throw() { return errMsg.c_str(); }
 };
 
+using ParseException = FxException;
+using CodeGenException = FxException;
 
 
 
