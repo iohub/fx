@@ -10,7 +10,6 @@
 
 	extern FILE *yyin;
 	extern FILE *yyout;
-	int lineno = 1;
     void yyerror (char const*);
     extern YYLTYPE yylloc;
 

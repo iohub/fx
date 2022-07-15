@@ -79,36 +79,28 @@ llvm::Value* CodeGen::emit(IfStmt *If) {
         throw new CodeGenException(fmt::format("{} null conditional", If->loc()));
     }
     llvm::Function *pF = builder_->GetInsertBlock()->getParent();
-
     llvm::BasicBlock *then = llvm::BasicBlock::Create(*ctx_, "then", pF);
     llvm::BasicBlock *else_ = llvm::BasicBlock::Create(*ctx_, "else");
     llvm::BasicBlock *merge = llvm::BasicBlock::Create(*ctx_, "ifcont");
-
+    else_ = If->else_ ? else_ : merge;
     builder_->CreateCondBr(cond, then, else_);
     // then
     builder_->SetInsertPoint(then);
-    llvm::Value* thenV = emit(If->then_);
-    if (!thenV) return nullptr;
-
+    emit(If->then_);
+    // goto ifcont
     builder_->CreateBr(merge);
-    // CodeGen of 'Then' changed the current block, update it.
-    then = builder_->GetInsertBlock();
-    // emit else block
-    pF->getBasicBlockList().push_back(else_);
-    builder_->SetInsertPoint(else_);
-    llvm::Value *elseV = emit(If->else_);
-    if (!elseV) return nullptr;
-    builder_->CreateBr(merge);
-    else_ = builder_->GetInsertBlock();
-    // emit merge block
+    if (If->else_) {
+        // else
+        pF->getBasicBlockList().push_back(else_);
+        builder_->SetInsertPoint(else_);
+        emit(If->else_);
+        // goto ifcont
+        builder_->CreateBr(merge);
+    }
+    // ifcont
     pF->getBasicBlockList().push_back(merge);
     builder_->SetInsertPoint(merge);
-
-    llvm::PHINode *phi = builder_->CreatePHI(thenV->getType(), 2, "iftmp");
-    phi->addIncoming(thenV, then);
-    phi->addIncoming(elseV, else_);
-
-    return phi;
+    return nullptr;
 }
 
 llvm::Value* CodeGen::emit(ReturnStmt *Return) {
@@ -162,6 +154,8 @@ llvm::Value* CodeGen::emit(BinaryExpr *expr) {
             return builder_->CreateICmpEQ(lhs, rhs, "eq");
         case OpKind::LE:
             return builder_->CreateICmpSLE(lhs, rhs, "le");
+        case OpKind::LT:
+            return builder_->CreateICmpSLT(lhs, rhs, "lt");
         default:
             Logging::error("emit unknown BinaryExpr {} {}\n", expr->loc(), expr->dump());
     }
@@ -184,13 +178,38 @@ llvm::Value* CodeGen::emit(AstNodePtr n) {
             return emit(dynamic_cast<BinaryExpr*>(n.get()));
         case Kind::VarRef:
             return emit(dynamic_cast<Val*>(n.get()));
+        case Kind::VarDecl:
+            return nullptr;
         case Kind::Assign:
             return emit(dynamic_cast<AssignStmt*>(n.get()));
         case Kind::If:
             return emit(dynamic_cast<IfStmt*>(n.get()));
+        case Kind::For:
+            return emit(dynamic_cast<ForStmt*>(n.get()));
+        case Kind::Nil:
+            return nullptr;
         default:
             Logging::info("emit unknown AstNode {} {}\n", n->loc(), n->dump());
     }
+    return nullptr;
+}
+
+llvm::Value* CodeGen::emit(ForStmt *For) {
+    llvm::Value *cond = emit(For->cond_stmt);
+    llvm::Function *pF = builder_->GetInsertBlock()->getParent();
+    llvm::BasicBlock *loopB = llvm::BasicBlock::Create(*ctx_, "loop");
+    llvm::BasicBlock *endB = llvm::BasicBlock::Create(*ctx_, "loop_end");
+    builder_->CreateCondBr(cond, loopB, endB);
+    pF->getBasicBlockList().push_back(loopB);
+    builder_->SetInsertPoint(loopB);
+
+    emit(For->body);
+    cond = emit(For->cond_stmt);
+    loopB = builder_->GetInsertBlock();
+    builder_->CreateCondBr(cond, loopB, endB);
+    pF->getBasicBlockList().push_back(endB);
+    builder_->SetInsertPoint(endB);
+
     return nullptr;
 }
 

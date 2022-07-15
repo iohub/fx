@@ -214,15 +214,7 @@ primitive_val
          ;
 
 for_stmt
-    : FOR LPAREN expr_stmt expr_stmt RPAREN stmts_block
-    {
-        ForStmt *n = new ForStmt(Loc(@1.first_line, @1.first_column));
-        n->cond_stmt = AstNodePtr($3);
-        n->next_stmt = AstNodePtr($4);
-        n->body = $6;
-        $$ = n;
-    }
-    | FOR LPAREN expr_stmt expr_stmt expr_stmt RPAREN stmts_block
+    : FOR LPAREN expr_stmt expr_stmt expr_stmt RPAREN stmts_block
     {
         ForStmt *n = new ForStmt(Loc(@1.first_line, @1.first_column));
         n->init_stmt = AstNodePtr($3);
@@ -281,7 +273,7 @@ assignment_expr
 void yyerror (char const* s)
 {
 	fflush(stdout);
-	fprintf(stderr, "lineno:%d, *** %s\n", lineno, s);
+	fprintf(stderr, "location(%d:%d), *** %s\n", yylloc.first_line, yylloc.first_column, s);
     exit(-1);
 }
 

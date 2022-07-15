@@ -4,15 +4,14 @@ def conditional(float x) bool {
 }
 
 def foo(float x, float y) float {
-  for ( conditional(x); y;) {
-      if (x > 10.0) { x = x + 1.0 } else { x = x + 2.0 }
+  for ( ; conditional(x); ;) {
+      x = x + x
   }
-
-  for ( ; ; ) {}
-  return 10.5
+  for ( ; x < 20.0; ;) {
+      x = x + y
+  }
+  return x
 }
-
-def ErrType() float { return "ok" }
 
 def fib(int x) int {
   if (x <= 0) {
@@ -22,6 +21,13 @@ def fib(int x) int {
       return 1
   }
   return fib(x-1) + fib(x-2)
+}
+
+def else1(int x) int {
+  if (x > 10.0) { x = x + 1.0 }
+  else { x = x + 2.0 }
+
+  return x
 }
 
 def main() int {
