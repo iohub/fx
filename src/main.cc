@@ -32,18 +32,19 @@ void compile(const std::string &fname) {
     if (!Program) {
         throw new ParseException(fmt::format("parse {} err", fname));
     }
-    AstNodePtr ptr(Program);
+    AstNodePtr wrap(Program);
     TypeChecker checker;
 
-    TypeCheckResult result = checker.check(ptr);
+    TypeCheckResult result = checker.check(wrap);
     json jsonExp = Program->tojson();
     Logging::info("typed ast (json format):\n{}\n", jsonExp.dump());
-    ptr->print();
-    fmt::print("TypeCheckResult {}\n", result.errmsg);
+    wrap->print();
+    Logging::info("TypeCheckResult {}\n", result.errmsg);
     CodeGen gen(fname);
     try {
-        gen.emit(ptr);
-        gen.print();
+        gen.emit(wrap);
+        Logging::info("llvm ir:{}\n", gen.llvm_ir());
+        gen.dump(fname + ".ll");
     } catch (CodeGenException *ex) {
         Logging::error("catch codegen exception {}", ex->what());
     }

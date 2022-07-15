@@ -25,8 +25,9 @@ class CodeGen {
 
 public:
     CodeGen(std::string name);
-    void print() const;
     llvm::Value* emit(AstNodePtr n);
+    std::string llvm_ir() const;
+    void dump(const std::string &fname) const;
 
 private:
     llvm::Function *emit_func_prototype(FuncDecl *fn);

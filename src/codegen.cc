@@ -1,3 +1,4 @@
+#include <fstream>
 #include "codegen.h"
 #include "exception.h"
 
@@ -10,11 +11,16 @@ CodeGen::CodeGen(std::string name) {
     builder_ = std::unique_ptr<llvm::IRBuilder<>>(new llvm::IRBuilder<>(*ctx_));
 }
 
-void CodeGen::print() const {
-    std::string out;
-    llvm::raw_string_ostream os{out};
+std::string CodeGen::llvm_ir() const {
+    std::string ir;
+    llvm::raw_string_ostream os{ir};
     mod_->print(os, nullptr);
-    fmt::print("llvm ir:\n{}\n", os.str());
+    return os.str();
+}
+
+void CodeGen::dump(const std::string &fname) const {
+    std::ofstream outf(fname);
+    outf << llvm_ir();
 }
 
 llvm::Value* CodeGen::emit(FuncDecl *fn) {
@@ -143,6 +149,7 @@ llvm::Value* CodeGen::emit(BinaryExpr *expr) {
     if (!expr || !expr->is(Kind::BinaryOperator)) return nullptr;
     llvm::Value *lhs = emit(expr->lhs);
     llvm::Value *rhs = emit(expr->rhs);
+    llvm::Type *lty = lltypeof(expr->lhs->ty);
     switch (expr->op) {
         case OpKind::ADD:
             return builder_->CreateAdd(lhs, rhs, "add");
