@@ -30,6 +30,7 @@ private:
     Env<AstNodePtr, AstNodePtr> env;
     bool isSubtype(AstNodePtr a, AstNodePtr b);
     TypeCheckResult checkBinaryOp(AstNodePtr op);
+    TypeCheckResult checkBinaryCmp(AstNodePtr op);
     TypeCheckResult checkFuncDecl(AstNodePtr func);
     TypeCheckResult checkAssign(AstNodePtr assign);
     TypeCheckResult checkVarRef(AstNodePtr var);

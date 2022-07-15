@@ -39,6 +39,7 @@ private:
     llvm::Value* emit(Decls *decls);
     llvm::Value* emit(IfStmt *If);
     llvm::Value* emit(BinaryExpr *BinExpr);
+    llvm::Value* emit(BinaryCmp *cmp);
     llvm::Value* emit(Val *v);
     llvm::Value* emit(Stmts *stmts);
     llvm::Value* emit(Call *call);

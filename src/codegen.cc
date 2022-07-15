@@ -5,6 +5,28 @@
 
 namespace fx {
 
+namespace detail {
+
+using Predicate = llvm::CmpInst::Predicate;
+static std::map<std::pair<OpKind, TypeID>,  Predicate> CmpInstrMappings = {
+    {{OpKind::EQ, TypeID::Int}, Predicate::ICMP_EQ},
+    {{OpKind::NEQ, TypeID::Int}, Predicate::ICMP_NE},
+    {{OpKind::GT, TypeID::Int}, Predicate::ICMP_SGT},
+    {{OpKind::GE, TypeID::Int}, Predicate::ICMP_SGE},
+    {{OpKind::LT, TypeID::Int}, Predicate::ICMP_SLT},
+    {{OpKind::LE, TypeID::Int}, Predicate::ICMP_SLE},
+
+    {{OpKind::EQ, TypeID::Float}, Predicate::FCMP_OEQ},
+    {{OpKind::GT, TypeID::Float}, Predicate::FCMP_OGT},
+    {{OpKind::GE, TypeID::Float}, Predicate::FCMP_OGE},
+    {{OpKind::LT, TypeID::Float}, Predicate::FCMP_OLT},
+    {{OpKind::LE, TypeID::Float}, Predicate::FCMP_OLE},
+    {{OpKind::NEQ, TypeID::Float}, Predicate::FCMP_ONE},
+};
+
+
+};
+
 CodeGen::CodeGen(std::string name) {
     ctx_ = std::make_unique<llvm::LLVMContext>();
     mod_ = std::make_unique<llvm::Module>(name, *ctx_);
@@ -149,25 +171,45 @@ llvm::Value* CodeGen::emit(BinaryExpr *expr) {
     if (!expr || !expr->is(Kind::BinaryOperator)) return nullptr;
     llvm::Value *lhs = emit(expr->lhs);
     llvm::Value *rhs = emit(expr->rhs);
-    llvm::Type *lty = lltypeof(expr->lhs->ty);
+    if (!expr->lhs) {
+        throw new CodeGenException(fmt::format("{} invalid BinaryExpr", expr->loc()));
+    }
+    Ty ty = expr->lhs->ty;
+    llvm::Type *lty = lltypeof(ty);
     switch (expr->op) {
         case OpKind::ADD:
-            return builder_->CreateAdd(lhs, rhs, "add");
+            return ty.is(TypeID::Int) ? builder_->CreateAdd(lhs, rhs, "add")
+                : builder_->CreateFAdd(lhs, rhs, "add");
         case OpKind::SUB:
-            return builder_->CreateSub(lhs, rhs, "sub");
-        case OpKind::GT:
-            return builder_->CreateICmpSGT(lhs, rhs, "gt");
-        case OpKind::EQ:
-            return builder_->CreateICmpEQ(lhs, rhs, "eq");
-        case OpKind::LE:
-            return builder_->CreateICmpSLE(lhs, rhs, "le");
-        case OpKind::LT:
-            return builder_->CreateICmpSLT(lhs, rhs, "lt");
+            return ty.is(TypeID::Int) ? builder_->CreateSub(lhs, rhs, "add")
+                : builder_->CreateFSub(lhs, rhs, "sub");
         default:
             Logging::error("emit unknown BinaryExpr {} {}\n", expr->loc(), expr->dump());
     }
     return nullptr;
 }
+
+llvm::Value* CodeGen::emit(BinaryCmp *cmp) {
+    if (!cmp || !cmp->is(Kind::BinaryCmp)) return nullptr;
+    llvm::Value *lhs = emit(cmp->lhs);
+    llvm::Value *rhs = emit(cmp->rhs);
+    if (!cmp->lhs) {
+        throw new CodeGenException(fmt::format("{} invalid Compare", cmp->loc()));
+    }
+    Ty ty = cmp->lhs->ty;
+    llvm::Type *lty = lltypeof(ty);
+    llvm::CmpInst::Predicate pre = detail::CmpInstrMappings[std::make_pair(cmp->op, ty.id)];
+    switch (ty.id) {
+        case TypeID::Int:
+            return builder_->CreateICmp(pre, lhs, rhs);
+        case TypeID::Float:
+            return builder_->CreateFCmp(pre, lhs, rhs);
+        default:
+            Logging::error("{} emit unknown BinaryCmp\n", cmp->loc());
+    }
+    return nullptr;
+}
+
 
 llvm::Value* CodeGen::emit(AstNodePtr n) {
     switch (n->kind) {
@@ -183,6 +225,8 @@ llvm::Value* CodeGen::emit(AstNodePtr n) {
             return emit(dynamic_cast<ReturnStmt*>(n.get()));
         case Kind::BinaryOperator:
             return emit(dynamic_cast<BinaryExpr*>(n.get()));
+        case Kind::BinaryCmp:
+            return emit(dynamic_cast<BinaryCmp*>(n.get()));
         case Kind::VarRef:
             return emit(dynamic_cast<Val*>(n.get()));
         case Kind::VarDecl:
@@ -232,7 +276,7 @@ llvm::Value* CodeGen::emit(Call *call) {
     if (!call) return nullptr;
     llvm::Function *F = mod_->getFunction(llvm::StringRef(call->nominal()));
     if (!F) {
-        throw new CodeGenException(fmt::format("Not found Function {} {}",
+        throw new CodeGenException(fmt::format("Not found function {} {}",
                     call->loc(), call->nominal()));
     }
     llvm::FunctionType *FT = F->getFunctionType();

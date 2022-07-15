@@ -172,7 +172,8 @@ compare_operator
 op
     : op_val binary_op op_val
     {
-        $$ = new BinaryExpr(Loc(@1.first_line, @1.first_column), Kind::BinaryOperator, TypeID::Nil, $2, $1, $3);
+        $$ = new BinaryExpr(Loc(@1.first_line, @1.first_column),
+            Kind::BinaryOperator, TypeID::Nil, $2, $1, $3);
     };
 
 op_val
@@ -240,8 +241,8 @@ if_stmt
 boolean_stmt
     : op_val compare_operator op_val
     {
-        $$ = new BinaryExpr(Loc(@1.first_line, @1.first_column),
-            Kind::BinaryOperator, TypeID::Bool, $2, $1, $3);
+        $$ = new BinaryCmp(Loc(@1.first_line, @1.first_column),
+            Kind::BinaryCmp, TypeID::Bool, $2, $1, $3);
     };
 
 

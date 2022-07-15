@@ -107,6 +107,29 @@ BinaryExpr::BinaryExpr(Loc loc, Kind nodeKind, Ty ty, std::string *opname, AstNo
     }
 }
 
+std::string BinaryCmp::dump() {
+    return fmt::format("binaryop@{}[{}{}]", ty.str(), tostr(lhs), tostr(rhs));
+}
+
+json BinaryCmp::tojson(json parent) {
+    json child;
+    child["lhs"] = node_tojson(lhs);
+    child["rhs"] = node_tojson(rhs);
+    child["node_kind"] = kind;
+    child["op_kind"] = op;
+    parent["BinaryCmp"] = child;
+    return parent;
+}
+
+BinaryCmp::BinaryCmp(Loc loc, Kind nodeKind, Ty ty, std::string *opname, AstNode *l, AstNode *r) :
+    AstNode(loc, nodeKind, ty), lhs(l), rhs(r), kind(nodeKind) {
+    op = OpKind::Invalid;
+    auto itr = detail::OperatorMappings.find(*opname);
+    if (itr != detail::OperatorMappings.end()) {
+        op = itr->second;
+    }
+}
+
 std::string FuncDecl::dump() {
     std::string str = name ? "FuncDecl@" + *name : "FuncDecl";
     for (auto itr: args()) str += itr->sexp();

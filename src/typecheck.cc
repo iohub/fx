@@ -24,6 +24,23 @@ TypeCheckResult TypeChecker::checkBinaryOp(AstNodePtr ptr) {
     return TypeOk;
 }
 
+TypeCheckResult TypeChecker::checkBinaryCmp(AstNodePtr ptr) {
+    BinaryCmp *op = dynamic_cast<BinaryCmp*>(ptr.get()); assert(op);
+    AstNodePtr lhs = op->lhs, rhs = op->rhs;
+    synthesize(lhs); synthesize(rhs);
+    if (!isSubtype(lhs, rhs)) {
+        return TypeCheckResult(fmt::format("{} incompatible type ({}) with ({})",
+                    op->loc(), lhs->TyStr(), rhs->TyStr()));
+    }
+    TypeCheckResult result;
+    if ((result = check(lhs)) != TypeOk) return result;
+    if ((result = check(rhs)) != TypeOk) return result;
+    if ((op->Type()).nil()) {
+        op->ty = lhs->ty;
+    }
+    return TypeOk;
+}
+
 TypeCheckResult TypeChecker::checkCall(AstNodePtr call) {
     Call *nn = dynamic_cast<Call*>(call.get()); assert(nn);
     AstNodePtr fndecl = env.lookup_func(nn->nominal());
@@ -95,6 +112,8 @@ TypeCheckResult TypeChecker::check(AstNodePtr any) {
             return TypeOk;
         case Kind::BinaryOperator:
             return checkBinaryOp(any);
+        case Kind::BinaryCmp:
+            return checkBinaryCmp(any);
         case Kind::If:
             return checkIf(any);
         case Kind::Assign:

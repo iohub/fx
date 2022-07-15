@@ -35,7 +35,7 @@ class AstNode : std::enable_shared_from_this<AstNode> {
 public:
     enum class Kind : uint8_t {
         Invalid, Nil, CallFunc, Constant,
-        FuncDecl, VarRef, VarDecl, Expr, BinaryOperator, UnaryOperator,
+        FuncDecl, VarRef, VarDecl, Expr, BinaryOperator, BinaryCmp, UnaryOperator,
         ReturnStmt, If, Assign, For, DeclList, Undefine
     };
     enum class OpKind: uint8_t {
@@ -134,9 +134,6 @@ struct BinaryExpr: public AstNode {
     Kind kind;
     OpKind op;
 
-    BinaryExpr(Loc loc, Kind nodeKind, OpKind opKind, AstNode *l, AstNode *r) :
-        lhs(l), rhs(r), op(opKind), AstNode(loc, nodeKind) {}
-
     BinaryExpr(Loc loc, Kind nodeKind, Ty ty, std::string *opname, AstNode *l, AstNode *r);
 
     virtual std::string dump();
@@ -144,6 +141,22 @@ struct BinaryExpr: public AstNode {
 
     ~BinaryExpr() {
         Logging::debug("~BinaryExpr({})\n", dump());
+    }
+};
+
+struct BinaryCmp: public AstNode {
+    AstNodePtr lhs;
+    AstNodePtr rhs;
+    Kind kind;
+    OpKind op;
+
+    BinaryCmp(Loc loc, Kind nodeKind, Ty ty, std::string *opname, AstNode *l, AstNode *r);
+
+    virtual std::string dump();
+    virtual json tojson(json parent);
+
+    ~BinaryCmp() {
+        Logging::debug("~BinaryCmp({})\n", dump());
     }
 };
 
