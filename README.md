@@ -50,21 +50,21 @@ entry:
   %x1 = alloca i32
   store i32 %x, i32* %x1
   %le = icmp sle i32 %x, 0
-  br i1 %le, label %then, label %else
+  br i1 %le, label %then, label %ifcont
 
 then:                                             ; preds = %entry
   ret i32 0
   br label %ifcont
 
-else:                                             ; preds = %entry
+ifcont:                                           ; preds = %then, %entry
   %eq = icmp eq i32 %x, 1
-  br i1 %eq, label %then2, label %else3
+  br i1 %eq, label %then2, label %ifcont3
 
-then2:                                            ; preds = %else
+then2:                                            ; preds = %ifcont
   ret i32 1
-  br label %ifcont
+  br label %ifcont3
 
-else3:                                            ; preds = %else
+ifcont3:                                          ; preds = %then2, %ifcont
   %sub = sub i32 %x, 1
   %0 = call i32 @fib(i32 %sub)
   %sub4 = sub i32 %x, 2
