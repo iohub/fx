@@ -11,7 +11,6 @@ entry:
 
 then:                                             ; preds = %entry
   ret i32 0
-  br label %ifcont
 
 ifcont:                                           ; preds = %then, %entry
   %2 = load i32, i32* %x1
@@ -20,7 +19,6 @@ ifcont:                                           ; preds = %then, %entry
 
 then2:                                            ; preds = %ifcont
   ret i32 1
-  br label %ifcont3
 
 ifcont3:                                          ; preds = %then2, %ifcont
   %4 = load i32, i32* %x1
@@ -36,14 +34,12 @@ ifcont3:                                          ; preds = %then2, %ifcont
 define i32 @main() {
 entry:
   %z = alloca i32
+  store i32 8, i32* %z
   %0 = load i32, i32* %z
-  store i32 8, i32 %0
-  %1 = load i32, i32* %z
-  %2 = call i32 @fib(i32 5)
-  %add = add i32 %1, %2
-  %3 = load i32, i32* %z
-  store i32 %add, i32 %3
-  %4 = load i32, i32* %z
-  %5 = call i32 @fib(i32 %4)
-  ret i32 %5
+  %1 = call i32 @fib(i32 5)
+  %add = add i32 %0, %1
+  store i32 %add, i32* %z
+  %2 = load i32, i32* %z
+  %3 = call i32 @fib(i32 %2)
+  ret i32 %3
 }

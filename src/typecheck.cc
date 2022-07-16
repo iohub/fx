@@ -105,6 +105,8 @@ TypeCheckResult TypeChecker::check(AstNodePtr any) {
             return checkFor(any);
         case Kind::VarRef:
             return checkVarRef(any);
+        case Kind::Value:
+            return checkVarRef(any);
         case Kind::Nil:
             return TypeOk;
         default:
@@ -222,7 +224,7 @@ Ty TypeChecker::synthesize(ReturnStmt *n) {
 
 Ty TypeChecker::synthesize(Val *n) {
     if (n->synthesized) return n->ty;
-    if (n->is(Kind::VarRef)) {
+    if (!n->is(Kind::Constant)) {
         AstNodePtr decl = env.lookup_var(n->nominal());
         n->ty =  decl ? decl->Type() : TypeID::UnResolved;
     }

@@ -42,6 +42,7 @@ std::string Val::dump() {
     switch (kind) {
         case Kind::Constant: str = "Constant"; break;
         case Kind::VarRef: str = "VarRef"; break;
+        case Kind::Value: str = "Value"; break;
         case Kind::VarDecl: str = "VarDecl"; break;
         default: str = "unknown";
     }
@@ -56,6 +57,7 @@ json Val::tojson(json parent) {
     switch (kind) {
         case Kind::Constant: str = "Constant"; break;
         case Kind::VarRef: str = "VarRef"; break;
+        case Kind::Value: str = "Value"; break;
         case Kind::VarDecl: str = "VarDecl"; break;
         default: str = "unknown";
     }

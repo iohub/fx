@@ -177,7 +177,7 @@ op
     };
 
 op_val
-      : IDENT { $$ = new Val(Loc(@1.first_line, @1.first_column), Kind::VarRef, $1); }
+      : IDENT { $$ = new Val(Loc(@1.first_line, @1.first_column), Kind::Value, $1); }
       | primitive_val { $$ = $1; }
       | func_call { $$ = $1; } ;
 

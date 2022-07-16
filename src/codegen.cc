@@ -160,9 +160,10 @@ llvm::Value* CodeGen::emit(Val *v) {
         case Kind::Constant:
             return emit_const_value(v);
         case Kind::VarRef:
-            if ((var = env_.lookup_var(v->nominal()))) {
-                return builder_->CreateLoad(var);
-            }
+            return env_.lookup_var(v->nominal());
+        case Kind::Value:
+            var = env_.lookup_var(v->nominal());
+            return builder_->CreateLoad(var);
         default:
             throw new CodeGenException(_f("{} emit unknown Val", v->loc()));
     }
@@ -230,6 +231,8 @@ llvm::Value* CodeGen::emit(AstNodePtr n) {
         case Kind::BinaryCmp:
             return emit_bincmp(dynamic_cast<BinaryExpr*>(n.get()));
         case Kind::VarRef:
+            return emit(dynamic_cast<Val*>(n.get()));
+        case Kind::Value:
             return emit(dynamic_cast<Val*>(n.get()));
         case Kind::VarDecl:
             return nullptr;

@@ -35,7 +35,7 @@ class AstNode : std::enable_shared_from_this<AstNode> {
 public:
     enum class Kind : uint8_t {
         Invalid, Nil, CallFunc, Constant,
-        FuncDecl, VarRef, VarDecl, Expr, BinaryOperator, BinaryCmp, UnaryOperator,
+        FuncDecl, VarRef, Value, VarDecl, Expr, BinaryOperator, BinaryCmp, UnaryOperator,
         ReturnStmt, If, Assign, For, DeclList, Undefine
     };
     enum class OpKind: uint8_t {
