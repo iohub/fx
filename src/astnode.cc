@@ -25,7 +25,7 @@ VisitorResult AstNode::visit() {
 }
 
 std::string AstNode::loc() const {
-    return fmt::format("line:{},column:{}",  loc_.lineno, loc_.colmnno);
+    return _f("line:{},column:{}",  loc_.lineno, loc_.colmnno);
 }
 
 json Decls::tojson(json parent) {
@@ -46,7 +46,7 @@ std::string Val::dump() {
         default: str = "unknown";
     }
     if (raw_data) {
-        str = fmt::format("{}@{}@{}", str, *raw_data, TyStr());
+        str = _f("{}@{}@{}", str, *raw_data, TyStr());
     }
     return str;
 }
@@ -73,7 +73,7 @@ VarDecl::~VarDecl() {
 }
 
 std::string VarDecl::dump() {
-    return fmt::format("VarDecl@{}@{}", *var_name, TyStr());
+    return _f("VarDecl@{}@{}", *var_name, TyStr());
 }
 
 json VarDecl::tojson(json parent) {
@@ -85,7 +85,7 @@ json VarDecl::tojson(json parent) {
 }
 
 std::string BinaryExpr::dump() {
-    return fmt::format("binaryop@{}[{}{}]", ty.str(), tostr(lhs), tostr(rhs));
+    return _f("binaryop@{}[{}{}]", ty.str(), tostr(lhs), tostr(rhs));
 }
 
 json BinaryExpr::tojson(json parent) {
@@ -107,34 +107,11 @@ BinaryExpr::BinaryExpr(Loc loc, Kind nodeKind, Ty ty, std::string *opname, AstNo
     }
 }
 
-std::string BinaryCmp::dump() {
-    return fmt::format("binaryop@{}[{}{}]", ty.str(), tostr(lhs), tostr(rhs));
-}
-
-json BinaryCmp::tojson(json parent) {
-    json child;
-    child["lhs"] = node_tojson(lhs);
-    child["rhs"] = node_tojson(rhs);
-    child["node_kind"] = kind;
-    child["op_kind"] = op;
-    parent["BinaryCmp"] = child;
-    return parent;
-}
-
-BinaryCmp::BinaryCmp(Loc loc, Kind nodeKind, Ty ty, std::string *opname, AstNode *l, AstNode *r) :
-    AstNode(loc, nodeKind, ty), lhs(l), rhs(r), kind(nodeKind) {
-    op = OpKind::Invalid;
-    auto itr = detail::OperatorMappings.find(*opname);
-    if (itr != detail::OperatorMappings.end()) {
-        op = itr->second;
-    }
-}
-
 std::string FuncDecl::dump() {
     std::string str = name ? "FuncDecl@" + *name : "FuncDecl";
     for (auto itr: args()) str += itr->sexp();
     for (auto itr: body()) str +=  itr->sexp();
-    return fmt::format("({})", str);
+    return _f("({})", str);
 }
 
 json FuncDecl::tojson(json parent) {
@@ -154,7 +131,7 @@ FuncDecl::~FuncDecl() {
 }
 
 std::string Call::dump() {
-    std::string str = fmt::format("Call:{}@{}", nominal(), TyStr());
+    std::string str = _f("Call:{}@{}", nominal(), TyStr());
     for (auto itr: args()) str += itr->sexp();
     return str;
 }
@@ -180,7 +157,7 @@ std::string Decls::dump() {
 
 std::string ReturnStmt::dump() {
     if (stmt) {
-        return fmt::format("ReturnStmt {}", stmt->sexp());
+        return _f("ReturnStmt {}", stmt->sexp());
     }
     return "ReturnStmt";
 }
@@ -200,7 +177,7 @@ ReturnStmt::~ReturnStmt() {
 std::string ForStmt::dump() {
     std::string str;
     if (body) for (auto n: *body) str += n->sexp();
-    return fmt::format("ForStmt<{}{}{}>[{}]",
+    return _f("ForStmt<{}{}{}>[{}]",
             tostr(init_stmt), tostr(cond_stmt), tostr(next_stmt), str);
 }
 
@@ -224,7 +201,7 @@ std::string IfStmt::dump() {
     if (then_) for (auto n: *then_) then_str += n->sexp();
     if (else_) for (auto n: *else_) else_str += n->sexp();
 
-    return fmt::format("IfStmt<{}>,then[{}],else[{}]",
+    return _f("IfStmt<{}>,then[{}],else[{}]",
             tostr(cond_), then_str, else_str);
 }
 
@@ -262,7 +239,7 @@ AssignStmt::~AssignStmt() {
 }
 
 std::string AssignStmt::dump() {
-    return fmt::format("AssignStmt<{},{}>", tostr(var_), tostr(val_));
+    return _f("AssignStmt<{},{}>", tostr(var_), tostr(val_));
 }
 
 json AssignStmt::tojson(json parent) {

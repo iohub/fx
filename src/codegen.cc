@@ -83,7 +83,7 @@ llvm::Value* CodeGen::emit(AssignStmt *assign) {
     llvm::Value* valV = emit(assign->val_);
     llvm::Value* varV = env_.lookup_var(assign->var_->nominal());
     if (!varV) {
-        throw new CodeGenException(fmt::format("{} not found variable", assign->loc()));
+        throw new CodeGenException(_f("{} not found variable", assign->loc()));
     }
     builder_->CreateStore(valV, varV);
     return valV;
@@ -104,7 +104,7 @@ llvm::Value* CodeGen::emit(Stmts *stmts) {
 llvm::Value* CodeGen::emit(IfStmt *If) {
     llvm::Value* cond = emit(If->cond_);
     if (!cond) {
-        throw new CodeGenException(fmt::format("{} null conditional", If->loc()));
+        throw new CodeGenException(_f("{} null conditional", If->loc()));
     }
     llvm::Function *pF = builder_->GetInsertBlock()->getParent();
     llvm::BasicBlock *then = llvm::BasicBlock::Create(*ctx_, "then", pF);
@@ -167,12 +167,12 @@ llvm::Value* CodeGen::emit(Val *v) {
     return retval;
 }
 
-llvm::Value* CodeGen::emit(BinaryExpr *expr) {
+llvm::Value* CodeGen::emit_binexpr(BinaryExpr *expr) {
     if (!expr || !expr->is(Kind::BinaryOperator)) return nullptr;
     llvm::Value *lhs = emit(expr->lhs);
     llvm::Value *rhs = emit(expr->rhs);
     if (!expr->lhs) {
-        throw new CodeGenException(fmt::format("{} invalid BinaryExpr", expr->loc()));
+        throw new CodeGenException(_f("{} invalid BinaryExpr", expr->loc()));
     }
     Ty ty = expr->lhs->ty;
     llvm::Type *lty = lltypeof(ty);
@@ -189,12 +189,12 @@ llvm::Value* CodeGen::emit(BinaryExpr *expr) {
     return nullptr;
 }
 
-llvm::Value* CodeGen::emit(BinaryCmp *cmp) {
+llvm::Value* CodeGen::emit_bincmp(BinaryExpr *cmp) {
     if (!cmp || !cmp->is(Kind::BinaryCmp)) return nullptr;
     llvm::Value *lhs = emit(cmp->lhs);
     llvm::Value *rhs = emit(cmp->rhs);
     if (!cmp->lhs) {
-        throw new CodeGenException(fmt::format("{} invalid Compare", cmp->loc()));
+        throw new CodeGenException(_f("{} invalid Compare", cmp->loc()));
     }
     Ty ty = cmp->lhs->ty;
     llvm::Type *lty = lltypeof(ty);
@@ -224,9 +224,9 @@ llvm::Value* CodeGen::emit(AstNodePtr n) {
         case Kind::ReturnStmt:
             return emit(dynamic_cast<ReturnStmt*>(n.get()));
         case Kind::BinaryOperator:
-            return emit(dynamic_cast<BinaryExpr*>(n.get()));
+            return emit_binexpr(dynamic_cast<BinaryExpr*>(n.get()));
         case Kind::BinaryCmp:
-            return emit(dynamic_cast<BinaryCmp*>(n.get()));
+            return emit_bincmp(dynamic_cast<BinaryExpr*>(n.get()));
         case Kind::VarRef:
             return emit(dynamic_cast<Val*>(n.get()));
         case Kind::VarDecl:
@@ -276,7 +276,7 @@ llvm::Value* CodeGen::emit(Call *call) {
     if (!call) return nullptr;
     llvm::Function *F = mod_->getFunction(llvm::StringRef(call->nominal()));
     if (!F) {
-        throw new CodeGenException(fmt::format("Not found function {} {}",
+        throw new CodeGenException(_f("Not found function {} {}",
                     call->loc(), call->nominal()));
     }
     llvm::FunctionType *FT = F->getFunctionType();
@@ -286,7 +286,7 @@ llvm::Value* CodeGen::emit(Call *call) {
         AstNodePtr arg = argList[i];
         llvm::Value *val = emit(arg);
         if (val == nullptr) {
-            throw new CodeGenException(fmt::format("Not found arg {} {} {}",
+            throw new CodeGenException(_f("Not found arg {} {} {}",
                         arg->loc(), arg->nominal(), int(arg->kind)));
         }
         llvm::Type *ty = FT->getParamType(i);

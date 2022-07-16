@@ -25,12 +25,12 @@ Logging::Level Logging::level;
 void compile(const std::string &fname) {
     FILE *fobj = fopen(fname.c_str(), "r");
     if (!fobj) {
-        throw new ParseException(fmt::format("open {} err", fname));
+        throw new ParseException(_f("open {} err", fname));
     }
     yyin = fobj;
     do { yyparse(); } while (!feof(yyin));
     if (!Program) {
-        throw new ParseException(fmt::format("parse {} err", fname));
+        throw new ParseException(_f("parse {} err", fname));
     }
     AstNodePtr wrap(Program);
     TypeChecker checker;

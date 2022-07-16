@@ -16,6 +16,7 @@ public:
 
 using ParseException = FxException;
 using CodeGenException = FxException;
+using TypeCheckException = FxException;
 
 
 

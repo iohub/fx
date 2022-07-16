@@ -7,6 +7,12 @@
 
 namespace fx {
 
+// format alias
+template <typename... T>
+std::string _f(fmt::format_string<T...> fmt, T&&... args) {
+    return fmt::format(fmt, args...);
+}
+
 class Defer {
 public:
     Defer(std::function<void()> &&init, std::function<void()> &&finish) :

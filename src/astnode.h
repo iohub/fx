@@ -49,7 +49,7 @@ public:
     AstNode(Loc loc): loc_(loc), kind(Kind::Invalid) {}
 
     bool is(Kind k) const { return kind == k; }
-    std::string sexp() { return  fmt::format("({})", dump()); }
+    std::string sexp() { return  _f("({})", dump()); }
     std::string loc() const;
     VisitorResult visit();
     void set_visitor(Visitor *v) { visitor = v; }
@@ -141,22 +141,6 @@ struct BinaryExpr: public AstNode {
 
     ~BinaryExpr() {
         Logging::debug("~BinaryExpr({})\n", dump());
-    }
-};
-
-struct BinaryCmp: public AstNode {
-    AstNodePtr lhs;
-    AstNodePtr rhs;
-    Kind kind;
-    OpKind op;
-
-    BinaryCmp(Loc loc, Kind nodeKind, Ty ty, std::string *opname, AstNode *l, AstNode *r);
-
-    virtual std::string dump();
-    virtual json tojson(json parent);
-
-    ~BinaryCmp() {
-        Logging::debug("~BinaryCmp({})\n", dump());
     }
 };
 

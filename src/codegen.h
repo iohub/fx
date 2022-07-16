@@ -33,13 +33,14 @@ private:
     llvm::Function *emit_func_prototype(FuncDecl *fn);
     llvm::AllocaInst* emit_block_alloca(llvm::BasicBlock &block, AstNodePtr var);
     llvm::Value *emit_const_value(Val *v);
+    llvm::Value* emit_bincmp(BinaryExpr *BinExpr);
+    llvm::Value* emit_binexpr(BinaryExpr *BinExpr);
     llvm::Type* lltypeof(Ty ty);
 
     llvm::Value* emit(FuncDecl *fn);
     llvm::Value* emit(Decls *decls);
     llvm::Value* emit(IfStmt *If);
     llvm::Value* emit(BinaryExpr *BinExpr);
-    llvm::Value* emit(BinaryCmp *cmp);
     llvm::Value* emit(Val *v);
     llvm::Value* emit(Stmts *stmts);
     llvm::Value* emit(Call *call);

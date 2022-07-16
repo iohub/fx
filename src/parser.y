@@ -241,7 +241,7 @@ if_stmt
 boolean_stmt
     : op_val compare_operator op_val
     {
-        $$ = new BinaryCmp(Loc(@1.first_line, @1.first_column),
+        $$ = new BinaryExpr(Loc(@1.first_line, @1.first_column),
             Kind::BinaryCmp, TypeID::Bool, $2, $1, $3);
     };
 

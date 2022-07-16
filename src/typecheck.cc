@@ -12,24 +12,7 @@ TypeCheckResult TypeChecker::checkBinaryOp(AstNodePtr ptr) {
     AstNodePtr lhs = op->lhs, rhs = op->rhs;
     synthesize(lhs); synthesize(rhs);
     if (!isSubtype(lhs, rhs)) {
-        return TypeCheckResult(fmt::format("{} incompatible type ({}) with ({})",
-                    op->loc(), lhs->TyStr(), rhs->TyStr()));
-    }
-    TypeCheckResult result;
-    if ((result = check(lhs)) != TypeOk) return result;
-    if ((result = check(rhs)) != TypeOk) return result;
-    if ((op->Type()).nil()) {
-        op->ty = lhs->ty;
-    }
-    return TypeOk;
-}
-
-TypeCheckResult TypeChecker::checkBinaryCmp(AstNodePtr ptr) {
-    BinaryCmp *op = dynamic_cast<BinaryCmp*>(ptr.get()); assert(op);
-    AstNodePtr lhs = op->lhs, rhs = op->rhs;
-    synthesize(lhs); synthesize(rhs);
-    if (!isSubtype(lhs, rhs)) {
-        return TypeCheckResult(fmt::format("{} incompatible type ({}) with ({})",
+        return TypeCheckResult(_f("{} incompatible type ({}) with ({})",
                     op->loc(), lhs->TyStr(), rhs->TyStr()));
     }
     TypeCheckResult result;
@@ -45,19 +28,19 @@ TypeCheckResult TypeChecker::checkCall(AstNodePtr call) {
     Call *nn = dynamic_cast<Call*>(call.get()); assert(nn);
     AstNodePtr fndecl = env.lookup_func(nn->nominal());
     if (!fndecl) {
-        return TypeCheckResult(fmt::format("{} Undefine Call:{}", call->loc(), call->nominal()));
+        return TypeCheckResult(_f("{} Undefine Call:{}", call->loc(), call->nominal()));
     }
     FuncDecl *fn = dynamic_cast<FuncDecl*>(fndecl.get());
     auto sArgs = fn->args(), dArgs = nn->args();
     if (sArgs.size() != dArgs.size()) {
-        return TypeCheckResult(fmt::format("{} Call {} incompatible params", nn->loc(), nn->nominal()));
+        return TypeCheckResult(_f("{} Call {} incompatible params", nn->loc(), nn->nominal()));
     }
     for (size_t idx = 0; idx < sArgs.size(); idx++) {
         auto sArg = sArgs[idx], dArg = dArgs[idx];
         TypeCheckResult result = check(dArg);
         if (result != TypeOk) return result;
         if (sArg->Type() != dArg->Type()) {
-            return TypeCheckResult(fmt::format("{} Call {} incompatible type ({}) ({})",
+            return TypeCheckResult(_f("{} Call {} incompatible type ({}) ({})",
                         nn->loc(), nn->nominal(), sArg->TyStr(), dArg->TyStr()));
         }
     }
@@ -75,7 +58,7 @@ TypeCheckResult TypeChecker::checkFor(AstNodePtr For) {
 
     if (nn->cond_stmt && nn->cond_stmt->ty != TypeID::Bool &&
             !(nn->cond_stmt->is(Kind::Nil))) {
-        return TypeCheckResult(fmt::format("{} incompatible conditional type:{} bool",
+        return TypeCheckResult(_f("{} incompatible conditional type:{} bool",
                     nn->loc(), nn->cond_stmt->TyStr()));
     }
     if (nn->body) {
@@ -113,7 +96,7 @@ TypeCheckResult TypeChecker::check(AstNodePtr any) {
         case Kind::BinaryOperator:
             return checkBinaryOp(any);
         case Kind::BinaryCmp:
-            return checkBinaryCmp(any);
+            return checkBinaryOp(any);
         case Kind::If:
             return checkIf(any);
         case Kind::Assign:
@@ -125,7 +108,7 @@ TypeCheckResult TypeChecker::check(AstNodePtr any) {
         case Kind::Nil:
             return TypeOk;
         default:
-            return TypeCheckResult(fmt::format("{} check Unknown kind:{},{}",
+            return TypeCheckResult(_f("{} check Unknown kind:{},{}",
                         any->loc(), uint16_t(any->kind), any->dump()));
     }
     return TypeOk;
@@ -157,20 +140,20 @@ TypeCheckResult TypeChecker::checkAssign(AstNodePtr assign) {
     AssignStmt* nn = dynamic_cast<AssignStmt*>(assign.get()); assert(nn);
     Ty varty, valty;
     if ((varty = synthesize(nn->var_)).unresolved()) {
-        return TypeCheckResult(fmt::format("{} variable unresolved type", nn->var_->loc()));
+        return TypeCheckResult(_f("{} variable unresolved type", nn->var_->loc()));
     }
     if ((valty = synthesize(nn->val_)).unresolved()) {
-        return TypeCheckResult(fmt::format("{} value unresolved type", nn->val_->loc()));
+        return TypeCheckResult(_f("{} value unresolved type", nn->val_->loc()));
     }
     if (!(nn->var_)->is(Kind::VarRef)) {
-        return TypeCheckResult(fmt::format("{} only allow assign to variable", nn->var_->loc()));
+        return TypeCheckResult(_f("{} only allow assign to variable", nn->var_->loc()));
     }
     TypeCheckResult result;
     if ((result = check(nn->val_)) != TypeOk) {
         return result;
     }
     if (nn->var_->Type() != nn->val_->Type()) {
-        return TypeCheckResult(fmt::format("{} cann't assign {} with {}",
+        return TypeCheckResult(_f("{} cann't assign {} with {}",
                     nn->var_->loc(), nn->var_->TyStr(), nn->val_->TyStr()));
     }
     return TypeOk;
@@ -214,7 +197,7 @@ TypeCheckResult TypeChecker::checkFuncDecl(AstNodePtr n) {
                 synthesize(n); foundReturn = true;
                 if ((result = checkReturn(n)) != TypeOk) return result;
                 if (fn->Type() != n->Type())
-                    return TypeCheckResult(fmt::format("{} incompatible type", n->loc()));
+                    return TypeCheckResult(_f("{} incompatible type", n->loc()));
                 break;
             case Kind::VarDecl:
                  env.put_var(n->nominal(), n); break;
