@@ -9,7 +9,7 @@ namespace fx {
 
 // format alias
 template <typename... T>
-std::string _f(fmt::format_string<T...> fmt, T&&... args) {
+inline std::string _f(fmt::format_string<T...> fmt, T&&... args) {
     return fmt::format(fmt, args...);
 }
 

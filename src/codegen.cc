@@ -62,7 +62,7 @@ llvm::Value* CodeGen::emit(FuncDecl *fn) {
     for (auto &arg : Fn->args()) {
         llvm::AllocaInst *inst = emit_block_alloca(Fn->getEntryBlock(), FArgs[idx++]);
         builder_->CreateStore(&arg, inst);
-        env_.put_var(std::string(arg.getName()), &arg);
+        env_.put_var(std::string(arg.getName()), inst);
     }
     for (auto &b : fn->body()) {
         if (b->is(Kind::VarDecl)) {
@@ -81,7 +81,7 @@ llvm::AllocaInst* CodeGen::emit_block_alloca(llvm::BasicBlock &block, AstNodePtr
 
 llvm::Value* CodeGen::emit(AssignStmt *assign) {
     llvm::Value* valV = emit(assign->val_);
-    llvm::Value* varV = env_.lookup_var(assign->var_->nominal());
+    llvm::Value* varV = emit(assign->var_);
     if (!varV) {
         throw new CodeGenException(_f("{} not found variable", assign->loc()));
     }
@@ -155,16 +155,18 @@ llvm::Value* CodeGen::emit_const_value(Val *v) {
 
 llvm::Value* CodeGen::emit(Val *v) {
     if (!v) return nullptr;
-    llvm::Value *retval = nullptr;
+    llvm::Value *var;
     switch (v->kind) {
         case Kind::Constant:
             return emit_const_value(v);
         case Kind::VarRef:
-            return env_.lookup_var(v->nominal());
+            if ((var = env_.lookup_var(v->nominal()))) {
+                return builder_->CreateLoad(var);
+            }
         default:
-            retval = nullptr;
+            throw new CodeGenException(_f("{} emit unknown Val", v->loc()));
     }
-    return retval;
+    return nullptr;
 }
 
 llvm::Value* CodeGen::emit_binexpr(BinaryExpr *expr) {

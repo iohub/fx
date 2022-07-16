@@ -25,7 +25,7 @@ def fib(int x) int {
 
 def else1(float x) float {
   if (x > 10.0) { x = x + 1.0 }
-  else { x = x + 2 }
+  else { x = x + 2.0 }
 
   return x
 }
