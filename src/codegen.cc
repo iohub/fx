@@ -122,12 +122,14 @@ llvm::Value* CodeGen::emit(IfStmt *If) {
     builder_->CreateCondBr(cond, _then, _else);
     builder_->SetInsertPoint(_then);
     emit(If->then_);
-    llvm::BranchInst::Create(_end, builder_->GetInsertBlock());
+    llvm::BasicBlock *_goend = insert_block_after(pF, _then, "_goend");
+    llvm::BranchInst::Create(_end, _goend);
 
     if (If->else_) {
         builder_->SetInsertPoint(_else);
         emit(If->else_);
-        llvm::BranchInst::Create(_end, builder_->GetInsertBlock());
+        _goend = insert_block_after(pF, _else, "_goend");
+        llvm::BranchInst::Create(_end, _goend);
     }
     builder_->SetInsertPoint(_end);
     return nullptr;
