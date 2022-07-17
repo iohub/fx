@@ -7,20 +7,22 @@ entry:
   store i32 %x, i32* %x1
   %0 = load i32, i32* %x1
   %1 = icmp sle i32 %0, 0
-  br i1 %1, label %then, label %ifcont
+  br i1 %1, label %_then, label %_end
 
-then:                                             ; preds = %entry
+_then:                                            ; preds = %entry
   ret i32 0
+  br label %_end
 
-ifcont:                                           ; preds = %then, %entry
+_end:                                             ; preds = %_then, %entry
   %2 = load i32, i32* %x1
   %3 = icmp eq i32 %2, 1
-  br i1 %3, label %then2, label %ifcont3
+  br i1 %3, label %_then2, label %_end3
 
-then2:                                            ; preds = %ifcont
+_then2:                                           ; preds = %_end
   ret i32 1
+  br label %_end3
 
-ifcont3:                                          ; preds = %then2, %ifcont
+_end3:                                            ; preds = %_then2, %_end
   %4 = load i32, i32* %x1
   %add = sub i32 %4, 1
   %5 = call i32 @fib(i32 %add)

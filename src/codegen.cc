@@ -101,33 +101,35 @@ llvm::Value* CodeGen::emit(Stmts *stmts) {
     return retval;
 }
 
+llvm::BasicBlock* CodeGen::insert_block_after(llvm::Function* function,
+        llvm::BasicBlock *predecessor, const llvm::Twine &name) {
+    auto bb = llvm::BasicBlock::Create(*ctx_, name,  function);
+    bb->moveAfter(predecessor);
+    return bb;
+}
+
 llvm::Value* CodeGen::emit(IfStmt *If) {
     llvm::Value* cond = emit(If->cond_);
-    if (!cond) {
-        throw new CodeGenException(_f("{} null conditional", If->loc()));
-    }
+    if (!cond) throw new CodeGenException(_f("{} null conditional", If->loc()));
+
     llvm::Function *pF = builder_->GetInsertBlock()->getParent();
-    llvm::BasicBlock *then = llvm::BasicBlock::Create(*ctx_, "then", pF);
-    llvm::BasicBlock *else_ = llvm::BasicBlock::Create(*ctx_, "else");
-    llvm::BasicBlock *merge = llvm::BasicBlock::Create(*ctx_, "ifcont");
-    else_ = If->else_ ? else_ : merge;
-    builder_->CreateCondBr(cond, then, else_);
-    // then
-    builder_->SetInsertPoint(then);
+    llvm::BasicBlock* _then = insert_block_after(pF, builder_->GetInsertBlock(), "_then");
+    llvm::BasicBlock* _else = If->else_ ? insert_block_after(pF, _then, "_else") : nullptr;
+    llvm::BasicBlock *predecessor = _else ? _else : _then;
+    llvm::BasicBlock* _end = insert_block_after(pF, predecessor, "_end");
+    if (!_else) _else = _end;
+
+    builder_->CreateCondBr(cond, _then, _else);
+    builder_->SetInsertPoint(_then);
     emit(If->then_);
-    // goto ifcont
-    builder_->CreateBr(merge);
+    llvm::BranchInst::Create(_end, builder_->GetInsertBlock());
+
     if (If->else_) {
-        // else
-        pF->getBasicBlockList().push_back(else_);
-        builder_->SetInsertPoint(else_);
+        builder_->SetInsertPoint(_else);
         emit(If->else_);
-        // goto ifcont
-        builder_->CreateBr(merge);
+        llvm::BranchInst::Create(_end, builder_->GetInsertBlock());
     }
-    // ifcont
-    pF->getBasicBlockList().push_back(merge);
-    builder_->SetInsertPoint(merge);
+    builder_->SetInsertPoint(_end);
     return nullptr;
 }
 
