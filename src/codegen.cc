@@ -64,6 +64,9 @@ llvm::Value* CodeGen::emit(FuncDecl *fn) {
         builder_->CreateStore(&arg, inst);
         env_.put_var(std::string(arg.getName()), inst);
     }
+    // alloc retval
+    llvm::Value* retval = builder_->CreateAlloca(lltypeof(fn->Type()), 0, "retval");
+    env_.put_var("retval", retval);
     for (auto &b : fn->body()) {
         if (b->is(Kind::VarDecl)) {
             llvm::AllocaInst *inst = emit_block_alloca(Fn->getEntryBlock(), b);
@@ -71,6 +74,7 @@ llvm::Value* CodeGen::emit(FuncDecl *fn) {
         }
     }
     emit(fn->body_);
+    builder_->CreateRet(builder_->CreateLoad(retval));
     return nullptr;
 }
 
@@ -91,14 +95,14 @@ llvm::Value* CodeGen::emit(AssignStmt *assign) {
 
 llvm::Value* CodeGen::emit(Stmts *stmts) {
     if (!stmts) return nullptr;
-    llvm::Value* retval = nullptr, *tmp;
     for (AstNodePtr p: *stmts) {
-        tmp = emit(p);
-        if (p->is(Kind::ReturnStmt)) {
-            retval = tmp;
-        }
+        emit(p);
     }
-    return retval;
+    return nullptr;
+}
+
+llvm::BasicBlock* CodeGen::currentbb() {
+    return builder_->GetInsertBlock();
 }
 
 llvm::BasicBlock* CodeGen::insert_block_after(llvm::Function* function,
@@ -113,7 +117,7 @@ llvm::Value* CodeGen::emit(IfStmt *If) {
     if (!cond) throw new CodeGenException(_f("{} null conditional", If->loc()));
 
     llvm::Function *pF = builder_->GetInsertBlock()->getParent();
-    llvm::BasicBlock* _then = insert_block_after(pF, builder_->GetInsertBlock(), "_then");
+    llvm::BasicBlock* _then = insert_block_after(pF, currentbb(), "_then");
     llvm::BasicBlock* _else = If->else_ ? insert_block_after(pF, _then, "_else") : nullptr;
     llvm::BasicBlock *predecessor = _else ? _else : _then;
     llvm::BasicBlock* _end = insert_block_after(pF, predecessor, "_end");
@@ -122,23 +126,27 @@ llvm::Value* CodeGen::emit(IfStmt *If) {
     builder_->CreateCondBr(cond, _then, _else);
     builder_->SetInsertPoint(_then);
     emit(If->then_);
-    llvm::BasicBlock *_goend = insert_block_after(pF, _then, "_goend");
-    llvm::BranchInst::Create(_end, _goend);
+    llvm::BranchInst::Create(_end, currentbb());
 
     if (If->else_) {
         builder_->SetInsertPoint(_else);
         emit(If->else_);
-        _goend = insert_block_after(pF, _else, "_goend");
-        llvm::BranchInst::Create(_end, _goend);
+        llvm::BranchInst::Create(_end, currentbb());
     }
     builder_->SetInsertPoint(_end);
     return nullptr;
 }
 
 llvm::Value* CodeGen::emit(ReturnStmt *Return) {
-    llvm::Value* retval = emit(Return->stmt);
-    builder_->CreateRet(retval);
-    return retval;
+    llvm::Function *pF = builder_->GetInsertBlock()->getParent();
+    llvm::Value* val = emit(Return->stmt);
+    // store retval
+    if (pF->getType()->getTypeID() != llvm::Type::TypeID::VectorTyID) {
+        llvm::Value* retval = env_.lookup_var("retval");
+        builder_->CreateStore(val, retval);
+    }
+    // builder_->CreateRet(val);
+    return val;
 }
 
 llvm::Value* CodeGen::emit_const_value(Val *v) {

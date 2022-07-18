@@ -30,6 +30,7 @@ public:
     void dump(const std::string &fname) const;
 
 private:
+    llvm::BasicBlock* currentbb();
     llvm::BasicBlock* insert_block_after(llvm::Function *function,
             llvm::BasicBlock *predecessor, const llvm::Twine &name);
     llvm::Function *emit_func_prototype(FuncDecl *fn);
