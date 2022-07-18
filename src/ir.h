@@ -3,11 +3,14 @@
 
 #include <llvm/IR/Function.h>
 #include <memory>
+#include "util.h"
 
 namespace fx {
 
 struct HIR {
-    ~HIR() {};
+    virtual ~HIR() {
+        Logging::debug("~HIR()\n");
+    };
 };
 
 typedef std::shared_ptr<HIR> HIRPtr;
@@ -21,6 +24,9 @@ struct FunctionIR : HIR {
     llvm::BasicBlock *retblock = nullptr;
     llvm::BasicBlock *terminator = nullptr;
     llvm::Value *retvar = nullptr;
+    ~FunctionIR() {
+        Logging::debug("~FunctionIR()\n");
+    };
 };
 
 

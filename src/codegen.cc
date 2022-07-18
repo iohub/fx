@@ -56,7 +56,7 @@ llvm::Value* CodeGen::emit(FuncDecl *fn) {
     }
     Defer defer([&]() { env_.enter(); }, [&]() { env_.leave(); });
     FunctionIR ir(Fn, llvm::BasicBlock::Create(*ctx_, "_ret", Fn));
-    ir.retvar = builder_->CreateAlloca(lltypeof(fn->Type()), 0, "retvar");
+    ir.retvar = builder_->CreateAlloca(lltypeof(fn->Type()), 0, fn->nominal() + "_retvar");
     env_.put_func(fn->nominal(), &ir);
 
     auto FArgs = fn->args();
@@ -78,7 +78,6 @@ llvm::Value* CodeGen::emit(FuncDecl *fn) {
         builder_->SetInsertPoint(ir.retblock);
         builder_->CreateRet(builder_->CreateLoad(ir.retvar));
     }
-
     return nullptr;
 }
 
@@ -130,12 +129,12 @@ llvm::Value* CodeGen::emit(IfStmt *If) {
     builder_->CreateCondBr(cond, _then, _else);
     builder_->SetInsertPoint(_then);
     emit(If->then_);
-    llvm::BranchInst::Create(_end, currentbb());
+    if (!currentbb()->getTerminator()) llvm::BranchInst::Create(_end, currentbb());
 
     if (If->else_) {
         builder_->SetInsertPoint(_else);
         emit(If->else_);
-        llvm::BranchInst::Create(_end, currentbb());
+        if (!currentbb()->getTerminator()) llvm::BranchInst::Create(_end, currentbb());
     }
     builder_->SetInsertPoint(_end);
     return nullptr;
@@ -151,7 +150,6 @@ llvm::Value* CodeGen::emit(ReturnStmt *Return) {
         builder_->CreateBr(ir->retblock);
         ir->terminator = currentbb();
     }
-    // builder_->CreateRet(val);
     return val;
 }
 
