@@ -39,7 +39,7 @@
 %token <str> NEQOP GTOP GEOP LTOP LEOP EQOP ADDOP MINUSOP MULOP DIVOP
 %token <str> FN
 
-%type <str> var_type primitive_type INT FLOAT STR compare_operator binary_op
+%type <str> var_type primitive_type INT FLOAT STR VOID compare_operator binary_op
 %type <decls> program decls
 %type <exprs> stmts stmts_block
 %type <node> var_decl expr op unary_expr func_call expr_stmt assignment_expr

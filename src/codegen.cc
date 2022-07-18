@@ -55,6 +55,9 @@ llvm::Value* CodeGen::emit(FuncDecl *fn) {
         Fn->eraseFromParent(); return nullptr;
     }
     Defer defer([&]() { env_.enter(); }, [&]() { env_.leave(); });
+    FunctionIR ir(Fn, llvm::BasicBlock::Create(*ctx_, "_ret", Fn));
+    ir.retvar = builder_->CreateAlloca(lltypeof(fn->Type()), 0, "retvar");
+    env_.put_func(fn->nominal(), &ir);
 
     auto FArgs = fn->args();
     size_t idx = 0;
@@ -64,9 +67,6 @@ llvm::Value* CodeGen::emit(FuncDecl *fn) {
         builder_->CreateStore(&arg, inst);
         env_.put_var(std::string(arg.getName()), inst);
     }
-    // alloc retval
-    llvm::Value* retval = builder_->CreateAlloca(lltypeof(fn->Type()), 0, "retval");
-    env_.put_var("retval", retval);
     for (auto &b : fn->body()) {
         if (b->is(Kind::VarDecl)) {
             llvm::AllocaInst *inst = emit_block_alloca(Fn->getEntryBlock(), b);
@@ -74,7 +74,11 @@ llvm::Value* CodeGen::emit(FuncDecl *fn) {
         }
     }
     emit(fn->body_);
-    builder_->CreateRet(builder_->CreateLoad(retval));
+    if (ir.terminator) {
+        builder_->SetInsertPoint(ir.retblock);
+        builder_->CreateRet(builder_->CreateLoad(ir.retvar));
+    }
+
     return nullptr;
 }
 
@@ -141,9 +145,11 @@ llvm::Value* CodeGen::emit(ReturnStmt *Return) {
     llvm::Function *pF = builder_->GetInsertBlock()->getParent();
     llvm::Value* val = emit(Return->stmt);
     // store retval
-    if (pF->getType()->getTypeID() != llvm::Type::TypeID::VectorTyID) {
-        llvm::Value* retval = env_.lookup_var("retval");
-        builder_->CreateStore(val, retval);
+    if (!pF->getReturnType()->isVoidTy()) {
+        FunctionIR *ir = env_.lookup_func(std::string(pF->getName()));
+        builder_->CreateStore(val, ir->retvar);
+        builder_->CreateBr(ir->retblock);
+        ir->terminator = currentbb();
     }
     // builder_->CreateRet(val);
     return val;
@@ -265,8 +271,8 @@ llvm::Value* CodeGen::emit(AstNodePtr n) {
 llvm::Value* CodeGen::emit(ForStmt *For) {
     llvm::Value *cond = emit(For->cond_stmt);
     llvm::Function *pF = builder_->GetInsertBlock()->getParent();
-    llvm::BasicBlock *loopB = llvm::BasicBlock::Create(*ctx_, "loop");
-    llvm::BasicBlock *endB = llvm::BasicBlock::Create(*ctx_, "loop_end");
+    llvm::BasicBlock *loopB = llvm::BasicBlock::Create(*ctx_, "_loop");
+    llvm::BasicBlock *endB = llvm::BasicBlock::Create(*ctx_, "_loop_end");
     builder_->CreateCondBr(cond, loopB, endB);
     pF->getBasicBlockList().push_back(loopB);
     builder_->SetInsertPoint(loopB);

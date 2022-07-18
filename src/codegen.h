@@ -16,6 +16,7 @@
 
 #include "astnode.h"
 #include "env.h"
+#include "ir.h"
 
 
 namespace fx {
@@ -55,7 +56,7 @@ private:
     std::unique_ptr<llvm::LLVMContext> ctx_;
     std::unique_ptr<llvm::Module> mod_;
     std::unique_ptr<llvm::IRBuilder<> > builder_;
-    Env<llvm::Value*, llvm::Function*> env_;
+    Env<llvm::Value*, FunctionIR*> env_;
 };
 
 
