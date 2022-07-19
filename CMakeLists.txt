@@ -25,9 +25,9 @@ ExternalProject_Add(llvm_built
 set(LLVM_INSTALL_DIR ${CMAKE_SOURCE_DIR}/llvm_built/src/llvm_built)
 find_package(LLVM 9.0.0 CONFIG PATHS "${LLVM_INSTALL_DIR}/lib/cmake/llvm" NO_DEFAULT_PATH)
 if (NOT LLVM_FOUND)
-    message(FATAL_ERROR "not found llvm")
+  message(FATAL_ERROR "not found llvm")
 else()
-    message(STATUS "found LLVM ${LLVM_PACKAGE_VERSION}")
+  message(STATUS "found LLVM ${LLVM_PACKAGE_VERSION}")
 endif()
 
 list(APPEND CMAKE_MODULE_PATH "${LLVM_CMAKE_DIR}")
@@ -46,10 +46,10 @@ exec_program(${CMAKE_LLVM_CONFIG} ARGS --libdir OUTPUT_VARIABLE LLVM_LIBDIR)
 
 # llvm library
 if (EXISTS "${LLVM_INCDIR}")
-    message(STATUS "found llvm includedir:${LLVM_INCDIR}")
-    message(STATUS "found llvm libdir:${LLVM_LIBDIR}")
+  message(STATUS "found llvm includedir:${LLVM_INCDIR}")
+  message(STATUS "found llvm libdir:${LLVM_LIBDIR}")
 else()
-    message(FATAL_ERROR "not found llvm:${LLVM_INCDIR}")
+  message(FATAL_ERROR "not found llvm:${LLVM_INCDIR}")
 endif()
 
 # fmt library
@@ -63,8 +63,8 @@ endif()
 
 # CLI11 library
 if(EXISTS "${CMAKE_SOURCE_DIR}/third_party/CLI11/include")
-    message(STATUS "found CLI11 library")
-    set(CLI11_INCLUDE_DIR third_party/CLI11/include)
+  message(STATUS "found CLI11 library")
+  set(CLI11_INCLUDE_DIR third_party/CLI11/include)
 else()
   message(STATUS "git submodule init && git submodule update")
   message(FATAL_ERROR "load CLI11 library failed")

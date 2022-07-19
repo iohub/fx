@@ -157,14 +157,10 @@ llvm::Value* CodeGen::emit_const_value(Val *v) {
     if (!v || !(v->is(Kind::Constant))) return nullptr;
     std::string num = v->raw_data ? *(v->raw_data) : "0";
     switch ((v->Type()).kind()) {
-        case TypeID::Float:
-            return llvm::ConstantFP::get(*ctx_, llvm::APFloat(std::stof(num)));
-        case TypeID::Int:
-            return llvm::ConstantInt::get(*ctx_, llvm::APInt(32, std::stoll(num)));
-        case TypeID::Bool:
-            return llvm::ConstantInt::get(*ctx_, llvm::APInt(8, std::stoi(num)));
-        default:
-            return nullptr;
+        case TypeID::Float: return llvm::ConstantFP::get(*ctx_, llvm::APFloat(std::stof(num)));
+        case TypeID::Int: return llvm::ConstantInt::get(*ctx_, llvm::APInt(32, std::stoll(num)));
+        case TypeID::Bool: return llvm::ConstantInt::get(*ctx_, llvm::APInt(8, std::stoi(num)));
+        default: return nullptr;
     }
     return nullptr;
 }
@@ -173,15 +169,12 @@ llvm::Value* CodeGen::emit(Val *v) {
     if (!v) return nullptr;
     llvm::Value *var;
     switch (v->kind) {
-        case Kind::Constant:
-            return emit_const_value(v);
-        case Kind::VarRef:
-            return env_.lookup_var(v->nominal());
+        case Kind::Constant: return emit_const_value(v);
+        case Kind::VarRef: return env_.lookup_var(v->nominal());
         case Kind::Value:
             var = env_.lookup_var(v->nominal());
             return builder_->CreateLoad(var);
-        default:
-            throw new CodeGenException(_f("{} emit unknown Val", v->loc()));
+        default: throw new CodeGenException(_f("{} emit unknown Val", v->loc()));
     }
     return nullptr;
 }
@@ -219,12 +212,9 @@ llvm::Value* CodeGen::emit_bincmp(BinaryExpr *cmp) {
     llvm::Type *lty = lltypeof(ty);
     llvm::CmpInst::Predicate pre = detail::CmpInstrMappings[std::make_pair(cmp->op, ty.id)];
     switch (ty.id) {
-        case TypeID::Int:
-            return builder_->CreateICmp(pre, lhs, rhs);
-        case TypeID::Float:
-            return builder_->CreateFCmp(pre, lhs, rhs);
-        default:
-            Logging::error("{} emit unknown BinaryCmp\n", cmp->loc());
+        case TypeID::Int: return builder_->CreateICmp(pre, lhs, rhs);
+        case TypeID::Float: return builder_->CreateFCmp(pre, lhs, rhs);
+        default: Logging::error("{} emit unknown BinaryCmp\n", cmp->loc());
     }
     return nullptr;
 }
@@ -232,34 +222,20 @@ llvm::Value* CodeGen::emit_bincmp(BinaryExpr *cmp) {
 
 llvm::Value* CodeGen::emit(AstNodePtr n) {
     switch (n->kind) {
-        case Kind::DeclList:
-            return emit(dynamic_cast<Decls*>(n.get()));
-        case Kind::FuncDecl:
-            return emit(dynamic_cast<FuncDecl*>(n.get()));
-        case Kind::CallFunc:
-            return emit(dynamic_cast<Call*>(n.get()));
-        case Kind::Constant:
-            return emit(dynamic_cast<Val*>(n.get()));
-        case Kind::ReturnStmt:
-            return emit(dynamic_cast<ReturnStmt*>(n.get()));
-        case Kind::BinaryOperator:
-            return emit_binexpr(dynamic_cast<BinaryExpr*>(n.get()));
-        case Kind::BinaryCmp:
-            return emit_bincmp(dynamic_cast<BinaryExpr*>(n.get()));
-        case Kind::VarRef:
-            return emit(dynamic_cast<Val*>(n.get()));
-        case Kind::Value:
-            return emit(dynamic_cast<Val*>(n.get()));
-        case Kind::VarDecl:
-            return nullptr;
-        case Kind::Assign:
-            return emit(dynamic_cast<AssignStmt*>(n.get()));
-        case Kind::If:
-            return emit(dynamic_cast<IfStmt*>(n.get()));
-        case Kind::For:
-            return emit(dynamic_cast<ForStmt*>(n.get()));
-        case Kind::Nil:
-            return nullptr;
+        case Kind::DeclList: return emit(dynamic_cast<Decls*>(n.get()));
+        case Kind::FuncDecl: return emit(dynamic_cast<FuncDecl*>(n.get()));
+        case Kind::CallFunc: return emit(dynamic_cast<Call*>(n.get()));
+        case Kind::Constant: return emit(dynamic_cast<Val*>(n.get()));
+        case Kind::ReturnStmt: return emit(dynamic_cast<ReturnStmt*>(n.get()));
+        case Kind::BinaryOperator: return emit_binexpr(dynamic_cast<BinaryExpr*>(n.get()));
+        case Kind::BinaryCmp: return emit_bincmp(dynamic_cast<BinaryExpr*>(n.get()));
+        case Kind::VarRef: return emit(dynamic_cast<Val*>(n.get()));
+        case Kind::Value: return emit(dynamic_cast<Val*>(n.get()));
+        case Kind::VarDecl: return nullptr;
+        case Kind::Assign: return emit(dynamic_cast<AssignStmt*>(n.get()));
+        case Kind::If: return emit(dynamic_cast<IfStmt*>(n.get()));
+        case Kind::For: return emit(dynamic_cast<ForStmt*>(n.get()));
+        case Kind::Nil: return nullptr;
         default:
             Logging::info("emit unknown AstNode {} {}\n", n->loc(), n->dump());
     }
@@ -335,20 +311,13 @@ llvm::Function* CodeGen::emit_func_prototype(FuncDecl *fn) {
 }
 
 llvm::Type* CodeGen::lltypeof(Ty ty) {
-    if (ty.is(TypeID::Int)) {
-        return llvm::Type::getInt32Ty(*ctx_);
-    }
+    if (ty.is(TypeID::Int)) return llvm::Type::getInt32Ty(*ctx_);
     switch(ty.kind()) {
-        case TypeID::Int:
-            return llvm::Type::getInt32Ty(*ctx_);
-        case TypeID::Float:
-            return llvm::Type::getFloatTy(*ctx_);
-        case TypeID::Bool:
-            return llvm::Type::getInt1Ty(*ctx_);
-        case TypeID::Void:
-            return llvm::Type::getVoidTy(*ctx_);
-        case TypeID::Object:
-            return mod_->getTypeByName(llvm::StringRef(ty.class_name))->getPointerTo();
+        case TypeID::Int: return llvm::Type::getInt32Ty(*ctx_);
+        case TypeID::Float: return llvm::Type::getFloatTy(*ctx_);
+        case TypeID::Bool: return llvm::Type::getInt1Ty(*ctx_);
+        case TypeID::Void: return llvm::Type::getVoidTy(*ctx_);
+        case TypeID::Object: return mod_->getTypeByName(llvm::StringRef(ty.class_name))->getPointerTo();
         default: return nullptr;
     }
 }

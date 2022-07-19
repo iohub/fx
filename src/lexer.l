@@ -48,6 +48,7 @@ STRING		\"{print}*\"
 "if"			{ Eat; return IF; }
 "else"			{ Eat; return ELSE; }
 "while"			{ Eat; return WHILE; }
+"class"			{ Eat; return CLASS; }
 "for"			{ Eat; return FOR; }
 "continue"	    { Eat; return CONTINUE; }
 "break"			{ Eat; return BREAK; }

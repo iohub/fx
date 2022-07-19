@@ -83,32 +83,19 @@ TypeCheckResult TypeChecker::checkVarRef(AstNodePtr val) {
 TypeCheckResult TypeChecker::check(AstNodePtr any) {
     if (!any) return TypeOk;
     switch(any->kind) {
-        case Kind::DeclList:
-            return checkDecls(any);
-        case Kind::CallFunc:
-            return checkCall(any);
-        case Kind::ReturnStmt:
-            return checkReturn(any);
-        case Kind::VarDecl:
-            return TypeOk;
-        case Kind::Constant:
-            return TypeOk;
-        case Kind::BinaryOperator:
-            return checkBinaryOp(any);
-        case Kind::BinaryCmp:
-            return checkBinaryOp(any);
-        case Kind::If:
-            return checkIf(any);
-        case Kind::Assign:
-            return checkAssign(any);
-        case Kind::For:
-            return checkFor(any);
-        case Kind::VarRef:
-            return checkVarRef(any);
-        case Kind::Value:
-            return checkVarRef(any);
-        case Kind::Nil:
-            return TypeOk;
+        case Kind::DeclList: return checkDecls(any);
+        case Kind::CallFunc: return checkCall(any);
+        case Kind::ReturnStmt: return checkReturn(any);
+        case Kind::VarDecl: return TypeOk;
+        case Kind::Constant: return TypeOk;
+        case Kind::BinaryOperator: return checkBinaryOp(any);
+        case Kind::BinaryCmp: return checkBinaryOp(any);
+        case Kind::If: return checkIf(any);
+        case Kind::Assign: return checkAssign(any);
+        case Kind::For: return checkFor(any);
+        case Kind::VarRef: return checkVarRef(any);
+        case Kind::Value: return checkVarRef(any);
+        case Kind::Nil: return TypeOk;
         default:
             return TypeCheckResult(_f("{} check Unknown kind:{},{}",
                         any->loc(), uint16_t(any->kind), any->dump()));
