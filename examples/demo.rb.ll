@@ -1,18 +1,18 @@
 ; ModuleID = '../examples/demo.rb'
 source_filename = "../examples/demo.rb"
 
-define i1 @conditional(float %x) {
+define i1 @cond_1(float %x) {
 entry:
   %x1 = alloca float
-  %conditional_retvar = alloca i1
+  %cond_1_retvar = alloca i1
   store float %x, float* %x1
   %0 = load float, float* %x1
   %1 = fcmp ogt float %0, 1.000000e+01
-  store i1 %1, i1* %conditional_retvar
+  store i1 %1, i1* %cond_1_retvar
   br label %_ret
 
 _ret:                                             ; preds = %entry
-  %2 = load i1, i1* %conditional_retvar
+  %2 = load i1, i1* %cond_1_retvar
   ret i1 %2
 }
 
@@ -24,7 +24,7 @@ entry:
   store float %x, float* %x1
   store float %y, float* %y2
   %0 = load float, float* %x1
-  %1 = call i1 @conditional(float %0)
+  %1 = call i1 @cond_1(float %0)
   br i1 %1, label %_loop, label %_loop_end
 
 _ret:                                             ; preds = %_loop_end5
@@ -37,7 +37,7 @@ _loop:                                            ; preds = %_loop, %entry
   %add = fadd float %3, %4
   store float %add, float* %x1
   %5 = load float, float* %x1
-  %6 = call i1 @conditional(float %5)
+  %6 = call i1 @cond_1(float %5)
   br i1 %6, label %_loop, label %_loop_end
 
 _loop_end:                                        ; preds = %_loop, %entry
@@ -98,10 +98,10 @@ _ret:                                             ; preds = %_end3, %_then2, %_t
   ret i32 %8
 }
 
-define float @else1(float %x) {
+define float @test_else_1(float %x) {
 entry:
   %x1 = alloca float
-  %else1_retvar = alloca float
+  %test_else_1_retvar = alloca float
   store float %x, float* %x1
   %0 = load float, float* %x1
   %1 = fcmp ogt float %0, 1.000000e+01
@@ -121,29 +121,30 @@ _else:                                            ; preds = %entry
 
 _end:                                             ; preds = %_else, %_then
   %4 = load float, float* %x1
-  store float %4, float* %else1_retvar
+  store float %4, float* %test_else_1_retvar
   br label %_ret
 
 _ret:                                             ; preds = %_end
-  %5 = load float, float* %else1_retvar
+  %5 = load float, float* %test_else_1_retvar
   ret float %5
 }
 
 define i32 @main() {
 entry:
+  %a = alloca float
   %z = alloca float
   %main_retvar = alloca i32
-  %0 = load float, float* %z
-  %1 = call float @foo(float 3.000000e+00, float 4.000000e+00)
-  %add = fadd float 2.000000e+00, %1
-  %2 = call float @foo(float 1.000000e+00, float %add)
-  %add1 = fadd float %0, %2
-  store float %add1, float* %z
-  %3 = call i32 @fib(i32 9)
-  store i32 %3, i32* %main_retvar
+  store float 1.000000e+01, float* %z
+  %0 = call float @foo(float 3.000000e+00, float 4.000000e+00)
+  %add = fadd float 2.000000e+00, %0
+  %1 = call float @foo(float 1.000000e+00, float %add)
+  %add1 = fadd float %1, 1.000000e+01
+  store float %add1, float* %a
+  %2 = call i32 @fib(i32 9)
+  store i32 %2, i32* %main_retvar
   br label %_ret
 
 _ret:                                             ; preds = %entry
-  %4 = load i32, i32* %main_retvar
-  ret i32 %4
+  %3 = load i32, i32* %main_retvar
+  ret i32 %3
 }

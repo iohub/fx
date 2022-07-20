@@ -32,7 +32,7 @@
     fx::BinaryExpr *op;
 }
 
-%token STR IF ELSE WHILE CLASS FOR CONTINUE BREAK VOID RETURN INT FLOAT COLON
+%token STR IF ELSE WHILE CLASS FOR CONTINUE BREAK VOID RETURN INT LET FLOAT COLON
 %token INCR OROP ANDOP NOTOP RELOP
 %token LPAREN RPAREN LBRACK RBRACK LBRACE RBRACE SEMI DOT COMMA ASSIGN REFER
 %token <str> IDENT ICONST FCONST CCONST STRING
@@ -199,7 +199,9 @@ stmts_block
       | LBRACE RBRACE { $$ = new Stmts(); }
       ;
 
-var_decl: var_type IDENT { $$ = new VarDecl(Loc(@1.first_line, @1.first_column), $2, $1, nullptr); };
+var_decl
+    : var_type IDENT
+    { $$ = new VarDecl(Loc(@1.first_line, @1.first_column), $2, $1); };
 
 primitive_type: INT | FLOAT | STR;
 
@@ -265,7 +267,13 @@ assignment_expr
     {
         $$ = new AssignStmt(Loc(@1.first_line, @1.first_column),
             new Val(Loc(@1.first_line, @1.first_column), Kind::VarRef, $1), $3);
+    }
+    | LET IDENT assignment_operator value_expr
+    {
+        VarDecl *n = new VarDecl(Loc(@2.first_line, @2.first_column), $2, new std::string($4->TyStr()));
+        $$ = new LetAssign(Loc(@1.first_line, @1.first_column), AstNodePtr(n), AstNodePtr($4));
     };
+
 
 
 %%

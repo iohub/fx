@@ -70,7 +70,6 @@ json Val::tojson(json parent) {
 
 VarDecl::~VarDecl() {
     Logging::debug("~VarDecl({})\n", dump());
-    if (raw_data) delete raw_data;
     if (var_name) delete var_name;
 }
 
@@ -84,6 +83,22 @@ json VarDecl::tojson(json parent) {
     child["type"] = Type().str();
     parent["VarDecl"] = child;
     return parent;
+}
+
+std::string LetAssign::dump() {
+    return _f("Let<{},{}>", tostr(var), tostr(val));
+}
+
+json LetAssign::tojson(json parent) {
+    json child;
+    child["var"] = node_tojson(var);
+    child["val"] = node_tojson(val);
+    parent["let"] = child;
+    return parent;
+}
+
+LetAssign::~LetAssign() {
+    Logging::debug("~LetAssign()\n");
 }
 
 std::string BinaryExpr::dump() {

@@ -20,7 +20,7 @@
 
 %x ML_COMMENT
 
-alpha 		[a-zA-Z]
+alpha 		[a-zA-Z_]
 digit 		[0-9]
 alnum 		{alpha}|{digit}
 print		[ -~]
@@ -44,6 +44,7 @@ STRING		\"{print}*\"
 
 "str"       	{ Eat; Text; return STR; }
 "int"			{ Eat; Text; return INT; }
+"let"			{ Eat; Text; return LET; }
 "float"			{ Eat; Text; return FLOAT; }
 "if"			{ Eat; return IF; }
 "else"			{ Eat; return ELSE; }

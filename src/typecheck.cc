@@ -95,6 +95,7 @@ TypeCheckResult TypeChecker::check(AstNodePtr any) {
         case Kind::For: return checkFor(any);
         case Kind::VarRef: return checkVarRef(any);
         case Kind::Value: return checkVarRef(any);
+        case Kind::LetAssign: return checkLetAssign(any);
         case Kind::Nil: return TypeOk;
         default:
             return TypeCheckResult(_f("{} check Unknown kind:{},{}",
@@ -170,6 +171,14 @@ TypeCheckResult TypeChecker::checkIf(AstNodePtr If) {
 TypeCheckResult TypeChecker::checkReturn(AstNodePtr Return) {
     ReturnStmt *nn = dynamic_cast<ReturnStmt*>(Return.get()); assert(nn);
     return check(nn->stmt);
+}
+
+TypeCheckResult TypeChecker::checkLetAssign(AstNodePtr letA) {
+    LetAssign *nn = dynamic_cast<LetAssign*>(letA.get()); assert(nn);
+    TypeCheckResult result = TypeOk;
+    if ((result = check(nn->val)) != TypeOk) return result;
+    nn->ty = nn->var->ty = nn->val->ty;
+    return result;
 }
 
 TypeCheckResult TypeChecker::checkFuncDecl(AstNodePtr n) {

@@ -39,6 +39,7 @@ private:
     TypeCheckResult checkDecls(AstNodePtr declList);
     TypeCheckResult checkIf(AstNodePtr If);
     TypeCheckResult checkFor(AstNodePtr For);
+    TypeCheckResult checkLetAssign(AstNodePtr LetA);
     TypeCheckResult checkStmts(Stmts *stmts);
 
     Ty synthesize(AstNodePtr n);

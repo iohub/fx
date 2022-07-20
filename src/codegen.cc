@@ -63,13 +63,13 @@ llvm::Value* CodeGen::emit(FuncDecl *fn) {
     size_t idx = 0;
     // alloc args
     for (auto &arg : Fn->args()) {
-        llvm::AllocaInst *inst = emit_block_alloca(Fn->getEntryBlock(), FArgs[idx++]);
+        llvm::AllocaInst *inst = emit_block_alloca(&(Fn->getEntryBlock()), FArgs[idx++]);
         builder_->CreateStore(&arg, inst);
         env_.put_var(std::string(arg.getName()), inst);
     }
     for (auto &b : fn->body()) {
         if (b->is(Kind::VarDecl)) {
-            llvm::AllocaInst *inst = emit_block_alloca(Fn->getEntryBlock(), b);
+            llvm::AllocaInst *inst = emit_block_alloca(&(Fn->getEntryBlock()), b);
             env_.put_var(b->nominal(), inst);
         }
     }
@@ -81,8 +81,8 @@ llvm::Value* CodeGen::emit(FuncDecl *fn) {
     return nullptr;
 }
 
-llvm::AllocaInst* CodeGen::emit_block_alloca(llvm::BasicBlock &block, AstNodePtr var) {
-    llvm::IRBuilder<> bbuilder(&block, block.begin());
+llvm::AllocaInst* CodeGen::emit_block_alloca(llvm::BasicBlock *block, AstNodePtr var) {
+    llvm::IRBuilder<> bbuilder(block, block->begin());
     return bbuilder.CreateAlloca(lltypeof(var->Type()), 0, var->nominal());
 }
 
@@ -201,6 +201,14 @@ llvm::Value* CodeGen::emit_binexpr(BinaryExpr *expr) {
     return nullptr;
 }
 
+llvm::Value* CodeGen::emit(LetAssign *letA) {
+    llvm::AllocaInst *inst = emit_block_alloca(currentbb(), letA->var);
+    env_.put_var(letA->var->nominal(), inst);
+    llvm::Value* val = emit(letA->val);
+    builder_->CreateStore(val, inst);
+    return nullptr;
+}
+
 llvm::Value* CodeGen::emit_bincmp(BinaryExpr *cmp) {
     if (!cmp || !cmp->is(Kind::BinaryCmp)) return nullptr;
     llvm::Value *lhs = emit(cmp->lhs);
@@ -233,6 +241,7 @@ llvm::Value* CodeGen::emit(AstNodePtr n) {
         case Kind::Value: return emit(dynamic_cast<Val*>(n.get()));
         case Kind::VarDecl: return nullptr;
         case Kind::Assign: return emit(dynamic_cast<AssignStmt*>(n.get()));
+        case Kind::LetAssign: return emit(dynamic_cast<LetAssign*>(n.get()));
         case Kind::If: return emit(dynamic_cast<IfStmt*>(n.get()));
         case Kind::For: return emit(dynamic_cast<ForStmt*>(n.get()));
         case Kind::Nil: return nullptr;

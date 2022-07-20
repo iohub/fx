@@ -35,7 +35,7 @@ private:
     llvm::BasicBlock* insert_block_after(llvm::Function *function,
             llvm::BasicBlock *predecessor, const llvm::Twine &name);
     llvm::Function *emit_func_prototype(FuncDecl *fn);
-    llvm::AllocaInst* emit_block_alloca(llvm::BasicBlock &block, AstNodePtr var);
+    llvm::AllocaInst* emit_block_alloca(llvm::BasicBlock *block, AstNodePtr var);
     llvm::Value *emit_const_value(Val *v);
     llvm::Value* emit_bincmp(BinaryExpr *BinExpr);
     llvm::Value* emit_binexpr(BinaryExpr *BinExpr);
@@ -48,6 +48,7 @@ private:
     llvm::Value* emit(Val *v);
     llvm::Value* emit(Stmts *stmts);
     llvm::Value* emit(Call *call);
+    llvm::Value* emit(LetAssign *letA);
     llvm::Value* emit(ReturnStmt *Return);
     llvm::Value* emit(AssignStmt *assign);
     llvm::Value* emit(ForStmt *For);

@@ -36,7 +36,7 @@ public:
     enum class Kind : uint8_t {
         Invalid, Nil, CallFunc, Constant,
         FuncDecl, VarRef, Value, VarDecl, Expr, BinaryOperator, BinaryCmp, UnaryOperator,
-        ReturnStmt, If, Assign, For, DeclList, Undefine
+        ReturnStmt, If, Assign, LetAssign, For, DeclList, Undefine
     };
     enum class OpKind: uint8_t {
         Invalid,
@@ -111,12 +111,10 @@ struct Val: public AstNode {
 };
 
 struct VarDecl: public AstNode {
-    std::string *raw_data;
     std::string *var_name;
 
-    VarDecl(Loc loc, std::string *name, std::string *type, std::string *data)
-        : AstNode(loc, Kind::VarDecl, Ty(*type)),
-        raw_data(data), var_name(name) { }
+    VarDecl(Loc loc, std::string *name, std::string *type)
+        : AstNode(loc, Kind::VarDecl, Ty(*type)), var_name(name) { }
 
     std::string name() {
         return var_name ? *var_name: "Nil";
@@ -126,6 +124,17 @@ struct VarDecl: public AstNode {
     virtual std::string dump();
     virtual json tojson(json parent);
     virtual std::string nominal() { return var_name? *var_name: "Nil"; }
+};
+
+struct LetAssign: public AstNode {
+    AstNodePtr var;
+    AstNodePtr val;
+    LetAssign(Loc loc, AstNodePtr var, AstNodePtr val) :
+        AstNode(loc, Kind::LetAssign), var(var), val(val) {}
+    ~LetAssign();
+
+    virtual std::string dump();
+    virtual json tojson(json parent);
 };
 
 struct BinaryExpr: public AstNode {

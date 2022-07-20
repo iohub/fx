@@ -37,7 +37,7 @@ void compile(const std::string &fname) {
 
     TypeCheckResult result = checker.check(wrap);
     json jsonExp = Program->tojson();
-    Logging::info("typed ast (json format):\n{}\n", jsonExp.dump());
+    // Logging::info("typed ast (json format):\n{}\n", jsonExp.dump());
     wrap->print();
     Logging::info("TypeCheckResult {}\n", result.errmsg);
     CodeGen gen(fname);
