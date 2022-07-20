@@ -14,6 +14,11 @@
 #include "typecheck.h"
 #include "codegen.h"
 
+#include "antlr4-runtime.h"
+#include "fxLexer.h"
+#include "fxParser.h"
+#include "fxVisitor.h"
+
 using namespace fx;
 using json = nlohmann::json;
 
@@ -50,6 +55,19 @@ void compile(const std::string &fname) {
     }
 }
 
+int parse(const std::string &fname){
+    std::ifstream ifs;
+    ifs.open(fname);
+    antlr4::ANTLRInputStream input(ifs);
+    fxLexer lexer(&input);
+    antlr4::CommonTokenStream tokens(&lexer);
+    fxParser parser(&tokens);
+    antlr4::tree::ParseTree *tree = parser.compilationUnit();
+    fxVisitor visitor;
+    visitor.visit(tree);
+
+    return 0;
+}
 
 int main(int argc, const char *argv[]) {
     Logging::level = Logging::Level::INFO;
@@ -58,6 +76,7 @@ int main(int argc, const char *argv[]) {
     std::string fname;
     app.add_option("-f,--file", fname, "source file");
     CLI11_PARSE(app, argc, argv);
+    parse(fname);
 
     // print pretty json
     // std::cout << std::setw(2) << jsonExp << std::endl;
