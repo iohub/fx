@@ -29,17 +29,17 @@ public:
 private:
     Env<AstNodePtr, AstNodePtr> env;
     bool isSubtype(AstNodePtr a, AstNodePtr b);
-    TypeCheckResult checkBinaryOp(AstNodePtr op);
-    TypeCheckResult checkBinaryCmp(AstNodePtr op);
-    TypeCheckResult checkFuncDecl(AstNodePtr func);
-    TypeCheckResult checkAssign(AstNodePtr assign);
-    TypeCheckResult checkVarRef(AstNodePtr var);
-    TypeCheckResult checkCall(AstNodePtr call);
-    TypeCheckResult checkReturn(AstNodePtr Return);
-    TypeCheckResult checkDecls(AstNodePtr declList);
-    TypeCheckResult checkIf(AstNodePtr If);
-    TypeCheckResult checkFor(AstNodePtr For);
-    TypeCheckResult checkLetAssign(AstNodePtr LetA);
+
+    TypeCheckResult check(BinaryExpr *cmp);
+    TypeCheckResult check(FuncDecl *func);
+    TypeCheckResult check(AssignStmt *assign);
+    TypeCheckResult check(Val *val);
+    TypeCheckResult check(Call *call);
+    TypeCheckResult check(ReturnStmt *Return);
+    TypeCheckResult check(Decls *declList);
+    TypeCheckResult check(IfStmt *If);
+    TypeCheckResult check(ForStmt *For);
+    TypeCheckResult check(LetAssign *LetA);
     TypeCheckResult checkStmts(Stmts *stmts);
 
     Ty synthesize(AstNodePtr n);
