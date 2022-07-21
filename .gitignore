@@ -4,4 +4,4 @@ src/lexer.cc
 src/parser.cc
 compile_commands.json
 _deps
-
+dist
