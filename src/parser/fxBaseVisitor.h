@@ -51,11 +51,7 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitEmpty(fxParser::EmptyContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual antlrcpp::Any visitBlockStmt(fxParser::BlockStmtContext *ctx) override {
+  virtual antlrcpp::Any visitStmt(fxParser::StmtContext *ctx) override {
     return visitChildren(ctx);
   }
 
@@ -67,35 +63,11 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitIncr(fxParser::IncrContext *ctx) override {
+  virtual antlrcpp::Any visitReturnStmt(fxParser::ReturnStmtContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitDecr(fxParser::DecrContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual antlrcpp::Any visitRet(fxParser::RetContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual antlrcpp::Any visitVRet(fxParser::VRetContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual antlrcpp::Any visitCond(fxParser::CondContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual antlrcpp::Any visitCondElse(fxParser::CondElseContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual antlrcpp::Any visitWhile(fxParser::WhileContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual antlrcpp::Any visitSExp(fxParser::SExpContext *ctx) override {
+  virtual antlrcpp::Any visitIfStmt(fxParser::IfStmtContext *ctx) override {
     return visitChildren(ctx);
   }
 
@@ -123,79 +95,55 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitEId(fxParser::EIdContext *ctx) override {
+  virtual antlrcpp::Any visitAndExpr(fxParser::AndExprContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitEFunCall(fxParser::EFunCallContext *ctx) override {
+  virtual antlrcpp::Any visitIDExpr(fxParser::IDExprContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitERelOp(fxParser::ERelOpContext *ctx) override {
+  virtual antlrcpp::Any visitConstExpr(fxParser::ConstExprContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitETrue(fxParser::ETrueContext *ctx) override {
+  virtual antlrcpp::Any visitRelOpExpr(fxParser::RelOpExprContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitEOr(fxParser::EOrContext *ctx) override {
+  virtual antlrcpp::Any visitCallExpr(fxParser::CallExprContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitEInt(fxParser::EIntContext *ctx) override {
+  virtual antlrcpp::Any visitBinOpExpr(fxParser::BinOpExprContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitEMemberExpr(fxParser::EMemberExprContext *ctx) override {
+  virtual antlrcpp::Any visitOrExpr(fxParser::OrExprContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitEUnOp(fxParser::EUnOpContext *ctx) override {
+  virtual antlrcpp::Any visitParamList(fxParser::ParamListContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitEStr(fxParser::EStrContext *ctx) override {
+  virtual antlrcpp::Any visitBoolean(fxParser::BooleanContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitENewExpr(fxParser::ENewExprContext *ctx) override {
+  virtual antlrcpp::Any visitConstBool(fxParser::ConstBoolContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitEMulOp(fxParser::EMulOpContext *ctx) override {
+  virtual antlrcpp::Any visitConstInt(fxParser::ConstIntContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitEAnd(fxParser::EAndContext *ctx) override {
+  virtual antlrcpp::Any visitConstStr(fxParser::ConstStrContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitEClassCast(fxParser::EClassCastContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual antlrcpp::Any visitEParen(fxParser::EParenContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual antlrcpp::Any visitEFalse(fxParser::EFalseContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual antlrcpp::Any visitEAddOp(fxParser::EAddOpContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual antlrcpp::Any visitENull(fxParser::ENullContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual antlrcpp::Any visitAddOp(fxParser::AddOpContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual antlrcpp::Any visitMulOp(fxParser::MulOpContext *ctx) override {
+  virtual antlrcpp::Any visitBinOp(fxParser::BinOpContext *ctx) override {
     return visitChildren(ctx);
   }
 

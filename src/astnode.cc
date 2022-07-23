@@ -46,9 +46,7 @@ std::string Val::dump() {
         case Kind::VarDecl: str = "VarDecl"; break;
         default: str = "unknown";
     }
-    if (raw_data) {
-        str = _f("{}@{}@{}", str, *raw_data, TyStr());
-    }
+    str = _f("{}@{}@{}", str, raw_data, TyStr());
     return str;
 }
 
@@ -62,7 +60,7 @@ json Val::tojson(json parent) {
         default: str = "unknown";
     }
     json child;
-    child["data"] = raw_data ? *raw_data : "Nil";
+    child["data"] = raw_data;
     child["type"] = TyStr();
     parent[str] = child;
     return parent;
@@ -114,10 +112,10 @@ json BinaryExpr::tojson(json parent) {
     return parent;
 }
 
-BinaryExpr::BinaryExpr(Loc loc, Kind nodeKind, Ty ty, std::string *opname, AstNode *l, AstNode *r) :
+BinaryExpr::BinaryExpr(Loc loc, Kind nodeKind, Ty ty, std::string opname, AstNode *l, AstNode *r) :
     AstNode(loc, nodeKind, ty), lhs(l), rhs(r), kind(nodeKind) {
     op = OpKind::Invalid;
-    auto itr = detail::OperatorMappings.find(*opname);
+    auto itr = detail::OperatorMappings.find(opname);
     if (itr != detail::OperatorMappings.end()) {
         op = itr->second;
     }
@@ -161,7 +159,6 @@ json Call::tojson(json parent) {
 Call::~Call() {
     Logging::debug("~callNode({})\n", dump());
     if (args_) delete args_;
-    if (name_) delete name_;
 }
 
 std::string Decls::dump() {

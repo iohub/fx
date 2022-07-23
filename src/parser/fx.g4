@@ -35,19 +35,33 @@ block
     ;
 
 stmt
-    : ';'                                # Empty
-    | block                              # BlockStmt
-    | type_ item ( ',' item )* ';'       # Decl
-    | expr '=' expr ';'                  # Ass
-    | expr '++' ';'                      # Incr
-    | expr '--' ';'                      # Decr
-    | 'return' expr ';'                  # Ret
-    | 'return' ';'                       # VRet
-    | 'if' '(' expr ')' stmt             # Cond
-    | 'if' '(' expr ')' stmt 'else' stmt # CondElse
-    | 'while' '(' expr ')' stmt          # While
-    | expr ';'                           # SExp
+    : ';'
+    | varAssignDef
+    | assignStmt
+    | returnStmt
+    | ifStmt
+    | 'while' '(' expr ')' stmt
+    | expr ';'
     ;
+
+varAssignDef
+    : type_ item ( ',' item )* ';'       # Decl
+    ;
+
+assignStmt
+    : expr '=' expr ';'                  # Ass
+    ;
+
+returnStmt
+    : 'return' expr ';'
+    | 'return' ';'
+    ;
+
+ifStmt
+    : 'if' '(' expr ')' block
+    | 'if' '(' expr ')' block 'else' block
+    ;
+
 
 type_
     : 'int'     # Int
@@ -63,33 +77,35 @@ item
     ;
 
 expr
-    : expr '(' ( expr ( ',' expr )* )? ')'  # EFunCall
-    | expr '.' ID                           # EMemberExpr
-    | ('-'|'!') expr                        # EUnOp
-    | expr mulOp expr                       # EMulOp
-    | expr addOp expr                       # EAddOp
-    | expr relOp expr                       # ERelOp
-    | <assoc=right> expr '&&' expr          # EAnd
-    | <assoc=right> expr '||' expr          # EOr
-    | 'new' type_                           # ENewExpr
-    | ID                                    # EId
-    | INT                                   # EInt
-    | 'true'                                # ETrue
-    | 'false'                               # EFalse
-    | STR                                   # EStr
-    | 'null'                                # ENull
-    | '(' expr ')'                          # EParen
-    | '(' type_ ')' expr                    # EClassCast
+    : expr binOp expr                  # BinOpExpr
+    | expr relOp expr                  # RelOpExpr
+    | <assoc=right> expr '&&' expr     # AndExpr
+    | <assoc=right> expr '||' expr     # OrExpr
+    | ID '(' paramList? ')'            # CallExpr
+    | ID                               # IDExpr
+    | constant                         # ConstExpr
+    ;
+
+paramList
+    : expr (',' expr)*
     ;
 
 
-addOp
+boolean
+    : 'true'
+    | 'false'
+    ;
+
+constant
+    : boolean    # ConstBool
+    | INT        # ConstInt
+    | STR        # ConstStr
+    ;
+
+binOp
     : '+'
     | '-'
-    ;
-
-mulOp
-    : '*'
+    | '*'
     | '/'
     | '%'
     ;

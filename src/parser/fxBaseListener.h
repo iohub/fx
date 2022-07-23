@@ -43,11 +43,8 @@ public:
   virtual void enterBlock(fxParser::BlockContext * /*ctx*/) override { }
   virtual void exitBlock(fxParser::BlockContext * /*ctx*/) override { }
 
-  virtual void enterEmpty(fxParser::EmptyContext * /*ctx*/) override { }
-  virtual void exitEmpty(fxParser::EmptyContext * /*ctx*/) override { }
-
-  virtual void enterBlockStmt(fxParser::BlockStmtContext * /*ctx*/) override { }
-  virtual void exitBlockStmt(fxParser::BlockStmtContext * /*ctx*/) override { }
+  virtual void enterStmt(fxParser::StmtContext * /*ctx*/) override { }
+  virtual void exitStmt(fxParser::StmtContext * /*ctx*/) override { }
 
   virtual void enterDecl(fxParser::DeclContext * /*ctx*/) override { }
   virtual void exitDecl(fxParser::DeclContext * /*ctx*/) override { }
@@ -55,29 +52,11 @@ public:
   virtual void enterAss(fxParser::AssContext * /*ctx*/) override { }
   virtual void exitAss(fxParser::AssContext * /*ctx*/) override { }
 
-  virtual void enterIncr(fxParser::IncrContext * /*ctx*/) override { }
-  virtual void exitIncr(fxParser::IncrContext * /*ctx*/) override { }
+  virtual void enterReturnStmt(fxParser::ReturnStmtContext * /*ctx*/) override { }
+  virtual void exitReturnStmt(fxParser::ReturnStmtContext * /*ctx*/) override { }
 
-  virtual void enterDecr(fxParser::DecrContext * /*ctx*/) override { }
-  virtual void exitDecr(fxParser::DecrContext * /*ctx*/) override { }
-
-  virtual void enterRet(fxParser::RetContext * /*ctx*/) override { }
-  virtual void exitRet(fxParser::RetContext * /*ctx*/) override { }
-
-  virtual void enterVRet(fxParser::VRetContext * /*ctx*/) override { }
-  virtual void exitVRet(fxParser::VRetContext * /*ctx*/) override { }
-
-  virtual void enterCond(fxParser::CondContext * /*ctx*/) override { }
-  virtual void exitCond(fxParser::CondContext * /*ctx*/) override { }
-
-  virtual void enterCondElse(fxParser::CondElseContext * /*ctx*/) override { }
-  virtual void exitCondElse(fxParser::CondElseContext * /*ctx*/) override { }
-
-  virtual void enterWhile(fxParser::WhileContext * /*ctx*/) override { }
-  virtual void exitWhile(fxParser::WhileContext * /*ctx*/) override { }
-
-  virtual void enterSExp(fxParser::SExpContext * /*ctx*/) override { }
-  virtual void exitSExp(fxParser::SExpContext * /*ctx*/) override { }
+  virtual void enterIfStmt(fxParser::IfStmtContext * /*ctx*/) override { }
+  virtual void exitIfStmt(fxParser::IfStmtContext * /*ctx*/) override { }
 
   virtual void enterInt(fxParser::IntContext * /*ctx*/) override { }
   virtual void exitInt(fxParser::IntContext * /*ctx*/) override { }
@@ -97,62 +76,44 @@ public:
   virtual void enterItem(fxParser::ItemContext * /*ctx*/) override { }
   virtual void exitItem(fxParser::ItemContext * /*ctx*/) override { }
 
-  virtual void enterEId(fxParser::EIdContext * /*ctx*/) override { }
-  virtual void exitEId(fxParser::EIdContext * /*ctx*/) override { }
+  virtual void enterAndExpr(fxParser::AndExprContext * /*ctx*/) override { }
+  virtual void exitAndExpr(fxParser::AndExprContext * /*ctx*/) override { }
 
-  virtual void enterEFunCall(fxParser::EFunCallContext * /*ctx*/) override { }
-  virtual void exitEFunCall(fxParser::EFunCallContext * /*ctx*/) override { }
+  virtual void enterIDExpr(fxParser::IDExprContext * /*ctx*/) override { }
+  virtual void exitIDExpr(fxParser::IDExprContext * /*ctx*/) override { }
 
-  virtual void enterERelOp(fxParser::ERelOpContext * /*ctx*/) override { }
-  virtual void exitERelOp(fxParser::ERelOpContext * /*ctx*/) override { }
+  virtual void enterConstExpr(fxParser::ConstExprContext * /*ctx*/) override { }
+  virtual void exitConstExpr(fxParser::ConstExprContext * /*ctx*/) override { }
 
-  virtual void enterETrue(fxParser::ETrueContext * /*ctx*/) override { }
-  virtual void exitETrue(fxParser::ETrueContext * /*ctx*/) override { }
+  virtual void enterRelOpExpr(fxParser::RelOpExprContext * /*ctx*/) override { }
+  virtual void exitRelOpExpr(fxParser::RelOpExprContext * /*ctx*/) override { }
 
-  virtual void enterEOr(fxParser::EOrContext * /*ctx*/) override { }
-  virtual void exitEOr(fxParser::EOrContext * /*ctx*/) override { }
+  virtual void enterCallExpr(fxParser::CallExprContext * /*ctx*/) override { }
+  virtual void exitCallExpr(fxParser::CallExprContext * /*ctx*/) override { }
 
-  virtual void enterEInt(fxParser::EIntContext * /*ctx*/) override { }
-  virtual void exitEInt(fxParser::EIntContext * /*ctx*/) override { }
+  virtual void enterBinOpExpr(fxParser::BinOpExprContext * /*ctx*/) override { }
+  virtual void exitBinOpExpr(fxParser::BinOpExprContext * /*ctx*/) override { }
 
-  virtual void enterEMemberExpr(fxParser::EMemberExprContext * /*ctx*/) override { }
-  virtual void exitEMemberExpr(fxParser::EMemberExprContext * /*ctx*/) override { }
+  virtual void enterOrExpr(fxParser::OrExprContext * /*ctx*/) override { }
+  virtual void exitOrExpr(fxParser::OrExprContext * /*ctx*/) override { }
 
-  virtual void enterEUnOp(fxParser::EUnOpContext * /*ctx*/) override { }
-  virtual void exitEUnOp(fxParser::EUnOpContext * /*ctx*/) override { }
+  virtual void enterParamList(fxParser::ParamListContext * /*ctx*/) override { }
+  virtual void exitParamList(fxParser::ParamListContext * /*ctx*/) override { }
 
-  virtual void enterEStr(fxParser::EStrContext * /*ctx*/) override { }
-  virtual void exitEStr(fxParser::EStrContext * /*ctx*/) override { }
+  virtual void enterBoolean(fxParser::BooleanContext * /*ctx*/) override { }
+  virtual void exitBoolean(fxParser::BooleanContext * /*ctx*/) override { }
 
-  virtual void enterENewExpr(fxParser::ENewExprContext * /*ctx*/) override { }
-  virtual void exitENewExpr(fxParser::ENewExprContext * /*ctx*/) override { }
+  virtual void enterConstBool(fxParser::ConstBoolContext * /*ctx*/) override { }
+  virtual void exitConstBool(fxParser::ConstBoolContext * /*ctx*/) override { }
 
-  virtual void enterEMulOp(fxParser::EMulOpContext * /*ctx*/) override { }
-  virtual void exitEMulOp(fxParser::EMulOpContext * /*ctx*/) override { }
+  virtual void enterConstInt(fxParser::ConstIntContext * /*ctx*/) override { }
+  virtual void exitConstInt(fxParser::ConstIntContext * /*ctx*/) override { }
 
-  virtual void enterEAnd(fxParser::EAndContext * /*ctx*/) override { }
-  virtual void exitEAnd(fxParser::EAndContext * /*ctx*/) override { }
+  virtual void enterConstStr(fxParser::ConstStrContext * /*ctx*/) override { }
+  virtual void exitConstStr(fxParser::ConstStrContext * /*ctx*/) override { }
 
-  virtual void enterEClassCast(fxParser::EClassCastContext * /*ctx*/) override { }
-  virtual void exitEClassCast(fxParser::EClassCastContext * /*ctx*/) override { }
-
-  virtual void enterEParen(fxParser::EParenContext * /*ctx*/) override { }
-  virtual void exitEParen(fxParser::EParenContext * /*ctx*/) override { }
-
-  virtual void enterEFalse(fxParser::EFalseContext * /*ctx*/) override { }
-  virtual void exitEFalse(fxParser::EFalseContext * /*ctx*/) override { }
-
-  virtual void enterEAddOp(fxParser::EAddOpContext * /*ctx*/) override { }
-  virtual void exitEAddOp(fxParser::EAddOpContext * /*ctx*/) override { }
-
-  virtual void enterENull(fxParser::ENullContext * /*ctx*/) override { }
-  virtual void exitENull(fxParser::ENullContext * /*ctx*/) override { }
-
-  virtual void enterAddOp(fxParser::AddOpContext * /*ctx*/) override { }
-  virtual void exitAddOp(fxParser::AddOpContext * /*ctx*/) override { }
-
-  virtual void enterMulOp(fxParser::MulOpContext * /*ctx*/) override { }
-  virtual void exitMulOp(fxParser::MulOpContext * /*ctx*/) override { }
+  virtual void enterBinOp(fxParser::BinOpContext * /*ctx*/) override { }
+  virtual void exitBinOp(fxParser::BinOpContext * /*ctx*/) override { }
 
   virtual void enterRelOp(fxParser::RelOpContext * /*ctx*/) override { }
   virtual void exitRelOp(fxParser::RelOpContext * /*ctx*/) override { }

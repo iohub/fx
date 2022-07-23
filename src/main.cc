@@ -76,6 +76,7 @@ public:
         if (ctx->children.size() == 6) {
             fn->args_ = visit(ctx->children.at(3));
         }
+        fn->body_ = visit(ctx->children.back());
         return (AstNode*) fn;
     }
 
@@ -112,31 +113,28 @@ public:
         return (AstNode *)n;
     }
 
-    virtual antlrcpp::Any visitBlock(fxParser::BlockContext *ctx) { return nullptr; }
-
-    virtual antlrcpp::Any visitEmpty(fxParser::EmptyContext *ctx) { return nullptr; }
-
-    virtual antlrcpp::Any visitBlockStmt(fxParser::BlockStmtContext *ctx) { return nullptr; }
+    virtual antlrcpp::Any visitBlock(fxParser::BlockContext *ctx) {
+        Loc loc(ctx->getStart()->getLine(), ctx->getStart()->getCharPositionInLine());
+        Stmts *retval = new Stmts();
+        for (auto *e : ctx->stmt()) {
+            AstNode *ev = visit(e);
+            if (ev) retval->push_back(AstNodePtr(ev));
+        }
+        return retval;
+    }
 
     virtual antlrcpp::Any visitDecl(fxParser::DeclContext *ctx) { return nullptr; }
 
     virtual antlrcpp::Any visitAss(fxParser::AssContext *ctx) { return nullptr; }
 
-    virtual antlrcpp::Any visitIncr(fxParser::IncrContext *ctx) { return nullptr; }
-
-    virtual antlrcpp::Any visitDecr(fxParser::DecrContext *ctx) { return nullptr; }
-
-    virtual antlrcpp::Any visitRet(fxParser::RetContext *ctx) { return nullptr; }
-
-    virtual antlrcpp::Any visitVRet(fxParser::VRetContext *ctx) { return nullptr; }
-
-    virtual antlrcpp::Any visitCond(fxParser::CondContext *ctx) { return nullptr; }
-
-    virtual antlrcpp::Any visitCondElse(fxParser::CondElseContext *ctx) { return nullptr; }
-
-    virtual antlrcpp::Any visitWhile(fxParser::WhileContext *ctx) { return nullptr; }
-
-    virtual antlrcpp::Any visitSExp(fxParser::SExpContext *ctx) { return nullptr; }
+    virtual antlrcpp::Any visitStmt(fxParser::StmtContext *ctx) {
+        Loc loc(ctx->getStart()->getLine(), ctx->getStart()->getCharPositionInLine());
+        for (auto *e : ctx->children) {
+            AstNode *ev = visit(e);
+            if (ev != nullptr) return ev;
+        }
+        return (AstNode*) nullptr;
+    }
 
     virtual antlrcpp::Any visitInt(fxParser::IntContext *ctx) { return nullptr; }
 
@@ -150,45 +148,88 @@ public:
 
     virtual antlrcpp::Any visitItem(fxParser::ItemContext *ctx) { return nullptr; }
 
-    virtual antlrcpp::Any visitEId(fxParser::EIdContext *ctx) { return nullptr; }
-
-    virtual antlrcpp::Any visitEFunCall(fxParser::EFunCallContext *ctx) { return nullptr; }
-
-    virtual antlrcpp::Any visitERelOp(fxParser::ERelOpContext *ctx) { return nullptr; }
-
-    virtual antlrcpp::Any visitETrue(fxParser::ETrueContext *ctx) { return nullptr; }
-
-    virtual antlrcpp::Any visitEOr(fxParser::EOrContext *ctx) { return nullptr; }
-
-    virtual antlrcpp::Any visitEInt(fxParser::EIntContext *ctx) { return nullptr; }
-
-    virtual antlrcpp::Any visitEMemberExpr(fxParser::EMemberExprContext *ctx) { return nullptr; }
-
-    virtual antlrcpp::Any visitEUnOp(fxParser::EUnOpContext *ctx) { return nullptr; }
-
-    virtual antlrcpp::Any visitEStr(fxParser::EStrContext *ctx) { return nullptr; }
-
-    virtual antlrcpp::Any visitENewExpr(fxParser::ENewExprContext *ctx) { return nullptr; }
-
-    virtual antlrcpp::Any visitEMulOp(fxParser::EMulOpContext *ctx) { return nullptr; }
-
-    virtual antlrcpp::Any visitEAnd(fxParser::EAndContext *ctx) { return nullptr; }
-
-    virtual antlrcpp::Any visitEClassCast(fxParser::EClassCastContext *ctx) { return nullptr; }
-
-    virtual antlrcpp::Any visitEParen(fxParser::EParenContext *ctx) { return nullptr; }
-
-    virtual antlrcpp::Any visitEFalse(fxParser::EFalseContext *ctx) { return nullptr; }
-
-    virtual antlrcpp::Any visitEAddOp(fxParser::EAddOpContext *ctx) { return nullptr; }
-
-    virtual antlrcpp::Any visitENull(fxParser::ENullContext *ctx) { return nullptr; }
-
-    virtual antlrcpp::Any visitAddOp(fxParser::AddOpContext *ctx) { return nullptr; }
-
-    virtual antlrcpp::Any visitMulOp(fxParser::MulOpContext *ctx) { return nullptr; }
-
     virtual antlrcpp::Any visitRelOp(fxParser::RelOpContext *ctx) { return nullptr; }
+
+    virtual antlrcpp::Any visitBinOp(fxParser::BinOpContext *ctx) { return nullptr; }
+
+    virtual antlrcpp::Any visitAndExpr(fxParser::AndExprContext *ctx) { return nullptr; }
+
+    virtual antlrcpp::Any visitIDExpr(fxParser::IDExprContext *ctx) { return nullptr; }
+
+    virtual antlrcpp::Any visitConstExpr(fxParser::ConstExprContext *ctx) {
+        return visit(ctx->constant());
+    }
+
+    virtual antlrcpp::Any visitParamList(fxParser::ParamListContext *ctx) {
+        Args *args = new Args();
+        return args;
+    }
+
+    virtual antlrcpp::Any visitCallExpr(fxParser::CallExprContext *ctx) {
+        Loc loc(ctx->getStart()->getLine(), ctx->getStart()->getCharPositionInLine());
+        Call *caller = new Call(loc);
+        caller->name_ = ctx->ID()->getText();
+        caller->args_ = visit(ctx->paramList());
+        return (AstNode*) caller;
+    }
+
+    virtual antlrcpp::Any visitRelOpExpr(fxParser::RelOpExprContext *ctx) { return nullptr; }
+
+    virtual antlrcpp::Any visitBinOpExpr(fxParser::BinOpExprContext *ctx) {
+        Loc loc(ctx->getStart()->getLine(), ctx->getStart()->getCharPositionInLine());
+        BinaryExpr *binExpr = new BinaryExpr(loc, Kind::BinaryOperator,
+                TypeID::Nil, ctx->binOp()->getText(), nullptr, nullptr);
+
+        return (AstNode *)binExpr;
+    }
+
+    virtual antlrcpp::Any visitOrExpr(fxParser::OrExprContext *ctx) { return nullptr; }
+
+    virtual antlrcpp::Any visitConstant(fxParser::ConstantContext *ctx) {
+        for (auto *e : ctx->children) {
+            AstNode *ev = visit(e);
+            if (ev) return ev;
+        }
+        return (AstNode*) nullptr;
+    }
+
+    virtual antlrcpp::Any visitConstBool(fxParser::ConstBoolContext *ctx) {
+        Loc loc(ctx->getStart()->getLine(), ctx->getStart()->getCharPositionInLine());
+        return (AstNode*) new Val(loc, Kind::Constant, TypeID::Bool, ctx->getText());
+    }
+
+    virtual antlrcpp::Any visitConstInt(fxParser::ConstIntContext *ctx) {
+        Loc loc(ctx->getStart()->getLine(), ctx->getStart()->getCharPositionInLine());
+        return (AstNode*) new Val(loc, Kind::Constant, TypeID::Int, ctx->getText());
+    }
+
+     virtual antlrcpp::Any visitConstStr(fxParser::ConstStrContext *ctx) {
+        Loc loc(ctx->getStart()->getLine(), ctx->getStart()->getCharPositionInLine());
+        return (AstNode*) new Val(loc, Kind::Constant, TypeID::Str, ctx->getText());
+     }
+
+    virtual antlrcpp::Any visitBoolean(fxParser::BooleanContext *ctx) { return nullptr; }
+
+    virtual antlrcpp::Any visitIfStmt(fxParser::IfStmtContext *ctx) {
+        Loc loc(ctx->getStart()->getLine(), ctx->getStart()->getCharPositionInLine());
+        Stmts *then = nullptr, *_else = nullptr;
+        if (!ctx->block().empty()) then = visit(ctx->block().at(0));
+        if (ctx->block().size() > 1) _else = visit(ctx->block().at(1));
+        IfStmt *retval = new IfStmt(loc, nullptr, then, _else);
+
+        return (AstNode*) retval;
+    }
+
+    virtual antlrcpp::Any visitReturnStmt(fxParser::ReturnStmtContext *ctx) {
+        Loc loc(ctx->getStart()->getLine(), ctx->getStart()->getCharPositionInLine());
+        if (ctx->expr()->isEmpty()) {
+            return (AstNode *) new ReturnStmt(loc);
+        }
+        AstNode * val = visit(ctx->expr());
+        ReturnStmt *retval = new ReturnStmt(loc, val->Type());
+        retval->stmt = AstNodePtr(val);
+        return (AstNode*) retval;
+    }
 
 public:
     Decls ast;
@@ -205,8 +246,7 @@ int parse(const std::string &fname){
     AstVisitor visitor;
     visitor.visit(top);
     ifs.close();
-
-    fmt::print("{}\n{}\n", top->toStringTree(), visitor.ast.dump());
+    fmt::print("{}\n", visitor.ast.dump());
 
     return 0;
 }

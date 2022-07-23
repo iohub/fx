@@ -94,19 +94,18 @@ struct Decls: public AstNode {
 };
 
 struct Val: public AstNode {
-    std::string *raw_data;
+    std::string raw_data;
 
-    Val(Loc loc, Kind kind, std::string *val) : AstNode(loc, kind), raw_data(val) {}
-    Val(Loc loc, Kind kind, Ty ty, std::string *val) : AstNode(loc, kind, ty), raw_data(val) {}
+    Val(Loc loc, Kind kind, std::string val) : AstNode(loc, kind), raw_data(val) {}
+    Val(Loc loc, Kind kind, Ty ty, std::string val) : AstNode(loc, kind, ty), raw_data(val) {}
 
     ~Val() {
         Logging::debug("~Val({})\n", dump());
-        if (raw_data) delete raw_data;
     }
 
     virtual std::string dump();
     virtual json tojson(json parent);
-    virtual std::string nominal() { return raw_data ? *raw_data : "Nil"; }
+    virtual std::string nominal() { return raw_data; }
 };
 
 struct VarDecl: public AstNode {
@@ -142,8 +141,7 @@ struct BinaryExpr: public AstNode {
     Kind kind;
     OpKind op;
 
-    BinaryExpr(Loc loc, Kind nodeKind, Ty ty, std::string *opname, AstNode *l, AstNode *r);
-
+    BinaryExpr(Loc loc, Kind nodeKind, Ty ty, std::string opname, AstNode *l, AstNode *r);
     virtual std::string dump();
     virtual json tojson(json parent);
 
@@ -190,7 +188,7 @@ struct FuncDecl: public AstNode {
 struct Call: public AstNode {
     virtual std::string dump();
     virtual json tojson(json parent);
-    virtual std::string nominal() { return name_ ? *name_ : "Nil"; }
+    virtual std::string nominal() { return name_; }
 
     Call(Loc loc) : AstNode(loc, Kind::CallFunc) {}
     ~Call();
@@ -200,7 +198,7 @@ struct Call: public AstNode {
     }
 
     Args *args_;
-    std::string *name_;
+    std::string name_;
 };
 
 struct ReturnStmt: public AstNode {

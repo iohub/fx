@@ -155,7 +155,7 @@ llvm::Value* CodeGen::emit(ReturnStmt *Return) {
 
 llvm::Value* CodeGen::emit_const_value(Val *v) {
     if (!v || !(v->is(Kind::Constant))) return nullptr;
-    std::string num = v->raw_data ? *(v->raw_data) : "0";
+    std::string num = v->raw_data;
     switch ((v->Type()).kind()) {
         case TypeID::Float: return llvm::ConstantFP::get(*ctx_, llvm::APFloat(std::stof(num)));
         case TypeID::Int: return llvm::ConstantInt::get(*ctx_, llvm::APInt(32, std::stoll(num)));
