@@ -73,13 +73,13 @@ decl: func_decl | var_decl ;
 func_decl
      : FN IDENT LPAREN def_args RPAREN var_type stmts_block
      {
-         $$ = new FuncDecl(Loc(@1.first_line, @1.first_column), $2, $6);
+         $$ = new FuncDecl(Loc(@1.first_line, @1.first_column), *$2, *$6);
          $$->body_ = $7;
          $$->args_ = $4;
      }
      | FN IDENT LPAREN RPAREN var_type stmts_block
      {
-         $$ = new FuncDecl(Loc(@1.first_line, @1.first_column), $2, $5); $$->body_ = $6;
+         $$ = new FuncDecl(Loc(@1.first_line, @1.first_column), *$2, *$5); $$->body_ = $6;
      }
      ;
 
@@ -201,7 +201,7 @@ stmts_block
 
 var_decl
     : var_type IDENT
-    { $$ = new VarDecl(Loc(@1.first_line, @1.first_column), $2, $1); };
+    { $$ = new VarDecl(Loc(@1.first_line, @1.first_column), *$2, *$1); };
 
 primitive_type: INT | FLOAT | STR;
 
@@ -270,7 +270,7 @@ assignment_expr
     }
     | LET IDENT assignment_operator value_expr
     {
-        VarDecl *n = new VarDecl(Loc(@2.first_line, @2.first_column), $2, new std::string($4->TyStr()));
+        VarDecl *n = new VarDecl(Loc(@2.first_line, @2.first_column), *$2, $4->TyStr());
         $$ = new LetAssign(Loc(@1.first_line, @1.first_column), AstNodePtr(n), AstNodePtr($4));
     };
 

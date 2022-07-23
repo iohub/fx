@@ -1,275 +1,131 @@
 grammar fx;
 
-compilationUnit
-    :   translationUnit? EOF
+program
+    : topDef+
     ;
 
-translationUnit
-    :   externalDeclaration+
+topDef
+    : funcDef
+    | classDef
     ;
 
-externalDeclaration
-    :   functionDefinition
+funcDef
+    : type_ ID '(' arg? ')' block
     ;
 
-functionDefinition
-    :   'def' Identifier '(' parameterList ')' typeSpecifier compoundStatement
+classDef
+    : 'class' ID ('extends' ID)? '{' classItem* '}'
     ;
 
-declarationSpecifiers
-    :   declarationSpecifier+
+classItem
+    : type_ ID ';'                   # FieldDecl
+    | type_ ID '(' arg? ')' block    # MethodDef
     ;
 
-declarationSpecifier
-    : typeSpecifier
+arg
+    : varDef ( ',' varDef)*
     ;
 
-parameterList
-    :   parameterDeclaration (',' parameterDeclaration)*
+varDef
+    : type_ ID
     ;
 
-parameterDeclaration
-    :   declarationSpecifiers Identifier
+block
+    : '{' stmt* '}'
     ;
 
-identifierList
-    :   Identifier (',' Identifier)*
+stmt
+    : ';'                                # Empty
+    | block                              # BlockStmt
+    | type_ item ( ',' item )* ';'       # Decl
+    | expr '=' expr ';'                  # Ass
+    | expr '++' ';'                      # Incr
+    | expr '--' ';'                      # Decr
+    | 'return' expr ';'                  # Ret
+    | 'return' ';'                       # VRet
+    | 'if' '(' expr ')' stmt             # Cond
+    | 'if' '(' expr ')' stmt 'else' stmt # CondElse
+    | 'while' '(' expr ')' stmt          # While
+    | expr ';'                           # SExp
     ;
 
-assignmentOperator
-    :   '=' | '*=' | '/=' | '%=' | '+=' | '-=' | '<<=' | '>>=' | '&=' | '^=' | '|='
+type_
+    : 'int'     # Int
+    | 'str'     # Str
+    | 'bool'    # Bool
+    | 'void'    # Void
+    | ID        # ClassName
     ;
 
-typeSpecifier
-    :   ('void'
-    |   'char'
-    |   'int'
-    |   'float'
-    |   'str'
-    |   'bool')
+item
+    : ID
+    | ID '=' expr
     ;
 
-compoundStatement
-    :   '{' statements? '}'
-    ;
-
-statement
-    :   if_statement
-    |   assignment_expression
-    |   return_statement
-    ;
-
-if_statement : 'if' '(' cond_expression ')' compoundStatement else_clause? ;
-else_clause : 'else' compoundStatement | 'else' if_statement  ;
-
-cond_expression : binary_expression ;
-
-binary_expression
-     : expression binary_compare expression
-     ;
-
-binary_compare
-    : Equal | '!=' | '>' | '>=' | '<' | '<='
-    ;
-
-return_statement
-    : 'return' expression
-    ;
-
-expression
-    : Identifier
-    | Constant
-    ;
-
-statements : statement+ ;
-
-assignment_expression
-    : Identifier assignmentOperator Identifier
+expr
+    : expr '(' ( expr ( ',' expr )* )? ')'  # EFunCall
+    | expr '.' ID                           # EMemberExpr
+    | ('-'|'!') expr                        # EUnOp
+    | expr mulOp expr                       # EMulOp
+    | expr addOp expr                       # EAddOp
+    | expr relOp expr                       # ERelOp
+    | <assoc=right> expr '&&' expr          # EAnd
+    | <assoc=right> expr '||' expr          # EOr
+    | 'new' type_                           # ENewExpr
+    | ID                                    # EId
+    | INT                                   # EInt
+    | 'true'                                # ETrue
+    | 'false'                               # EFalse
+    | STR                                   # EStr
+    | 'null'                                # ENull
+    | '(' expr ')'                          # EParen
+    | '(' type_ ')' expr                    # EClassCast
     ;
 
 
-
-
-
-
-
-Break : 'break';
-Case : 'case';
-Char : 'char';
-Const : 'const';
-Continue : 'continue';
-Default : 'default';
-Do : 'do';
-Else : 'else';
-Enum : 'enum';
-Float : 'float';
-For : 'for';
-If : 'if';
-Inline : 'inline';
-Int : 'int';
-Return : 'return';
-Struct : 'struct';
-Switch : 'switch';
-Void : 'void';
-While : 'while';
-
-Bool : 'bool';
-
-LeftParen : '(';
-RightParen : ')';
-LeftBracket : '[';
-RightBracket : ']';
-LeftBrace : '{';
-RightBrace : '}';
-
-Less : '<';
-LessEqual : '<=';
-Greater : '>';
-GreaterEqual : '>=';
-LeftShift : '<<';
-RightShift : '>>';
-
-Plus : '+';
-PlusPlus : '++';
-Minus : '-';
-MinusMinus : '--';
-Star : '*';
-Div : '/';
-Mod : '%';
-
-And : '&';
-Or : '|';
-AndAnd : '&&';
-OrOr : '||';
-Caret : '^';
-Not : '!';
-Tilde : '~';
-
-Question : '?';
-Colon : ':';
-Semi : ';';
-Comma : ',';
-
-Assign : '=';
-// '*=' | '/=' | '%=' | '+=' | '-=' | '<<=' | '>>=' | '&=' | '^=' | '|='
-StarAssign : '*=';
-DivAssign : '/=';
-ModAssign : '%=';
-PlusAssign : '+=';
-MinusAssign : '-=';
-LeftShiftAssign : '<<=';
-RightShiftAssign : '>>=';
-AndAssign : '&=';
-XorAssign : '^=';
-OrAssign : '|=';
-
-Equal : '==';
-NotEqual : '!=';
-
-Arrow : '->';
-Dot : '.';
-
-
-Identifier
-    :   IdentifierNondigit
-        (   IdentifierNondigit
-        |   Digit
-        )*
+addOp
+    : '+'
+    | '-'
     ;
 
-Constant
-    :   IntegerConstant
-    |   FloatingConstant
-    |   CharacterConstant
+mulOp
+    : '*'
+    | '/'
+    | '%'
     ;
 
+relOp
+    : '<'
+    | '<='
+    | '>'
+    | '>='
+    | '=='
+    | '!='
+    ;
+
+COMMENT : ('#' ~[\r\n]* | '//' ~[\r\n]*) -> channel(HIDDEN);
+MULTICOMMENT : '/*' .*? '*/' -> channel(HIDDEN);
+
+fragment Letter  : Capital | Small ;
+fragment Capital : [A-Z\u00C0-\u00D6\u00D8-\u00DE] ;
+fragment Small   : [a-z\u00DF-\u00F6\u00F8-\u00FF] ;
+fragment Digit : [0-9] ;
+
+INT : Digit+ ;
+fragment ID_First : Letter | '_';
+ID : ID_First (ID_First | Digit)* ;
+
+WS : (' ' | '\r' | '\t' | '\n')+ ->  skip;
+
+STR
+    :   '"' StringCharacters? '"'
+    ;
+fragment StringCharacters
+    :   StringCharacter+
+    ;
 fragment
-Nondigit
-    :   [a-zA-Z_]
+StringCharacter
+    :   ~["\\]
+    |   '\\' [tnr"\\]
     ;
 
-fragment
-IdentifierNondigit
-    :   Nondigit
-    ;
-
-fragment
-Digit
-    :   [0-9]
-    ;
-
-fragment
-IntegerConstant
-    :   DecimalConstant
-    ;
-
-fragment
-DecimalConstant
-    :   NonzeroDigit Digit*
-    ;
-
-fragment
-NonzeroDigit
-    :   [1-9]
-    ;
-
-fragment
-FloatingConstant
-    :   DecimalFloatingConstant
-    ;
-
-fragment
-DecimalFloatingConstant
-    :   FractionalConstant
-    |   DigitSequence
-    ;
-
-DigitSequence
-    :   Digit+
-    ;
-
-fragment
-FractionalConstant
-    :   DigitSequence? '.' DigitSequence
-    |   DigitSequence '.'
-    ;
-
-fragment
-CharacterConstant
-    :   '\'' CCharSequence '\''
-    |   'L\'' CCharSequence '\''
-    |   'u\'' CCharSequence '\''
-    |   'U\'' CCharSequence '\''
-    ;
-
-fragment
-CCharSequence
-    :   CChar+
-    ;
-
-fragment
-CChar
-    :   ~['\\\r\n]
-    ;
-
-Whitespace
-    :   [ \t]+
-        -> skip
-    ;
-
-Newline
-    :   (   '\r' '\n'?
-        |   '\n'
-        )
-        -> skip
-    ;
-
-BlockComment
-    :   '/*' .*? '*/'
-        -> skip
-    ;
-
-LineComment
-    :   '//' ~[\r\n]*
-        -> skip
-    ;

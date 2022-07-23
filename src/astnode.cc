@@ -70,16 +70,15 @@ json Val::tojson(json parent) {
 
 VarDecl::~VarDecl() {
     Logging::debug("~VarDecl({})\n", dump());
-    if (var_name) delete var_name;
 }
 
 std::string VarDecl::dump() {
-    return _f("VarDecl@{}@{}", *var_name, TyStr());
+    return _f("VarDecl@{}@{}", var_name, TyStr());
 }
 
 json VarDecl::tojson(json parent) {
     json child;
-    child["varname"] = var_name ? *var_name : "Nil";
+    child["varname"] = var_name;
     child["type"] = Type().str();
     parent["VarDecl"] = child;
     return parent;
@@ -125,7 +124,7 @@ BinaryExpr::BinaryExpr(Loc loc, Kind nodeKind, Ty ty, std::string *opname, AstNo
 }
 
 std::string FuncDecl::dump() {
-    std::string str = name ? "FuncDecl@" + *name : "FuncDecl";
+    std::string str = "FuncDecl@" + name;
     for (auto itr: args()) str += itr->sexp();
     for (auto itr: body()) str +=  itr->sexp();
     return _f("({})", str);
@@ -133,7 +132,7 @@ std::string FuncDecl::dump() {
 
 json FuncDecl::tojson(json parent) {
     json child;
-    child["name"] = name ? *name : "Nil";
+    child["name"] = name;
     child["args"] = vec_tojson(args_);
     child["body"] = vec_tojson(body_);
     parent["FuncDecl"] = child;
@@ -144,7 +143,6 @@ FuncDecl::~FuncDecl() {
     Logging::debug("~FuncDecl({})\n", dump());
     if (args_) delete args_;
     if (body_) delete body_;
-    if (name) delete name;
 }
 
 std::string Call::dump() {

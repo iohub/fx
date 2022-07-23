@@ -12,20 +12,13 @@
 class  fxLexer : public antlr4::Lexer {
 public:
   enum {
-    T__0 = 1, T__1 = 2, Break = 3, Case = 4, Char = 5, Const = 6, Continue = 7, 
-    Default = 8, Do = 9, Else = 10, Enum = 11, Float = 12, For = 13, If = 14, 
-    Inline = 15, Int = 16, Return = 17, Struct = 18, Switch = 19, Void = 20, 
-    While = 21, Bool = 22, LeftParen = 23, RightParen = 24, LeftBracket = 25, 
-    RightBracket = 26, LeftBrace = 27, RightBrace = 28, Less = 29, LessEqual = 30, 
-    Greater = 31, GreaterEqual = 32, LeftShift = 33, RightShift = 34, Plus = 35, 
-    PlusPlus = 36, Minus = 37, MinusMinus = 38, Star = 39, Div = 40, Mod = 41, 
-    And = 42, Or = 43, AndAnd = 44, OrOr = 45, Caret = 46, Not = 47, Tilde = 48, 
-    Question = 49, Colon = 50, Semi = 51, Comma = 52, Assign = 53, StarAssign = 54, 
-    DivAssign = 55, ModAssign = 56, PlusAssign = 57, MinusAssign = 58, LeftShiftAssign = 59, 
-    RightShiftAssign = 60, AndAssign = 61, XorAssign = 62, OrAssign = 63, 
-    Equal = 64, NotEqual = 65, Arrow = 66, Dot = 67, Identifier = 68, Constant = 69, 
-    DigitSequence = 70, Whitespace = 71, Newline = 72, BlockComment = 73, 
-    LineComment = 74
+    T__0 = 1, T__1 = 2, T__2 = 3, T__3 = 4, T__4 = 5, T__5 = 6, T__6 = 7, 
+    T__7 = 8, T__8 = 9, T__9 = 10, T__10 = 11, T__11 = 12, T__12 = 13, T__13 = 14, 
+    T__14 = 15, T__15 = 16, T__16 = 17, T__17 = 18, T__18 = 19, T__19 = 20, 
+    T__20 = 21, T__21 = 22, T__22 = 23, T__23 = 24, T__24 = 25, T__25 = 26, 
+    T__26 = 27, T__27 = 28, T__28 = 29, T__29 = 30, T__30 = 31, T__31 = 32, 
+    T__32 = 33, T__33 = 34, T__34 = 35, T__35 = 36, T__36 = 37, T__37 = 38, 
+    COMMENT = 39, MULTICOMMENT = 40, INT = 41, ID = 42, WS = 43, STR = 44
   };
 
   fxLexer(antlr4::CharStream *input);

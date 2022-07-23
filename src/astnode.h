@@ -31,7 +31,6 @@ public:
 };
 
 class AstNode : std::enable_shared_from_this<AstNode> {
-
 public:
     enum class Kind : uint8_t {
         Invalid, Nil, CallFunc, Constant,
@@ -111,19 +110,19 @@ struct Val: public AstNode {
 };
 
 struct VarDecl: public AstNode {
-    std::string *var_name;
+    std::string var_name;
 
-    VarDecl(Loc loc, std::string *name, std::string *type)
-        : AstNode(loc, Kind::VarDecl, Ty(*type)), var_name(name) { }
+    VarDecl(Loc loc, std::string name, std::string type)
+        : AstNode(loc, Kind::VarDecl, Ty(type)), var_name(name) { }
 
     std::string name() {
-        return var_name ? *var_name: "Nil";
+        return var_name;
     }
 
     ~VarDecl();
     virtual std::string dump();
     virtual json tojson(json parent);
-    virtual std::string nominal() { return var_name? *var_name: "Nil"; }
+    virtual std::string nominal() { return var_name; }
 };
 
 struct LetAssign: public AstNode {
@@ -169,11 +168,11 @@ namespace detail {
 };
 
 struct FuncDecl: public AstNode {
-    FuncDecl(Loc loc, std::string *name, std::string *type)
-        : AstNode(loc, Kind::FuncDecl, Ty(*type)), name(name) { }
+    FuncDecl(Loc loc, std::string name, std::string type)
+        : AstNode(loc, Kind::FuncDecl, Ty(type)), name(name) { }
 
     virtual std::string nominal() {
-        return name ? *name : "Nil";
+        return name;
     }
 
     virtual std::string dump();
@@ -183,9 +182,9 @@ struct FuncDecl: public AstNode {
     Stmts body() const { return body_ ? *body_ : Stmts(); }
     Args args() const { return args_ ? *args_ : Args(); }
 
-    Args *args_;
-    Stmts *body_;
-    std::string *name;
+    Args *args_ = nullptr;
+    Stmts *body_ = nullptr;
+    std::string name;
 };
 
 struct Call: public AstNode {

@@ -4,7 +4,6 @@ project(fx LANGUAGES CXX C)
 
 include(FetchContent)
 set(CMAKE_TLS_VERIFY true)
-set(DEFAULT_CMAKE_BUILD_TYPE Debug)
 set(CMAKE_CXX_STANDARD 17)
 
 find_package(BISON REQUIRED)
@@ -28,7 +27,8 @@ set(ANTLR_DIR ${CMAKE_CURRENT_BINARY_DIR}/_deps/antlr-src)
 list(APPEND CMAKE_MODULE_PATH ${ANTLR_DIR}/cmake)
 
 set(LLVM_INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR}/_deps/llvm-src)
-find_package(LLVM 9.0.0 CONFIG PATHS ${LLVM_INSTALL_DIR}/lib/cmake/llvm NO_DEFAULT_PATH)
+# set(LLVM_INSTALL_DIR /home/do/extdata/local/mlir)
+find_package(LLVM CONFIG PATHS ${LLVM_INSTALL_DIR}/lib/cmake/llvm NO_DEFAULT_PATH)
 
 if (NOT LLVM_FOUND)
   message(FATAL_ERROR "not found llvm in ${LLVM_INSTALL_DIR}")
@@ -85,13 +85,14 @@ add_executable(fx
     ${Fmt_INCLUDE_DIR}
     ${CLI11_INCLUDE_DIR}
     src/type.cc
-    ${Antlr4Parser}
     src/astnode.cc
+    ${Antlr4Parser}
     src/typecheck.cc
     src/codegen.cc
     src/main.cc
 )
 
+include_directories(${CMAKE_SOURCE_DIR}/src)
 include_directories(${CMAKE_SOURCE_DIR}/src/parser)
 include_directories(${ANTLR_DIR}/runtime/src)
 include_directories(${CMAKE_SOURCE_DIR}/third_party/CLI11/include)
