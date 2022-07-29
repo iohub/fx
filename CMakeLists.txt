@@ -75,8 +75,8 @@ endif()
 
 # antlr4
 set(Antlr4Parser
-    ${CMAKE_SOURCE_DIR}/src/parser/fxLexer.cpp
-    ${CMAKE_SOURCE_DIR}/src/parser/fxParser.cpp
+    ${CMAKE_SOURCE_DIR}/src/antlr4/fxLexer.cpp
+    ${CMAKE_SOURCE_DIR}/src/antlr4/fxParser.cpp
 )
 
 add_executable(fx
@@ -86,6 +86,7 @@ add_executable(fx
     ${CLI11_INCLUDE_DIR}
     src/type.cc
     src/astnode.cc
+    src/fxParserImpl.cc
     ${Antlr4Parser}
     src/typecheck.cc
     src/codegen.cc
@@ -93,7 +94,7 @@ add_executable(fx
 )
 
 include_directories(${CMAKE_SOURCE_DIR}/src)
-include_directories(${CMAKE_SOURCE_DIR}/src/parser)
+include_directories(${CMAKE_SOURCE_DIR}/src/antlr4)
 include_directories(${ANTLR_DIR}/runtime/src)
 include_directories(${CMAKE_SOURCE_DIR}/third_party/CLI11/include)
 include_directories(${LLVM_INCDIR})
