@@ -31,7 +31,6 @@ public:
 };
 
 class AstNode : std::enable_shared_from_this<AstNode> {
-
 public:
     enum class Kind : uint8_t {
         Invalid, Nil, CallFunc, Constant,
@@ -95,35 +94,34 @@ struct Decls: public AstNode {
 };
 
 struct Val: public AstNode {
-    std::string *raw_data;
+    std::string raw_data;
 
-    Val(Loc loc, Kind kind, std::string *val) : AstNode(loc, kind), raw_data(val) {}
-    Val(Loc loc, Kind kind, Ty ty, std::string *val) : AstNode(loc, kind, ty), raw_data(val) {}
+    Val(Loc loc, Kind kind, std::string val) : AstNode(loc, kind), raw_data(val) {}
+    Val(Loc loc, Kind kind, Ty ty, std::string val) : AstNode(loc, kind, ty), raw_data(val) {}
 
     ~Val() {
         Logging::debug("~Val({})\n", dump());
-        if (raw_data) delete raw_data;
     }
 
     virtual std::string dump();
     virtual json tojson(json parent);
-    virtual std::string nominal() { return raw_data ? *raw_data : "Nil"; }
+    virtual std::string nominal() { return raw_data; }
 };
 
 struct VarDecl: public AstNode {
-    std::string *var_name;
+    std::string var_name;
 
-    VarDecl(Loc loc, std::string *name, std::string *type)
-        : AstNode(loc, Kind::VarDecl, Ty(*type)), var_name(name) { }
+    VarDecl(Loc loc, std::string name, std::string type)
+        : AstNode(loc, Kind::VarDecl, Ty(type)), var_name(name) { }
 
     std::string name() {
-        return var_name ? *var_name: "Nil";
+        return var_name;
     }
 
     ~VarDecl();
     virtual std::string dump();
     virtual json tojson(json parent);
-    virtual std::string nominal() { return var_name? *var_name: "Nil"; }
+    virtual std::string nominal() { return var_name; }
 };
 
 struct LetAssign: public AstNode {
@@ -143,8 +141,7 @@ struct BinaryExpr: public AstNode {
     Kind kind;
     OpKind op;
 
-    BinaryExpr(Loc loc, Kind nodeKind, Ty ty, std::string *opname, AstNode *l, AstNode *r);
-
+    BinaryExpr(Loc loc, Kind nodeKind, Ty ty, std::string opname, AstNode *l, AstNode *r);
     virtual std::string dump();
     virtual json tojson(json parent);
 
@@ -169,11 +166,11 @@ namespace detail {
 };
 
 struct FuncDecl: public AstNode {
-    FuncDecl(Loc loc, std::string *name, std::string *type)
-        : AstNode(loc, Kind::FuncDecl, Ty(*type)), name(name) { }
+    FuncDecl(Loc loc, std::string name, std::string type)
+        : AstNode(loc, Kind::FuncDecl, Ty(type)), name(name) { }
 
     virtual std::string nominal() {
-        return name ? *name : "Nil";
+        return name;
     }
 
     virtual std::string dump();
@@ -183,15 +180,15 @@ struct FuncDecl: public AstNode {
     Stmts body() const { return body_ ? *body_ : Stmts(); }
     Args args() const { return args_ ? *args_ : Args(); }
 
-    Args *args_;
-    Stmts *body_;
-    std::string *name;
+    Args *args_ = nullptr;
+    Stmts *body_ = nullptr;
+    std::string name;
 };
 
 struct Call: public AstNode {
     virtual std::string dump();
     virtual json tojson(json parent);
-    virtual std::string nominal() { return name_ ? *name_ : "Nil"; }
+    virtual std::string nominal() { return name_; }
 
     Call(Loc loc) : AstNode(loc, Kind::CallFunc) {}
     ~Call();
@@ -201,7 +198,7 @@ struct Call: public AstNode {
     }
 
     Args *args_;
-    std::string *name_;
+    std::string name_;
 };
 
 struct ReturnStmt: public AstNode {

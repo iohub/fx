@@ -73,13 +73,13 @@ decl: func_decl | var_decl ;
 func_decl
      : FN IDENT LPAREN def_args RPAREN var_type stmts_block
      {
-         $$ = new FuncDecl(Loc(@1.first_line, @1.first_column), $2, $6);
+         $$ = new FuncDecl(Loc(@1.first_line, @1.first_column), *$2, *$6);
          $$->body_ = $7;
          $$->args_ = $4;
      }
      | FN IDENT LPAREN RPAREN var_type stmts_block
      {
-         $$ = new FuncDecl(Loc(@1.first_line, @1.first_column), $2, $5); $$->body_ = $6;
+         $$ = new FuncDecl(Loc(@1.first_line, @1.first_column), *$2, *$5); $$->body_ = $6;
      }
      ;
 
@@ -88,7 +88,7 @@ func_call
      {
          Call *n = new Call(Loc(@1.first_line, @1.first_column));
          n->args_ = $3;
-         n->name_ = $1;
+         n->name_ = *$1;
          $$ = n;
      }
      ;
@@ -173,11 +173,11 @@ op
     : op_val binary_op op_val
     {
         $$ = new BinaryExpr(Loc(@1.first_line, @1.first_column),
-            Kind::BinaryOperator, TypeID::Nil, $2, $1, $3);
+            Kind::BinaryOperator, TypeID::Nil, *$2, $1, $3);
     };
 
 op_val
-      : IDENT { $$ = new Val(Loc(@1.first_line, @1.first_column), Kind::Value, $1); }
+      : IDENT { $$ = new Val(Loc(@1.first_line, @1.first_column), Kind::Value, *$1); }
       | primitive_val { $$ = $1; }
       | func_call { $$ = $1; } ;
 
@@ -201,7 +201,7 @@ stmts_block
 
 var_decl
     : var_type IDENT
-    { $$ = new VarDecl(Loc(@1.first_line, @1.first_column), $2, $1); };
+    { $$ = new VarDecl(Loc(@1.first_line, @1.first_column), *$2, *$1); };
 
 primitive_type: INT | FLOAT | STR;
 
@@ -209,11 +209,11 @@ var_type: primitive_type | IDENT;
 
 primitive_val
          :ICONST
-             { $$ = new Val(Loc(@1.first_line, @1.first_column), Kind::Constant, TypeID::Int, $1); }
+             { $$ = new Val(Loc(@1.first_line, @1.first_column), Kind::Constant, TypeID::Int, *$1); }
          | FCONST
-             { $$ = new Val(Loc(@1.first_line, @1.first_column), Kind::Constant, TypeID::Float, $1); }
+             { $$ = new Val(Loc(@1.first_line, @1.first_column), Kind::Constant, TypeID::Float, *$1); }
          | STRING
-             { $$ = new Val(Loc(@1.first_line, @1.first_column), Kind::Constant, TypeID::Str, $1); }
+             { $$ = new Val(Loc(@1.first_line, @1.first_column), Kind::Constant, TypeID::Str, *$1); }
          ;
 
 for_stmt
@@ -244,7 +244,7 @@ boolean_stmt
     : op_val compare_operator op_val
     {
         $$ = new BinaryExpr(Loc(@1.first_line, @1.first_column),
-            Kind::BinaryCmp, TypeID::Bool, $2, $1, $3);
+            Kind::BinaryCmp, TypeID::Bool, *$2, $1, $3);
     };
 
 
@@ -266,11 +266,11 @@ assignment_expr
     : IDENT assignment_operator value_expr
     {
         $$ = new AssignStmt(Loc(@1.first_line, @1.first_column),
-            new Val(Loc(@1.first_line, @1.first_column), Kind::VarRef, $1), $3);
+            new Val(Loc(@1.first_line, @1.first_column), Kind::VarRef, *$1), $3);
     }
     | LET IDENT assignment_operator value_expr
     {
-        VarDecl *n = new VarDecl(Loc(@2.first_line, @2.first_column), $2, new std::string($4->TyStr()));
+        VarDecl *n = new VarDecl(Loc(@2.first_line, @2.first_column), *$2, $4->TyStr());
         $$ = new LetAssign(Loc(@1.first_line, @1.first_column), AstNodePtr(n), AstNodePtr($4));
     };
 

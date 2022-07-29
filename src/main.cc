@@ -17,56 +17,47 @@
 #include "antlr4-runtime.h"
 #include "fxLexer.h"
 #include "fxParser.h"
-#include "fxVisitor.h"
+#include "fxParserImpl.h"
 
 using namespace fx;
 using json = nlohmann::json;
 
-extern FILE *yyin;
-extern AstNode* Program;
 Logging::Level Logging::level;
 
-
-void compile(const std::string &fname) {
-    FILE *fobj = fopen(fname.c_str(), "r");
-    if (!fobj) {
-        throw new ParseException(_f("open {} err", fname));
-    }
-    yyin = fobj;
-    do { yyparse(); } while (!feof(yyin));
-    if (!Program) {
-        throw new ParseException(_f("parse {} err", fname));
-    }
-    AstNodePtr wrap(Program);
-    TypeChecker checker;
-
-    TypeCheckResult result = checker.check(wrap);
-    json jsonExp = Program->tojson();
-    // Logging::info("typed ast (json format):\n{}\n", jsonExp.dump());
-    wrap->print();
-    Logging::info("TypeCheckResult {}\n", result.errmsg);
-    CodeGen gen(fname);
-    try {
-        gen.emit(wrap);
-        Logging::info("llvm ir:{}\n", gen.llvm_ir());
-        gen.dump(fname + ".ll");
-    } catch (CodeGenException *ex) {
-        Logging::error("catch codegen exception {}", ex->what());
-    }
-}
-
-int parse(const std::string &fname){
+Decls* parse(const std::string &fname){
     std::ifstream ifs;
     ifs.open(fname);
     antlr4::ANTLRInputStream input(ifs);
     fxLexer lexer(&input);
     antlr4::CommonTokenStream tokens(&lexer);
     fxParser parser(&tokens);
-    antlr4::tree::ParseTree *tree = parser.compilationUnit();
-    fxVisitor visitor;
-    visitor.visit(tree);
+    antlr4::tree::ParseTree *top = parser.program();
+    AstVisitor visitor;
+    visitor.visit(top);
+    ifs.close();
+    return visitor.ast;
+}
 
-    return 0;
+void compile(const std::string &fname) {
+    AstNodePtr wrap(parse(fname));
+    TypeChecker checker;
+    fmt::print("ast:\n{}\n", wrap->dump());
+    wrap->print() ;
+    return ;
+
+    TypeCheckResult result = checker.check(wrap);
+    json jsonExp = wrap->tojson();
+    // Logging::info("typed ast (json format):\n{}\n", jsonExp.dump());
+    // wrap->print();
+    // Logging::info("TypeCheckResult {}\n", result.errmsg);
+    CodeGen gen(fname);
+    try {
+        gen.emit(wrap);
+        // Logging::info("llvm ir:{}\n", gen.llvm_ir());
+        gen.dump(fname + ".ll");
+    } catch (CodeGenException *ex) {
+        Logging::error("catch codegen exception {}", ex->what());
+    }
 }
 
 int main(int argc, const char *argv[]) {
