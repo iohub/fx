@@ -22,47 +22,17 @@
 using namespace fx;
 using json = nlohmann::json;
 
-extern FILE *yyin;
-extern AstNode* Program;
 Logging::Level Logging::level;
 
 
-void compile(const std::string &fname) {
-    FILE *fobj = fopen(fname.c_str(), "r");
-    if (!fobj) {
-        throw new ParseException(_f("open {} err", fname));
-    }
-    yyin = fobj;
-    do { yyparse(); } while (!feof(yyin));
-    if (!Program) {
-        throw new ParseException(_f("parse {} err", fname));
-    }
-    AstNodePtr wrap(Program);
-    TypeChecker checker;
-
-    TypeCheckResult result = checker.check(wrap);
-    json jsonExp = Program->tojson();
-    // Logging::info("typed ast (json format):\n{}\n", jsonExp.dump());
-    // wrap->print();
-    // Logging::info("TypeCheckResult {}\n", result.errmsg);
-    CodeGen gen(fname);
-    try {
-        gen.emit(wrap);
-        // Logging::info("llvm ir:{}\n", gen.llvm_ir());
-        gen.dump(fname + ".ll");
-    } catch (CodeGenException *ex) {
-        Logging::error("catch codegen exception {}", ex->what());
-    }
-}
-
 class  AstVisitor : public fxVisitor {
 public:
-    AstVisitor() : ast(Loc()) {}
+    AstVisitor() { ast = new Decls(Loc()); }
 
     virtual antlrcpp::Any visitProgram(fxParser::ProgramContext *ctx) {
         for (auto *child : ctx->children) {
             AstNode* n = visit(child);
-            if (n) ast.append(n);
+            if (n) ast->append(n);
         }
         return (AstNode*)&ast;
     }
@@ -83,7 +53,7 @@ public:
     virtual antlrcpp::Any visitTopDef(fxParser::TopDefContext *ctx) {
         for (auto *child : ctx->children) {
             AstNode* n = visit(child);
-            if (n) ast.append(n);
+            if (n) ast->append(n);
         }
         return (AstNode*) nullptr;
     }
@@ -162,6 +132,7 @@ public:
 
     virtual antlrcpp::Any visitParamList(fxParser::ParamListContext *ctx) {
         Args *args = new Args();
+        for (auto *e: ctx->expr()) visit(e);
         return args;
     }
 
@@ -177,9 +148,10 @@ public:
 
     virtual antlrcpp::Any visitBinOpExpr(fxParser::BinOpExprContext *ctx) {
         Loc loc(ctx->getStart()->getLine(), ctx->getStart()->getCharPositionInLine());
+        AstNode* lhs = visit(ctx->expr().at(0));
+        AstNode* rhs = visit(ctx->expr().at(1));
         BinaryExpr *binExpr = new BinaryExpr(loc, Kind::BinaryOperator,
-                TypeID::Nil, ctx->binOp()->getText(), nullptr, nullptr);
-
+                TypeID::Nil, ctx->binOp()->getText(), lhs, rhs);
         return (AstNode *)binExpr;
     }
 
@@ -216,7 +188,6 @@ public:
         if (!ctx->block().empty()) then = visit(ctx->block().at(0));
         if (ctx->block().size() > 1) _else = visit(ctx->block().at(1));
         IfStmt *retval = new IfStmt(loc, nullptr, then, _else);
-
         return (AstNode*) retval;
     }
 
@@ -232,10 +203,10 @@ public:
     }
 
 public:
-    Decls ast;
+    Decls *ast;
 };
 
-int parse(const std::string &fname){
+Decls* parse(const std::string &fname){
     std::ifstream ifs;
     ifs.open(fname);
     antlr4::ANTLRInputStream input(ifs);
@@ -246,9 +217,29 @@ int parse(const std::string &fname){
     AstVisitor visitor;
     visitor.visit(top);
     ifs.close();
-    fmt::print("{}\n", visitor.ast.dump());
+    return visitor.ast;
+}
 
-    return 0;
+void compile(const std::string &fname) {
+    AstNodePtr wrap(parse(fname));
+    TypeChecker checker;
+    fmt::print("ast:\n{}\n", wrap->dump());
+    wrap->print() ;
+    return ;
+
+    TypeCheckResult result = checker.check(wrap);
+    json jsonExp = wrap->tojson();
+    // Logging::info("typed ast (json format):\n{}\n", jsonExp.dump());
+    // wrap->print();
+    // Logging::info("TypeCheckResult {}\n", result.errmsg);
+    CodeGen gen(fname);
+    try {
+        gen.emit(wrap);
+        // Logging::info("llvm ir:{}\n", gen.llvm_ir());
+        gen.dump(fname + ".ll");
+    } catch (CodeGenException *ex) {
+        Logging::error("catch codegen exception {}", ex->what());
+    }
 }
 
 int main(int argc, const char *argv[]) {

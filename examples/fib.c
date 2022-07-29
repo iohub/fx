@@ -1,5 +1,5 @@
 
-int fib(int x, int y) {
+int fib(int x) {
   if (x <=0) {
       return 0;
   }
@@ -10,6 +10,7 @@ int fib(int x, int y) {
 }
 
 int main() {
-    fib(5);
-    return 0;
+
+    return fib(5);
 }
+
