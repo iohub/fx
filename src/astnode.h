@@ -190,7 +190,7 @@ struct Call: public AstNode {
     virtual json tojson(json parent);
     virtual std::string nominal() { return name_; }
 
-    Call(Loc loc) : AstNode(loc, Kind::CallFunc) {}
+    Call(Loc loc) : AstNode(loc, Kind::CallFunc, TypeID::Nil) {}
     ~Call();
 
     Args args() {

@@ -39,7 +39,6 @@ public:
     virtual antlrcpp::Any visitRelOpExpr(fxParser::RelOpExprContext *ctx);
     virtual antlrcpp::Any visitBinOpExpr(fxParser::BinOpExprContext *ctx);
     virtual antlrcpp::Any visitOrExpr(fxParser::OrExprContext *ctx);
-    virtual antlrcpp::Any visitConstant(fxParser::ConstantContext *ctx);
     virtual antlrcpp::Any visitConstBool(fxParser::ConstBoolContext *ctx);
     virtual antlrcpp::Any visitConstInt(fxParser::ConstIntContext *ctx);
     virtual antlrcpp::Any visitConstStr(fxParser::ConstStrContext *ctx);
@@ -49,6 +48,7 @@ public:
 
 public:
     Decls *ast;
+    Loc loc(antlr4::ParserRuleContext *ctx);
 };
 
 

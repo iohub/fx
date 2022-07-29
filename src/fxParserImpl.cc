@@ -15,10 +15,9 @@ antlrcpp::Any AstVisitor::visitProgram(fxParser::ProgramContext *ctx) {
 }
 
 antlrcpp::Any AstVisitor::visitFuncDef(fxParser::FuncDefContext *ctx) {
-    Loc loc(ctx->getStart()->getLine(), ctx->getStart()->getCharPositionInLine());
     std::string ident = ctx->ID()->toString();
-    std::string tyname = ctx->type_()->toString();
-    FuncDecl *fn = new FuncDecl(loc, ident, tyname);
+    std::string tyname = ctx->type_()->getText();
+    FuncDecl *fn = new FuncDecl(loc(ctx), ident, tyname);
     // has args
     if (ctx->children.size() == 6) {
         fn->args_ = visit(ctx->children.at(3));
@@ -55,13 +54,11 @@ antlrcpp::Any AstVisitor::visitArg(fxParser::ArgContext *ctx) {
 antlrcpp::Any AstVisitor::visitVarDef(fxParser::VarDefContext *ctx) {
     std::string tyname = ctx->type_()->getText();
     std::string ident = ctx->ID()->toString();
-    Loc loc(ctx->getStart()->getLine(), ctx->getStart()->getCharPositionInLine());
-    VarDecl *n = new VarDecl(loc, ident, tyname);
+    VarDecl *n = new VarDecl(loc(ctx), ident, tyname);
     return (AstNode *)n;
 }
 
 antlrcpp::Any AstVisitor::visitBlock(fxParser::BlockContext *ctx) {
-    Loc loc(ctx->getStart()->getLine(), ctx->getStart()->getCharPositionInLine());
     Stmts *retval = new Stmts();
     for (auto *e : ctx->stmt()) {
         AstNode *ev = visit(e);
@@ -75,7 +72,6 @@ antlrcpp::Any AstVisitor::visitDecl(fxParser::DeclContext *ctx) { return nullptr
 antlrcpp::Any AstVisitor::visitAss(fxParser::AssContext *ctx) { return nullptr; }
 
 antlrcpp::Any AstVisitor::visitStmt(fxParser::StmtContext *ctx) {
-    Loc loc(ctx->getStart()->getLine(), ctx->getStart()->getCharPositionInLine());
     for (auto *e : ctx->children) {
         AstNode *ev = visit(e);
         if (ev != nullptr) return ev;
@@ -101,7 +97,9 @@ antlrcpp::Any AstVisitor::visitBinOp(fxParser::BinOpContext *ctx) { return nullp
 
 antlrcpp::Any AstVisitor::visitAndExpr(fxParser::AndExprContext *ctx) { return nullptr; }
 
-antlrcpp::Any AstVisitor::visitIDExpr(fxParser::IDExprContext *ctx) { return nullptr; }
+antlrcpp::Any AstVisitor::visitIDExpr(fxParser::IDExprContext *ctx) {
+    return (AstNode*) new Val(loc(ctx), Kind::VarRef, ctx->getText());
+}
 
 antlrcpp::Any AstVisitor::visitConstExpr(fxParser::ConstExprContext *ctx) {
     return visit(ctx->constant());
@@ -109,13 +107,15 @@ antlrcpp::Any AstVisitor::visitConstExpr(fxParser::ConstExprContext *ctx) {
 
 antlrcpp::Any AstVisitor::visitParamList(fxParser::ParamListContext *ctx) {
     Args *args = new Args();
-    for (auto *e: ctx->expr()) visit(e);
+    for (auto *e: ctx->expr()) {
+        AstNode *ev = visit(e);
+        if (ev) args->push_back(AstNodePtr(ev));
+    }
     return args;
 }
 
 antlrcpp::Any AstVisitor::visitCallExpr(fxParser::CallExprContext *ctx) {
-    Loc loc(ctx->getStart()->getLine(), ctx->getStart()->getCharPositionInLine());
-    Call *caller = new Call(loc);
+    Call *caller = new Call(loc(ctx));
     caller->name_ = ctx->ID()->getText();
     caller->args_ = visit(ctx->paramList());
     return (AstNode*) caller;
@@ -124,57 +124,47 @@ antlrcpp::Any AstVisitor::visitCallExpr(fxParser::CallExprContext *ctx) {
 antlrcpp::Any AstVisitor::visitRelOpExpr(fxParser::RelOpExprContext *ctx) { return nullptr; }
 
 antlrcpp::Any AstVisitor::visitBinOpExpr(fxParser::BinOpExprContext *ctx) {
-    Loc loc(ctx->getStart()->getLine(), ctx->getStart()->getCharPositionInLine());
     AstNode* lhs = visit(ctx->expr().at(0));
     AstNode* rhs = visit(ctx->expr().at(1));
-    BinaryExpr *binExpr = new BinaryExpr(loc, Kind::BinaryOperator,
+    BinaryExpr *binExpr = new BinaryExpr(loc(ctx), Kind::BinaryOperator,
             TypeID::Nil, ctx->binOp()->getText(), lhs, rhs);
     return (AstNode *)binExpr;
 }
 
 antlrcpp::Any AstVisitor::visitOrExpr(fxParser::OrExprContext *ctx) { return nullptr; }
 
-antlrcpp::Any AstVisitor::visitConstant(fxParser::ConstantContext *ctx) {
-    for (auto *e : ctx->children) {
-        AstNode *ev = visit(e);
-        if (ev) return ev;
-    }
-    return (AstNode*) nullptr;
-}
-
 antlrcpp::Any AstVisitor::visitConstBool(fxParser::ConstBoolContext *ctx) {
-    Loc loc(ctx->getStart()->getLine(), ctx->getStart()->getCharPositionInLine());
-    return (AstNode*) new Val(loc, Kind::Constant, TypeID::Bool, ctx->getText());
+    return (AstNode*) new Val(loc(ctx), Kind::Constant, TypeID::Bool, ctx->getText());
 }
 
 antlrcpp::Any AstVisitor::visitConstInt(fxParser::ConstIntContext *ctx) {
-    Loc loc(ctx->getStart()->getLine(), ctx->getStart()->getCharPositionInLine());
-    return (AstNode*) new Val(loc, Kind::Constant, TypeID::Int, ctx->getText());
+    return (AstNode*) new Val(loc(ctx), Kind::Constant, TypeID::Int, ctx->getText());
 }
 
 antlrcpp::Any AstVisitor::visitConstStr(fxParser::ConstStrContext *ctx) {
-    Loc loc(ctx->getStart()->getLine(), ctx->getStart()->getCharPositionInLine());
-    return (AstNode*) new Val(loc, Kind::Constant, TypeID::Str, ctx->getText());
+    return (AstNode*) new Val(loc(ctx), Kind::Constant, TypeID::Str, ctx->getText());
 }
 
 antlrcpp::Any AstVisitor::visitBoolean(fxParser::BooleanContext *ctx) { return nullptr; }
 
+Loc AstVisitor::loc(antlr4::ParserRuleContext *ctx) {
+    return Loc(ctx->getStart()->getLine(), ctx->getStart()->getCharPositionInLine());
+}
+
 antlrcpp::Any AstVisitor::visitIfStmt(fxParser::IfStmtContext *ctx) {
-    Loc loc(ctx->getStart()->getLine(), ctx->getStart()->getCharPositionInLine());
     Stmts *then = nullptr, *_else = nullptr;
     if (!ctx->block().empty()) then = visit(ctx->block().at(0));
     if (ctx->block().size() > 1) _else = visit(ctx->block().at(1));
-    IfStmt *retval = new IfStmt(loc, nullptr, then, _else);
+    IfStmt *retval = new IfStmt(loc(ctx), nullptr, then, _else);
     return (AstNode*) retval;
 }
 
 antlrcpp::Any AstVisitor::visitReturnStmt(fxParser::ReturnStmtContext *ctx) {
-    Loc loc(ctx->getStart()->getLine(), ctx->getStart()->getCharPositionInLine());
     if (ctx->expr()->isEmpty()) {
-        return (AstNode *) new ReturnStmt(loc);
+        return (AstNode *) new ReturnStmt(loc(ctx));
     }
     AstNode * val = visit(ctx->expr());
-    ReturnStmt *retval = new ReturnStmt(loc, val->Type());
+    ReturnStmt *retval = new ReturnStmt(loc(ctx), val->Type());
     retval->stmt = AstNodePtr(val);
     return (AstNode*) retval;
 }

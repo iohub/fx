@@ -41,12 +41,13 @@ Decls* parse(const std::string &fname){
 void compile(const std::string &fname) {
     AstNodePtr wrap(parse(fname));
     TypeChecker checker;
-    fmt::print("ast:\n{}\n", wrap->dump());
-    wrap->print() ;
-    return ;
 
     TypeCheckResult result = checker.check(wrap);
     json jsonExp = wrap->tojson();
+    wrap->print() ;
+    fmt::print("ast:\n{}\n", wrap->dump());
+    return ;
+
     // Logging::info("typed ast (json format):\n{}\n", jsonExp.dump());
     // wrap->print();
     // Logging::info("TypeCheckResult {}\n", result.errmsg);
