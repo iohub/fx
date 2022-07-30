@@ -46,7 +46,6 @@ void compile(const std::string &fname) {
     json jsonExp = wrap->tojson();
     wrap->print() ;
     fmt::print("ast:\n{}\n", wrap->dump());
-    return ;
 
     // Logging::info("typed ast (json format):\n{}\n", jsonExp.dump());
     // wrap->print();
