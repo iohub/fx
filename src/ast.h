@@ -114,9 +114,7 @@ struct VarDecl: public AstNode {
     VarDecl(Loc loc, std::string name, std::string type)
         : AstNode(loc, Kind::VarDecl, Ty(type)), var_name(name) { }
 
-    std::string name() {
-        return var_name;
-    }
+    std::string name() { return var_name; }
 
     ~VarDecl();
     virtual std::string dump();

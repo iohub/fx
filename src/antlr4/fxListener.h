@@ -44,8 +44,11 @@ public:
   virtual void enterStmt(fxParser::StmtContext *ctx) = 0;
   virtual void exitStmt(fxParser::StmtContext *ctx) = 0;
 
-  virtual void enterDecl(fxParser::DeclContext *ctx) = 0;
-  virtual void exitDecl(fxParser::DeclContext *ctx) = 0;
+  virtual void enterForStmt(fxParser::ForStmtContext *ctx) = 0;
+  virtual void exitForStmt(fxParser::ForStmtContext *ctx) = 0;
+
+  virtual void enterVarDecl(fxParser::VarDeclContext *ctx) = 0;
+  virtual void exitVarDecl(fxParser::VarDeclContext *ctx) = 0;
 
   virtual void enterAss(fxParser::AssContext *ctx) = 0;
   virtual void exitAss(fxParser::AssContext *ctx) = 0;
@@ -70,9 +73,6 @@ public:
 
   virtual void enterClassName(fxParser::ClassNameContext *ctx) = 0;
   virtual void exitClassName(fxParser::ClassNameContext *ctx) = 0;
-
-  virtual void enterItem(fxParser::ItemContext *ctx) = 0;
-  virtual void exitItem(fxParser::ItemContext *ctx) = 0;
 
   virtual void enterAndExpr(fxParser::AndExprContext *ctx) = 0;
   virtual void exitAndExpr(fxParser::AndExprContext *ctx) = 0;

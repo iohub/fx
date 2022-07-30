@@ -40,12 +40,16 @@ stmt
     | assignStmt
     | returnStmt
     | ifStmt
-    | 'while' '(' expr ')' stmt
+    | forStmt
     | expr ';'
     ;
 
+forStmt
+    : 'for' '(' expr? ';' expr ';' expr? ')' block
+    ;
+
 varAssignDef
-    : type_ item ( ',' item )* ';'       # Decl
+    : type_ ID ';'       # VarDecl
     ;
 
 assignStmt
@@ -69,11 +73,6 @@ type_
     | 'bool'    # Bool
     | 'void'    # Void
     | ID        # ClassName
-    ;
-
-item
-    : ID
-    | ID '=' expr
     ;
 
 expr
@@ -136,9 +135,11 @@ WS : (' ' | '\r' | '\t' | '\n')+ ->  skip;
 STR
     :   '"' StringCharacters? '"'
     ;
+
 fragment StringCharacters
     :   StringCharacter+
     ;
+
 fragment
 StringCharacter
     :   ~["\\]

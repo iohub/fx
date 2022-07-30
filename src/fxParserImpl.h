@@ -20,7 +20,6 @@ public:
     virtual antlrcpp::Any visitArg(fxParser::ArgContext *ctx);
     virtual antlrcpp::Any visitVarDef(fxParser::VarDefContext *ctx);
     virtual antlrcpp::Any visitBlock(fxParser::BlockContext *ctx);
-    virtual antlrcpp::Any visitDecl(fxParser::DeclContext *ctx);
     virtual antlrcpp::Any visitAss(fxParser::AssContext *ctx);
     virtual antlrcpp::Any visitStmt(fxParser::StmtContext *ctx);
     virtual antlrcpp::Any visitInt(fxParser::IntContext *ctx);
@@ -28,7 +27,6 @@ public:
     virtual antlrcpp::Any visitBool(fxParser::BoolContext *ctx);
     virtual antlrcpp::Any visitVoid(fxParser::VoidContext *ctx);
     virtual antlrcpp::Any visitClassName(fxParser::ClassNameContext *ctx);
-    virtual antlrcpp::Any visitItem(fxParser::ItemContext *ctx);
     virtual antlrcpp::Any visitRelOp(fxParser::RelOpContext *ctx);
     virtual antlrcpp::Any visitBinOp(fxParser::BinOpContext *ctx);
     virtual antlrcpp::Any visitAndExpr(fxParser::AndExprContext *ctx);
@@ -45,6 +43,8 @@ public:
     virtual antlrcpp::Any visitBoolean(fxParser::BooleanContext *ctx);
     virtual antlrcpp::Any visitIfStmt(fxParser::IfStmtContext *ctx);
     virtual antlrcpp::Any visitReturnStmt(fxParser::ReturnStmtContext *ctx);
+    virtual antlrcpp::Any visitForStmt(fxParser::ForStmtContext *ctx);
+    virtual antlrcpp::Any visitVarDecl(fxParser::VarDeclContext *ctx);
 
 public:
     Decls *ast;

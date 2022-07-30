@@ -39,7 +39,9 @@ public:
 
     virtual antlrcpp::Any visitStmt(fxParser::StmtContext *context) = 0;
 
-    virtual antlrcpp::Any visitDecl(fxParser::DeclContext *context) = 0;
+    virtual antlrcpp::Any visitForStmt(fxParser::ForStmtContext *context) = 0;
+
+    virtual antlrcpp::Any visitVarDecl(fxParser::VarDeclContext *context) = 0;
 
     virtual antlrcpp::Any visitAss(fxParser::AssContext *context) = 0;
 
@@ -56,8 +58,6 @@ public:
     virtual antlrcpp::Any visitVoid(fxParser::VoidContext *context) = 0;
 
     virtual antlrcpp::Any visitClassName(fxParser::ClassNameContext *context) = 0;
-
-    virtual antlrcpp::Any visitItem(fxParser::ItemContext *context) = 0;
 
     virtual antlrcpp::Any visitAndExpr(fxParser::AndExprContext *context) = 0;
 

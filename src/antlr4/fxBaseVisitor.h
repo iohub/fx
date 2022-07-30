@@ -55,7 +55,11 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitDecl(fxParser::DeclContext *ctx) override {
+  virtual antlrcpp::Any visitForStmt(fxParser::ForStmtContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitVarDecl(fxParser::VarDeclContext *ctx) override {
     return visitChildren(ctx);
   }
 
@@ -88,10 +92,6 @@ public:
   }
 
   virtual antlrcpp::Any visitClassName(fxParser::ClassNameContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual antlrcpp::Any visitItem(fxParser::ItemContext *ctx) override {
     return visitChildren(ctx);
   }
 
