@@ -10,7 +10,6 @@
 #include "exception.h"
 #include "util.h"
 #include "ast.h"
-#include "parser.hh"
 #include "typecheck.h"
 #include "codegen.h"
 
@@ -45,7 +44,7 @@ void compile(const std::string &fname) {
     TypeCheckResult result = checker.check(wrap);
     json jsonExp = wrap->tojson();
     wrap->print() ;
-    fmt::print("ast:\n{}\n", wrap->dump());
+    fmt::print("typed ast:\n{}\n", wrap->dump());
 
     // Logging::info("typed ast (json format):\n{}\n", jsonExp.dump());
     // wrap->print();

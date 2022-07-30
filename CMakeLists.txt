@@ -6,9 +6,6 @@ include(FetchContent)
 set(CMAKE_TLS_VERIFY true)
 set(CMAKE_CXX_STANDARD 17)
 
-find_package(BISON REQUIRED)
-find_package(FLEX REQUIRED)
-
 set(LLVM_PKG clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz)
 set(LLVM_BUILT_URL https://releases.llvm.org/9.0.0/${LLVM_PKG})
 set(JSONLIB_URL https://github.com/nlohmann/json/releases/download/v3.10.5/json.tar.xz)
@@ -38,10 +35,6 @@ endif()
 
 list(APPEND CMAKE_MODULE_PATH ${LLVM_CMAKE_DIR})
 include(AddLLVM)
-
-BISON_TARGET(Parser src/parser.y ${CMAKE_SOURCE_DIR}/src/parser.cc)
-FLEX_TARGET(Scanner src/lexer.l ${CMAKE_SOURCE_DIR}/src/lexer.cc)
-ADD_FLEX_BISON_DEPENDENCY(Scanner Parser)
 
 set(CMAKE_LLVM_CONFIG ${LLVM_INSTALL_DIR}/bin/llvm-config)
 exec_program(${CMAKE_LLVM_CONFIG} ARGS --includedir OUTPUT_VARIABLE LLVM_INCDIR)
@@ -80,8 +73,6 @@ set(Antlr4Parser
 )
 
 add_executable(fx
-    ${BISON_Parser_OUTPUTS}
-    ${FLEX_Scanner_OUTPUTS}
     ${Fmt_INCLUDE_DIR}
     ${CLI11_INCLUDE_DIR}
     src/type.cc
