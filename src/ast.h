@@ -74,7 +74,7 @@ protected:
     // type annotation
     Ty ty;
     // type synthesized ?
-    bool synthesized;
+    bool synthesized = false;
     Visitor *visitor;
 };
 
