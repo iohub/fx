@@ -121,7 +121,14 @@ antlrcpp::Any AstVisitor::visitCallExpr(fxParser::CallExprContext *ctx) {
     return (AstNode*) caller;
 }
 
-antlrcpp::Any AstVisitor::visitRelOpExpr(fxParser::RelOpExprContext *ctx) { return nullptr; }
+antlrcpp::Any AstVisitor::visitRelOpExpr(fxParser::RelOpExprContext *ctx) {
+    AstNode* lhs = visit(ctx->expr().at(0));
+    AstNode* rhs = visit(ctx->expr().at(1));
+    BinaryExpr *expr = new BinaryExpr(loc(ctx), Kind::BinaryCmp,
+            TypeID::Bool, ctx->relOp()->getText(), lhs, rhs);
+
+    return (AstNode*) expr;
+}
 
 antlrcpp::Any AstVisitor::visitBinOpExpr(fxParser::BinOpExprContext *ctx) {
     AstNode* lhs = visit(ctx->expr().at(0));
@@ -155,7 +162,8 @@ antlrcpp::Any AstVisitor::visitIfStmt(fxParser::IfStmtContext *ctx) {
     Stmts *then = nullptr, *_else = nullptr;
     if (!ctx->block().empty()) then = visit(ctx->block().at(0));
     if (ctx->block().size() > 1) _else = visit(ctx->block().at(1));
-    IfStmt *retval = new IfStmt(loc(ctx), nullptr, then, _else);
+    AstNode *cond = visit(ctx->expr());
+    IfStmt *retval = new IfStmt(loc(ctx), cond, then, _else);
     return (AstNode*) retval;
 }
 
