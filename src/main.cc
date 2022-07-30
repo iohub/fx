@@ -9,7 +9,7 @@
 
 #include "exception.h"
 #include "util.h"
-#include "astnode.h"
+#include "ast.h"
 #include "parser.hh"
 #include "typecheck.h"
 #include "codegen.h"

@@ -5,7 +5,7 @@
 	#include <stdlib.h>
 	#include <string>
 	#include <string.h>
-    #include "astnode.h"
+    #include "ast.h"
 	#include "parser.hh"
 
 	extern FILE *yyin;

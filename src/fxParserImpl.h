@@ -3,7 +3,7 @@
 
 #include "fxLexer.h"
 #include "fxVisitor.h"
-#include "astnode.h"
+#include "ast.h"
 
 using namespace fx;
 
