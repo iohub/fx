@@ -46,8 +46,11 @@ public:
   virtual void enterStmt(fxParser::StmtContext * /*ctx*/) override { }
   virtual void exitStmt(fxParser::StmtContext * /*ctx*/) override { }
 
-  virtual void enterDecl(fxParser::DeclContext * /*ctx*/) override { }
-  virtual void exitDecl(fxParser::DeclContext * /*ctx*/) override { }
+  virtual void enterForStmt(fxParser::ForStmtContext * /*ctx*/) override { }
+  virtual void exitForStmt(fxParser::ForStmtContext * /*ctx*/) override { }
+
+  virtual void enterVarDecl(fxParser::VarDeclContext * /*ctx*/) override { }
+  virtual void exitVarDecl(fxParser::VarDeclContext * /*ctx*/) override { }
 
   virtual void enterAss(fxParser::AssContext * /*ctx*/) override { }
   virtual void exitAss(fxParser::AssContext * /*ctx*/) override { }
@@ -72,9 +75,6 @@ public:
 
   virtual void enterClassName(fxParser::ClassNameContext * /*ctx*/) override { }
   virtual void exitClassName(fxParser::ClassNameContext * /*ctx*/) override { }
-
-  virtual void enterItem(fxParser::ItemContext * /*ctx*/) override { }
-  virtual void exitItem(fxParser::ItemContext * /*ctx*/) override { }
 
   virtual void enterAndExpr(fxParser::AndExprContext * /*ctx*/) override { }
   virtual void exitAndExpr(fxParser::AndExprContext * /*ctx*/) override { }

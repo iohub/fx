@@ -34,11 +34,11 @@ antlrcpp::Any AstVisitor::visitTopDef(fxParser::TopDefContext *ctx) {
     return (AstNode*) nullptr;
 }
 
-antlrcpp::Any AstVisitor::visitClassDef(fxParser::ClassDefContext *ctx) { return nullptr; }
+antlrcpp::Any AstVisitor::visitClassDef(fxParser::ClassDefContext *ctx) { return (AstNode*)nullptr; }
 
-antlrcpp::Any AstVisitor::visitFieldDecl(fxParser::FieldDeclContext *ctx) { return nullptr; }
+antlrcpp::Any AstVisitor::visitFieldDecl(fxParser::FieldDeclContext *ctx) { return (AstNode*)nullptr; }
 
-antlrcpp::Any AstVisitor::visitMethodDef(fxParser::MethodDefContext *ctx) { return nullptr; }
+antlrcpp::Any AstVisitor::visitMethodDef(fxParser::MethodDefContext *ctx) { return (AstNode*)nullptr; }
 
 antlrcpp::Any AstVisitor::visitArg(fxParser::ArgContext *ctx) {
     Args *args = new Args();
@@ -53,7 +53,7 @@ antlrcpp::Any AstVisitor::visitArg(fxParser::ArgContext *ctx) {
 
 antlrcpp::Any AstVisitor::visitVarDef(fxParser::VarDefContext *ctx) {
     std::string tyname = ctx->type_()->getText();
-    std::string ident = ctx->ID()->toString();
+    std::string ident = ctx->ID()->getText();
     VarDecl *n = new VarDecl(loc(ctx), ident, tyname);
     return (AstNode *)n;
 }
@@ -67,9 +67,7 @@ antlrcpp::Any AstVisitor::visitBlock(fxParser::BlockContext *ctx) {
     return retval;
 }
 
-antlrcpp::Any AstVisitor::visitDecl(fxParser::DeclContext *ctx) { return nullptr; }
-
-antlrcpp::Any AstVisitor::visitAss(fxParser::AssContext *ctx) { return nullptr; }
+antlrcpp::Any AstVisitor::visitAss(fxParser::AssContext *ctx) { return (AstNode*)nullptr; }
 
 antlrcpp::Any AstVisitor::visitStmt(fxParser::StmtContext *ctx) {
     for (auto *e : ctx->children) {
@@ -79,23 +77,21 @@ antlrcpp::Any AstVisitor::visitStmt(fxParser::StmtContext *ctx) {
     return (AstNode*) nullptr;
 }
 
-antlrcpp::Any AstVisitor::visitInt(fxParser::IntContext *ctx) { return nullptr; }
+antlrcpp::Any AstVisitor::visitInt(fxParser::IntContext *ctx) { return (AstNode*)nullptr; }
 
-antlrcpp::Any AstVisitor::visitStr(fxParser::StrContext *ctx) { return nullptr; }
+antlrcpp::Any AstVisitor::visitStr(fxParser::StrContext *ctx) { return (AstNode*)nullptr; }
 
-antlrcpp::Any AstVisitor::visitBool(fxParser::BoolContext *ctx) { return nullptr; }
+antlrcpp::Any AstVisitor::visitBool(fxParser::BoolContext *ctx) { return (AstNode*)nullptr; }
 
-antlrcpp::Any AstVisitor::visitVoid(fxParser::VoidContext *ctx) { return nullptr; }
+antlrcpp::Any AstVisitor::visitVoid(fxParser::VoidContext *ctx) { return (AstNode*)nullptr; }
 
-antlrcpp::Any AstVisitor::visitClassName(fxParser::ClassNameContext *ctx) { return nullptr; }
+antlrcpp::Any AstVisitor::visitClassName(fxParser::ClassNameContext *ctx) { return (AstNode*)nullptr; }
 
-antlrcpp::Any AstVisitor::visitItem(fxParser::ItemContext *ctx) { return nullptr; }
+antlrcpp::Any AstVisitor::visitRelOp(fxParser::RelOpContext *ctx) { return (AstNode*)nullptr; }
 
-antlrcpp::Any AstVisitor::visitRelOp(fxParser::RelOpContext *ctx) { return nullptr; }
+antlrcpp::Any AstVisitor::visitBinOp(fxParser::BinOpContext *ctx) { return (AstNode*)nullptr; }
 
-antlrcpp::Any AstVisitor::visitBinOp(fxParser::BinOpContext *ctx) { return nullptr; }
-
-antlrcpp::Any AstVisitor::visitAndExpr(fxParser::AndExprContext *ctx) { return nullptr; }
+antlrcpp::Any AstVisitor::visitAndExpr(fxParser::AndExprContext *ctx) { return (AstNode*)nullptr; }
 
 antlrcpp::Any AstVisitor::visitIDExpr(fxParser::IDExprContext *ctx) {
     return (AstNode*) new Val(loc(ctx), Kind::Value, ctx->getText());
@@ -138,7 +134,7 @@ antlrcpp::Any AstVisitor::visitBinOpExpr(fxParser::BinOpExprContext *ctx) {
     return (AstNode *)binExpr;
 }
 
-antlrcpp::Any AstVisitor::visitOrExpr(fxParser::OrExprContext *ctx) { return nullptr; }
+antlrcpp::Any AstVisitor::visitOrExpr(fxParser::OrExprContext *ctx) { return (AstNode*)nullptr; }
 
 antlrcpp::Any AstVisitor::visitConstBool(fxParser::ConstBoolContext *ctx) {
     return (AstNode*) new Val(loc(ctx), Kind::Constant, TypeID::Bool, ctx->getText());
@@ -152,7 +148,7 @@ antlrcpp::Any AstVisitor::visitConstStr(fxParser::ConstStrContext *ctx) {
     return (AstNode*) new Val(loc(ctx), Kind::Constant, TypeID::Str, ctx->getText());
 }
 
-antlrcpp::Any AstVisitor::visitBoolean(fxParser::BooleanContext *ctx) { return nullptr; }
+antlrcpp::Any AstVisitor::visitBoolean(fxParser::BooleanContext *ctx) { return (AstNode*)nullptr; }
 
 Loc AstVisitor::loc(antlr4::ParserRuleContext *ctx) {
     return Loc(ctx->getStart()->getLine(), ctx->getStart()->getCharPositionInLine());
@@ -177,6 +173,24 @@ antlrcpp::Any AstVisitor::visitReturnStmt(fxParser::ReturnStmtContext *ctx) {
     return (AstNode*) retval;
 }
 
+antlrcpp::Any AstVisitor::visitForStmt(fxParser::ForStmtContext *ctx) {
+    ForStmt *n = new ForStmt(loc(ctx));
+    if (ctx->expr().size() == 3) {
+        n->init_stmt = AstNodePtr(visit(ctx->expr().at(0)));
+        n->cond_stmt = AstNodePtr(visit(ctx->expr().at(1)));
+        n->next_stmt = AstNodePtr(visit(ctx->expr().at(2)));
+    } else if (ctx->expr().size() == 1) {
+        AstNode *cond = visit(ctx->expr().at(0));
+        if (cond) n->cond_stmt = AstNodePtr(cond);
+    }
+    n->body = visit(ctx->block());
+    return (AstNode*) n;
+}
+
+antlrcpp::Any AstVisitor::visitVarDecl(fxParser::VarDeclContext *ctx) {
+    VarDecl *n = new VarDecl(loc(ctx),  ctx->ID()->getText(), ctx->type_()->getText());
+    return (AstNode*) n;
+}
 
 
 

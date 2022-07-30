@@ -44,11 +44,10 @@ void compile(const std::string &fname) {
     TypeCheckResult result = checker.check(wrap);
     json jsonExp = wrap->tojson();
     wrap->print() ;
-    fmt::print("typed ast:\n{}\n", wrap->dump());
+    fmt::print("typed ast (sexp):\n{}\n", wrap->dump());
+    fmt::print("\ntyped ast (json):\n{}\n", wrap->dump());
+    Logging::info("TypeCheckResult {}\n", result.errmsg);
 
-    // Logging::info("typed ast (json format):\n{}\n", jsonExp.dump());
-    // wrap->print();
-    // Logging::info("TypeCheckResult {}\n", result.errmsg);
     CodeGen gen(fname);
     try {
         gen.emit(wrap);
@@ -67,7 +66,6 @@ int main(int argc, const char *argv[]) {
     app.add_option("-f,--file", fname, "source file");
     CLI11_PARSE(app, argc, argv);
     parse(fname);
-
     // print pretty json
     // std::cout << std::setw(2) << jsonExp << std::endl;
     // visualize onsite: https://vanya.jp.net/vtree
