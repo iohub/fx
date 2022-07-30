@@ -1,5 +1,5 @@
 #include "fxParserImpl.h"
-#include "astnode.h"
+#include "ast.h"
 #include "antlr4-runtime.h"
 #include "fxLexer.h"
 #include "fxParser.h"
@@ -98,7 +98,7 @@ antlrcpp::Any AstVisitor::visitBinOp(fxParser::BinOpContext *ctx) { return nullp
 antlrcpp::Any AstVisitor::visitAndExpr(fxParser::AndExprContext *ctx) { return nullptr; }
 
 antlrcpp::Any AstVisitor::visitIDExpr(fxParser::IDExprContext *ctx) {
-    return (AstNode*) new Val(loc(ctx), Kind::VarRef, ctx->getText());
+    return (AstNode*) new Val(loc(ctx), Kind::Value, ctx->getText());
 }
 
 antlrcpp::Any AstVisitor::visitConstExpr(fxParser::ConstExprContext *ctx) {

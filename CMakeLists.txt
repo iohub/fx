@@ -85,7 +85,7 @@ add_executable(fx
     ${Fmt_INCLUDE_DIR}
     ${CLI11_INCLUDE_DIR}
     src/type.cc
-    src/astnode.cc
+    src/ast.cc
     src/fxParserImpl.cc
     ${Antlr4Parser}
     src/typecheck.cc

@@ -4,7 +4,7 @@
 
 #include <stack>
 #include "type.h"
-#include "astnode.h"
+#include "ast.h"
 
 namespace fx {
 

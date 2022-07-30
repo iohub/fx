@@ -4,7 +4,7 @@
 
 #include <string>
 #include <map>
-#include "astnode.h"
+#include "ast.h"
 #include "env.h"
 
 namespace fx {

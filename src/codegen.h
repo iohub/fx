@@ -14,7 +14,7 @@
 #include <llvm/IR/Function.h>
 #include <llvm/IR/Verifier.h>
 
-#include "astnode.h"
+#include "ast.h"
 #include "env.h"
 #include "ir.h"
 

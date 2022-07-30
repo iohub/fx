@@ -3,7 +3,7 @@
     #include <stdio.h>
     #include <stdlib.h>
     #include <string>
-    #include "astnode.h"
+    #include "ast.h"
 
     extern FILE *yyin;
     extern FILE *yyout;
