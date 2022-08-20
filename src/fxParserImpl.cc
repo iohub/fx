@@ -67,7 +67,12 @@ antlrcpp::Any AstVisitor::visitBlock(fxParser::BlockContext *ctx) {
     return retval;
 }
 
-antlrcpp::Any AstVisitor::visitAss(fxParser::AssContext *ctx) { return (AstNode*)nullptr; }
+antlrcpp::Any AstVisitor::visitAss(fxParser::AssContext *ctx) {
+    AstNode * var = visit(ctx->expr(0));
+    AstNode * val = visit(ctx->expr(1));
+    AssignStmt *stmt = new AssignStmt(loc(ctx), var, val);
+    return (AstNode*)stmt;
+}
 
 antlrcpp::Any AstVisitor::visitStmt(fxParser::StmtContext *ctx) {
     for (auto *e : ctx->children) {

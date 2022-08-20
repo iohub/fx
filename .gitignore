@@ -1,7 +1,5 @@
 build_ninja
-llvm_built
-src/lexer.cc
-src/parser.cc
+build
 compile_commands.json
 _deps
 dist

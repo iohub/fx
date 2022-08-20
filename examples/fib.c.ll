@@ -3,6 +3,7 @@ source_filename = "../examples/fib.c"
 
 define i32 @fib(i32 %x) {
 entry:
+  %y = alloca i32
   %x1 = alloca i32
   %fib_retvar = alloca i32
   store i32 %x, i32* %x1
@@ -25,18 +26,22 @@ _then2:                                           ; preds = %_end
 
 _end3:                                            ; preds = %_end
   %4 = load i32, i32* %x1
-  %add = sub i32 %4, 1
-  %5 = call i32 @fib(i32 %add)
+  %add = sub i32 %4, 10
+  %5 = load i32, i32* %y
+  store i32 %add, i32 %5
   %6 = load i32, i32* %x1
-  %add4 = sub i32 %6, 2
-  %7 = call i32 @fib(i32 %add4)
-  %add5 = add i32 %5, %7
+  %sub = fsub i32 %6, 1
+  %7 = call i32 @fib(i32 %sub)
+  %8 = load i32, i32* %x1
+  %sub4 = fsub i32 %8, 2
+  %9 = call i32 @fib(i32 %sub4)
+  %add5 = fadd i32 %7, %9
   store i32 %add5, i32* %fib_retvar
   br label %_ret
 
 _ret:                                             ; preds = %_end3, %_then2, %_then
-  %8 = load i32, i32* %fib_retvar
-  ret i32 %8
+  %10 = load i32, i32* %fib_retvar
+  ret i32 %10
 }
 
 define i32 @main() {

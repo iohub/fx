@@ -6,6 +6,8 @@ int fib(int x) {
   if (x == 1) {
       return 1;
   }
+  int y;
+  y = x - 10;
   return fib(x-1) + fib(x-2);
 }
 
