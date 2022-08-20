@@ -20,10 +20,6 @@ void AstNode::print() {
     fmt::print("{}\n", out.c_str());
 }
 
-VisitorResult AstNode::visit() {
-    return visitor->visit(shared_from_this());
-}
-
 std::string AstNode::loc() const {
     return _f("line:{},column:{}",  loc_.lineno, loc_.colmnno);
 }

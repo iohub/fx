@@ -167,13 +167,10 @@ llvm::Value* CodeGen::emit_const_value(Val *v) {
 
 llvm::Value* CodeGen::emit(Val *v) {
     if (!v) return nullptr;
-    llvm::Value *var;
     switch (v->kind) {
         case Kind::Constant: return emit_const_value(v);
         case Kind::VarRef: return env_.lookup_var(v->nominal());
-        case Kind::Value:
-            var = env_.lookup_var(v->nominal());
-            return builder_->CreateLoad(var);
+        case Kind::Value: return builder_->CreateLoad(env_.lookup_var(v->nominal()));
         default: throw new CodeGenException(_f("{} emit unknown Val", v->loc()));
     }
     return nullptr;
@@ -211,8 +208,7 @@ llvm::Value* CodeGen::emit(LetAssign *letA) {
 
 llvm::Value* CodeGen::emit_bincmp(BinaryExpr *cmp) {
     if (!cmp || !cmp->is(Kind::BinaryCmp)) return nullptr;
-    llvm::Value *lhs = emit(cmp->lhs);
-    llvm::Value *rhs = emit(cmp->rhs);
+    llvm::Value *lhs = emit(cmp->lhs), *rhs = emit(cmp->rhs);
     if (!cmp->lhs) {
         throw new CodeGenException(_f("{} invalid Compare", cmp->loc()));
     }
@@ -230,20 +226,20 @@ llvm::Value* CodeGen::emit_bincmp(BinaryExpr *cmp) {
 
 llvm::Value* CodeGen::emit(AstNodePtr n) {
     switch (n->kind) {
-        case Kind::DeclList: return emit(dynamic_cast<Decls*>(n.get()));
-        case Kind::FuncDecl: return emit(dynamic_cast<FuncDecl*>(n.get()));
-        case Kind::CallFunc: return emit(dynamic_cast<Call*>(n.get()));
-        case Kind::Constant: return emit(dynamic_cast<Val*>(n.get()));
-        case Kind::ReturnStmt: return emit(dynamic_cast<ReturnStmt*>(n.get()));
-        case Kind::BinaryOperator: return emit_binexpr(dynamic_cast<BinaryExpr*>(n.get()));
-        case Kind::BinaryCmp: return emit_bincmp(dynamic_cast<BinaryExpr*>(n.get()));
-        case Kind::VarRef: return emit(dynamic_cast<Val*>(n.get()));
-        case Kind::Value: return emit(dynamic_cast<Val*>(n.get()));
+        case Kind::DeclList: return emit(static_cast<Decls*>(n.get()));
+        case Kind::FuncDecl: return emit(static_cast<FuncDecl*>(n.get()));
+        case Kind::CallFunc: return emit(static_cast<Call*>(n.get()));
+        case Kind::Constant: return emit(static_cast<Val*>(n.get()));
+        case Kind::ReturnStmt: return emit(static_cast<ReturnStmt*>(n.get()));
+        case Kind::BinaryOperator: return emit_binexpr(static_cast<BinaryExpr*>(n.get()));
+        case Kind::BinaryCmp: return emit_bincmp(static_cast<BinaryExpr*>(n.get()));
+        case Kind::VarRef: return emit(static_cast<Val*>(n.get()));
+        case Kind::Value: return emit(static_cast<Val*>(n.get()));
         case Kind::VarDecl: return nullptr;
-        case Kind::Assign: return emit(dynamic_cast<AssignStmt*>(n.get()));
-        case Kind::LetAssign: return emit(dynamic_cast<LetAssign*>(n.get()));
-        case Kind::If: return emit(dynamic_cast<IfStmt*>(n.get()));
-        case Kind::For: return emit(dynamic_cast<ForStmt*>(n.get()));
+        case Kind::Assign: return emit(static_cast<AssignStmt*>(n.get()));
+        case Kind::LetAssign: return emit(static_cast<LetAssign*>(n.get()));
+        case Kind::If: return emit(static_cast<IfStmt*>(n.get()));
+        case Kind::For: return emit(static_cast<ForStmt*>(n.get()));
         case Kind::Nil: return nullptr;
         default:
             Logging::info("emit unknown AstNode {} {}\n", n->loc(), n->dump());

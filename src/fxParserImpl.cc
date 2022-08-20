@@ -68,8 +68,9 @@ antlrcpp::Any AstVisitor::visitBlock(fxParser::BlockContext *ctx) {
 }
 
 antlrcpp::Any AstVisitor::visitAss(fxParser::AssContext *ctx) {
-    AstNode * var = visit(ctx->expr(0));
-    AstNode * val = visit(ctx->expr(1));
+    AstNode* var = visit(ctx->expr(0));
+    var->kind = fx::Kind::VarRef;
+    AstNode* val = visit(ctx->expr(1));
     AssignStmt *stmt = new AssignStmt(loc(ctx), var, val);
     return (AstNode*)stmt;
 }

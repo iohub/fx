@@ -23,15 +23,8 @@ using Stmts = NodeVec;
 using DeclList = NodeVec;
 using json = nlohmann::json;
 
-class VisitorResult {};
 
-class Visitor {
-public:
-    virtual VisitorResult visit(AstNodePtr n) { return VisitorResult(); } ;
-};
-
-class AstNode : std::enable_shared_from_this<AstNode> {
-public:
+struct AstNode : std::enable_shared_from_this<AstNode> {
     enum class Kind : uint8_t {
         Invalid, Nil, CallFunc, Constant,
         FuncDecl, VarRef, Value, VarDecl, Expr, BinaryOperator, BinaryCmp, UnaryOperator,
@@ -50,8 +43,6 @@ public:
     bool is(Kind k) const { return kind == k; }
     std::string sexp() { return  _f("({})", dump()); }
     std::string loc() const;
-    VisitorResult visit();
-    void set_visitor(Visitor *v) { visitor = v; }
     void print();
     virtual ~AstNode() { };
 
@@ -65,17 +56,11 @@ public:
     virtual std::string dump() { return "astnode"; };
     virtual json tojson(json parent=json()) { return parent; }
 
-    friend class TypeChecker;
-    friend class CodeGen;
-
-protected:
+    // member
     Kind kind = Kind::Invalid;
     Loc loc_;
-    // type annotation
     Ty ty;
-    // type synthesized ?
     bool synthesized = false;
-    Visitor *visitor;
 };
 
 typedef AstNode::Kind Kind;
