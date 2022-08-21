@@ -1,9 +1,8 @@
-; ModuleID = '../examples/fib.c'
-source_filename = "../examples/fib.c"
+; ModuleID = 'examples/fib.c'
+source_filename = "examples/fib.c"
 
 define i32 @fib(i32 %x) {
 entry:
-  %y = alloca i32
   %x1 = alloca i32
   %fib_retvar = alloca i32
   store i32 %x, i32* %x1
@@ -26,21 +25,39 @@ _then2:                                           ; preds = %_end
 
 _end3:                                            ; preds = %_end
   %4 = load i32, i32* %x1
-  %add = sub i32 %4, 10
-  store i32 %add, i32* %y
-  %5 = load i32, i32* %x1
-  %add4 = sub i32 %5, 1
-  %6 = call i32 @fib(i32 %add4)
-  %7 = load i32, i32* %x1
-  %add5 = sub i32 %7, 2
-  %8 = call i32 @fib(i32 %add5)
-  %add6 = add i32 %6, %8
-  store i32 %add6, i32* %fib_retvar
+  %add = sub i32 %4, 1
+  %5 = call i32 @fib(i32 %add)
+  %6 = load i32, i32* %x1
+  %add4 = sub i32 %6, 2
+  %7 = call i32 @fib(i32 %add4)
+  %add5 = add i32 %5, %7
+  store i32 %add5, i32* %fib_retvar
   br label %_ret
 
 _ret:                                             ; preds = %_end3, %_then2, %_then
-  %9 = load i32, i32* %fib_retvar
-  ret i32 %9
+  %8 = load i32, i32* %fib_retvar
+  ret i32 %8
+}
+
+define i32 @add(i32 %x) {
+entry:
+  %val = alloca i32
+  %x1 = alloca i32
+  %add_retvar = alloca i32
+  store i32 %x, i32* %x1
+  %0 = load i32, i32* %x1
+  %add = add i32 %0, 10
+  store i32 %add, i32* %val
+  %1 = load i32, i32* %val
+  %add2 = add i32 %1, 100
+  store i32 %add2, i32* %val
+  %2 = load i32, i32* %val
+  store i32 %2, i32* %add_retvar
+  br label %_ret
+
+_ret:                                             ; preds = %entry
+  %3 = load i32, i32* %add_retvar
+  ret i32 %3
 }
 
 define i32 @main() {

@@ -52,8 +52,11 @@ public:
   virtual void enterVarDecl(fxParser::VarDeclContext * /*ctx*/) override { }
   virtual void exitVarDecl(fxParser::VarDeclContext * /*ctx*/) override { }
 
-  virtual void enterAss(fxParser::AssContext * /*ctx*/) override { }
-  virtual void exitAss(fxParser::AssContext * /*ctx*/) override { }
+  virtual void enterAgnDecl(fxParser::AgnDeclContext * /*ctx*/) override { }
+  virtual void exitAgnDecl(fxParser::AgnDeclContext * /*ctx*/) override { }
+
+  virtual void enterAgnStmt(fxParser::AgnStmtContext * /*ctx*/) override { }
+  virtual void exitAgnStmt(fxParser::AgnStmtContext * /*ctx*/) override { }
 
   virtual void enterReturnStmt(fxParser::ReturnStmtContext * /*ctx*/) override { }
   virtual void exitReturnStmt(fxParser::ReturnStmtContext * /*ctx*/) override { }

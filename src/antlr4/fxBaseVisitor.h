@@ -63,7 +63,11 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitAss(fxParser::AssContext *ctx) override {
+  virtual antlrcpp::Any visitAgnDecl(fxParser::AgnDeclContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitAgnStmt(fxParser::AgnStmtContext *ctx) override {
     return visitChildren(ctx);
   }
 

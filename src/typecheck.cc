@@ -10,6 +10,7 @@ bool TypeChecker::isSubtype(AstNodePtr a, AstNodePtr b) {
 TypeCheckResult TypeChecker::check(BinaryExpr *op) {
     AstNodePtr lhs = op->lhs, rhs = op->rhs;
     synthesize(lhs); synthesize(rhs);
+    // Logging::info("check BinaryExpr lhs:{} rhs:{}\n", lhs->dump(), rhs->dump());
     if (!isSubtype(lhs, rhs)) {
         return TypeCheckResult(_f("{} incompatible type ({}) with ({})",
                     op->loc(), lhs->TyStr(), rhs->TyStr()));
@@ -17,9 +18,8 @@ TypeCheckResult TypeChecker::check(BinaryExpr *op) {
     TypeCheckResult result;
     if ((result = check(lhs)) != TypeOk) return result;
     if ((result = check(rhs)) != TypeOk) return result;
-    if ((op->Type()).nil()) {
-        op->ty = lhs->ty;
-    }
+    if ((op->Type()).nil()) op->ty = lhs->ty;
+
     return TypeOk;
 }
 
@@ -72,6 +72,8 @@ TypeCheckResult TypeChecker::check(ForStmt *For) {
 TypeCheckResult TypeChecker::check(Val *val) {
     TypeCheckResult result;
     Ty ty = synthesize(val);
+    if (ty == TypeID::UnResolved)
+        return TypeCheckResult(_f("{} unresolved var", val->loc()));
     return TypeOk;
 }
 
@@ -109,8 +111,7 @@ TypeCheckResult TypeChecker::check(Decls *declList) {
             case Kind::FuncDecl:
                 if (!(fn = dynamic_cast<FuncDecl*>(n.get()))) break;
                 env.put_func(n->nominal(), n);
-                result = check(n);
-                if (result != TypeOk) {
+                if ((result = check(n)) != TypeOk) {
                     Logging::info("[error]: {}\n", result.errmsg);
                 }
                 break;
@@ -171,7 +172,9 @@ TypeCheckResult TypeChecker::check(ReturnStmt *Return) {
 TypeCheckResult TypeChecker::check(LetAssign *letA) {
     LetAssign *nn = letA;
     TypeCheckResult result = TypeOk;
+    if ((result = check(nn->var)) != TypeOk) return result;
     if ((result = check(nn->val)) != TypeOk) return result;
+    if (nn->var->Type() != nn->val->Type()) return TypeCheckResult(_f("{} incompatible type", nn->loc()));
     nn->ty = nn->var->ty = nn->val->ty;
     return result;
 }
@@ -184,12 +187,19 @@ TypeCheckResult TypeChecker::check(FuncDecl *fn) {
     TypeCheckResult result;
     for (auto n : fn->body()) {
         result = TypeOk;
+        LetAssign *let;
         switch(n->kind) {
             case Kind::ReturnStmt:
                 synthesize(n); foundReturn = true;
                 if ((result = check(n)) != TypeOk) return result;
                 if (fn->Type() != n->Type())
                     return TypeCheckResult(_f("{} incompatible type", n->loc()));
+                break;
+            case Kind::LetAssign:
+                if ((let = dynamic_cast<LetAssign*>(n.get())) != nullptr) {
+                    env.put_var(let->var->nominal(), let->var);
+                }
+                result = check(n);
                 break;
             case Kind::VarDecl:
                  env.put_var(n->nominal(), n); break;

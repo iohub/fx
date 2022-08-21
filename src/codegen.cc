@@ -98,9 +98,7 @@ llvm::Value* CodeGen::emit(AssignStmt *assign) {
 
 llvm::Value* CodeGen::emit(Stmts *stmts) {
     if (!stmts) return nullptr;
-    for (AstNodePtr p: *stmts) {
-        emit(p);
-    }
+    for (AstNodePtr p: *stmts) emit(p);
     return nullptr;
 }
 
@@ -178,11 +176,8 @@ llvm::Value* CodeGen::emit(Val *v) {
 
 llvm::Value* CodeGen::emit_binexpr(BinaryExpr *expr) {
     if (!expr || !expr->is(Kind::BinaryOperator)) return nullptr;
-    llvm::Value *lhs = emit(expr->lhs);
-    llvm::Value *rhs = emit(expr->rhs);
-    if (!expr->lhs) {
-        throw new CodeGenException(_f("{} invalid BinaryExpr", expr->loc()));
-    }
+    llvm::Value *lhs = emit(expr->lhs), *rhs = emit(expr->rhs);
+    if (!expr->lhs) throw new CodeGenException(_f("{} invalid BinaryExpr", expr->loc()));
     Ty ty = expr->lhs->ty;
     llvm::Type *lty = lltypeof(ty);
     switch (expr->op) {
@@ -268,9 +263,7 @@ llvm::Value* CodeGen::emit(ForStmt *For) {
 
 llvm::Value* CodeGen::emit(Decls *decls) {
     if (!decls) return nullptr;
-    for (auto p: decls->decls) {
-        emit(p);
-    }
+    for (auto p: decls->decls) emit(p);
     return nullptr;
 }
 
@@ -316,7 +309,6 @@ llvm::Function* CodeGen::emit_func_prototype(FuncDecl *fn) {
 }
 
 llvm::Type* CodeGen::lltypeof(Ty ty) {
-    if (ty.is(TypeID::Int)) return llvm::Type::getInt32Ty(*ctx_);
     switch(ty.kind()) {
         case TypeID::Int: return llvm::Type::getInt32Ty(*ctx_);
         case TypeID::Float: return llvm::Type::getFloatTy(*ctx_);

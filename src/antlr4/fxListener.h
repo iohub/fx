@@ -50,8 +50,11 @@ public:
   virtual void enterVarDecl(fxParser::VarDeclContext *ctx) = 0;
   virtual void exitVarDecl(fxParser::VarDeclContext *ctx) = 0;
 
-  virtual void enterAss(fxParser::AssContext *ctx) = 0;
-  virtual void exitAss(fxParser::AssContext *ctx) = 0;
+  virtual void enterAgnDecl(fxParser::AgnDeclContext *ctx) = 0;
+  virtual void exitAgnDecl(fxParser::AgnDeclContext *ctx) = 0;
+
+  virtual void enterAgnStmt(fxParser::AgnStmtContext *ctx) = 0;
+  virtual void exitAgnStmt(fxParser::AgnStmtContext *ctx) = 0;
 
   virtual void enterReturnStmt(fxParser::ReturnStmtContext *ctx) = 0;
   virtual void exitReturnStmt(fxParser::ReturnStmtContext *ctx) = 0;

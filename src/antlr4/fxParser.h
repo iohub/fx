@@ -267,6 +267,19 @@ public:
    
   };
 
+  class  AgnDeclContext : public VarAssignDefContext {
+  public:
+    AgnDeclContext(VarAssignDefContext *ctx);
+
+    Type_Context *type_();
+    antlr4::tree::TerminalNode *ID();
+    ExprContext *expr();
+    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
+    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+  };
+
   class  VarDeclContext : public VarAssignDefContext {
   public:
     VarDeclContext(VarAssignDefContext *ctx);
@@ -294,9 +307,9 @@ public:
    
   };
 
-  class  AssContext : public AssignStmtContext {
+  class  AgnStmtContext : public AssignStmtContext {
   public:
-    AssContext(AssignStmtContext *ctx);
+    AgnStmtContext(AssignStmtContext *ctx);
 
     std::vector<ExprContext *> expr();
     ExprContext* expr(size_t i);

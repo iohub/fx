@@ -45,7 +45,7 @@ void compile(const std::string &fname) {
     json jsonExp = wrap->tojson();
     wrap->print() ;
     fmt::print("typed ast (sexp):\n{}\n", wrap->dump());
-    fmt::print("\ntyped ast (json):\n{}\n", wrap->dump());
+    fmt::print("\ntyped ast (json):\n{}\n", jsonExp.dump());
     Logging::info("TypeCheckResult {}\n", result.errmsg);
 
     CodeGen gen(fname);

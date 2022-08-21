@@ -84,9 +84,7 @@ struct Val: public AstNode {
     Val(Loc loc, Kind kind, std::string val) : AstNode(loc, kind), raw_data(val) {}
     Val(Loc loc, Kind kind, Ty ty, std::string val) : AstNode(loc, kind, ty), raw_data(val) {}
 
-    ~Val() {
-        Logging::debug("~Val({})\n", dump());
-    }
+    ~Val() { Logging::debug("~Val({})\n", dump()); }
 
     virtual std::string dump();
     virtual json tojson(json parent);

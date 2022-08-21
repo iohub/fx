@@ -50,10 +50,11 @@ forStmt
 
 varAssignDef
     : type_ ID ';'       # VarDecl
+    | type_ ID '=' expr ';' # AgnDecl
     ;
 
 assignStmt
-    : expr '=' expr ';'                  # Ass
+    : expr '=' expr ';'                  # AgnStmt
     ;
 
 returnStmt

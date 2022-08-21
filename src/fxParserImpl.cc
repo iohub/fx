@@ -67,7 +67,7 @@ antlrcpp::Any AstVisitor::visitBlock(fxParser::BlockContext *ctx) {
     return retval;
 }
 
-antlrcpp::Any AstVisitor::visitAss(fxParser::AssContext *ctx) {
+antlrcpp::Any AstVisitor::visitAgnStmt(fxParser::AgnStmtContext *ctx) {
     AstNode* var = visit(ctx->expr(0));
     var->kind = fx::Kind::VarRef;
     AstNode* val = visit(ctx->expr(1));
@@ -195,6 +195,13 @@ antlrcpp::Any AstVisitor::visitForStmt(fxParser::ForStmtContext *ctx) {
 
 antlrcpp::Any AstVisitor::visitVarDecl(fxParser::VarDeclContext *ctx) {
     VarDecl *n = new VarDecl(loc(ctx),  ctx->ID()->getText(), ctx->type_()->getText());
+    return (AstNode*) n;
+}
+
+antlrcpp::Any AstVisitor::visitAgnDecl(fxParser::AgnDeclContext *ctx) {
+    VarDecl *var = new VarDecl(loc(ctx), ctx->ID()->getText(), ctx->type_()->getText());
+    AstNode *val = visit(ctx->expr());
+    LetAssign *n = new LetAssign(loc(ctx), AstNodePtr(var), AstNodePtr(val));
     return (AstNode*) n;
 }
 
