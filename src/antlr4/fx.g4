@@ -49,8 +49,10 @@ forStmt
     ;
 
 varAssignDef
-    : type_ ID ';'       # VarDecl
-    | type_ ID '=' expr ';' # AgnDecl
+    : type_ ID ';'                                     # VarDecl
+    | type_ ID '=' expr ';'                            # AgnDecl
+    | 'matrix' ID '(' type_ ',' INT '*' INT ')' ';'    # MatrixDecl
+    | 'matrix' ID '=' '[' matrixConst ']' ';'          # MatrixAgnDecl
     ;
 
 assignStmt
@@ -90,6 +92,13 @@ paramList
     : expr (',' expr)*
     ;
 
+matrixConst
+    : matrixLine (';' matrixLine )*
+    ;
+
+matrixLine
+    : INT (',' INT)*
+    ;
 
 boolean
     : 'true'

@@ -10,6 +10,7 @@ int fib(int x) {
 }
 
 int add(int x) {
+    matrix m(int, 100 * 2);
     int val = x + 10;
     val = val + 100;
     return val;

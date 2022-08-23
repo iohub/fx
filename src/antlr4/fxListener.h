@@ -53,6 +53,12 @@ public:
   virtual void enterAgnDecl(fxParser::AgnDeclContext *ctx) = 0;
   virtual void exitAgnDecl(fxParser::AgnDeclContext *ctx) = 0;
 
+  virtual void enterMatrixDecl(fxParser::MatrixDeclContext *ctx) = 0;
+  virtual void exitMatrixDecl(fxParser::MatrixDeclContext *ctx) = 0;
+
+  virtual void enterMatrixAgnDecl(fxParser::MatrixAgnDeclContext *ctx) = 0;
+  virtual void exitMatrixAgnDecl(fxParser::MatrixAgnDeclContext *ctx) = 0;
+
   virtual void enterAgnStmt(fxParser::AgnStmtContext *ctx) = 0;
   virtual void exitAgnStmt(fxParser::AgnStmtContext *ctx) = 0;
 
@@ -100,6 +106,12 @@ public:
 
   virtual void enterParamList(fxParser::ParamListContext *ctx) = 0;
   virtual void exitParamList(fxParser::ParamListContext *ctx) = 0;
+
+  virtual void enterMatrixConst(fxParser::MatrixConstContext *ctx) = 0;
+  virtual void exitMatrixConst(fxParser::MatrixConstContext *ctx) = 0;
+
+  virtual void enterMatrixLine(fxParser::MatrixLineContext *ctx) = 0;
+  virtual void exitMatrixLine(fxParser::MatrixLineContext *ctx) = 0;
 
   virtual void enterBoolean(fxParser::BooleanContext *ctx) = 0;
   virtual void exitBoolean(fxParser::BooleanContext *ctx) = 0;

@@ -17,7 +17,8 @@ public:
     T__14 = 15, T__15 = 16, T__16 = 17, T__17 = 18, T__18 = 19, T__19 = 20, 
     T__20 = 21, T__21 = 22, T__22 = 23, T__23 = 24, T__24 = 25, T__25 = 26, 
     T__26 = 27, T__27 = 28, T__28 = 29, T__29 = 30, T__30 = 31, T__31 = 32, 
-    COMMENT = 33, MULTICOMMENT = 34, INT = 35, ID = 36, WS = 37, STR = 38
+    T__32 = 33, T__33 = 34, T__34 = 35, COMMENT = 36, MULTICOMMENT = 37, 
+    INT = 38, ID = 39, WS = 40, STR = 41
   };
 
   enum {
@@ -25,7 +26,8 @@ public:
     RuleClassItem = 4, RuleArg = 5, RuleVarDef = 6, RuleBlock = 7, RuleStmt = 8, 
     RuleForStmt = 9, RuleVarAssignDef = 10, RuleAssignStmt = 11, RuleReturnStmt = 12, 
     RuleIfStmt = 13, RuleType_ = 14, RuleExpr = 15, RuleParamList = 16, 
-    RuleBoolean = 17, RuleConstant = 18, RuleBinOp = 19, RuleRelOp = 20
+    RuleMatrixConst = 17, RuleMatrixLine = 18, RuleBoolean = 19, RuleConstant = 20, 
+    RuleBinOp = 21, RuleRelOp = 22
   };
 
   fxParser(antlr4::TokenStream *input);
@@ -55,6 +57,8 @@ public:
   class Type_Context;
   class ExprContext;
   class ParamListContext;
+  class MatrixConstContext;
+  class MatrixLineContext;
   class BooleanContext;
   class ConstantContext;
   class BinOpContext;
@@ -267,6 +271,18 @@ public:
    
   };
 
+  class  MatrixAgnDeclContext : public VarAssignDefContext {
+  public:
+    MatrixAgnDeclContext(VarAssignDefContext *ctx);
+
+    antlr4::tree::TerminalNode *ID();
+    MatrixConstContext *matrixConst();
+    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
+    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+  };
+
   class  AgnDeclContext : public VarAssignDefContext {
   public:
     AgnDeclContext(VarAssignDefContext *ctx);
@@ -286,6 +302,20 @@ public:
 
     Type_Context *type_();
     antlr4::tree::TerminalNode *ID();
+    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
+    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+  };
+
+  class  MatrixDeclContext : public VarAssignDefContext {
+  public:
+    MatrixDeclContext(VarAssignDefContext *ctx);
+
+    antlr4::tree::TerminalNode *ID();
+    Type_Context *type_();
+    std::vector<antlr4::tree::TerminalNode *> INT();
+    antlr4::tree::TerminalNode* INT(size_t i);
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
 
@@ -533,6 +563,38 @@ public:
   };
 
   ParamListContext* paramList();
+
+  class  MatrixConstContext : public antlr4::ParserRuleContext {
+  public:
+    MatrixConstContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    std::vector<MatrixLineContext *> matrixLine();
+    MatrixLineContext* matrixLine(size_t i);
+
+    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
+    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  MatrixConstContext* matrixConst();
+
+  class  MatrixLineContext : public antlr4::ParserRuleContext {
+  public:
+    MatrixLineContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    std::vector<antlr4::tree::TerminalNode *> INT();
+    antlr4::tree::TerminalNode* INT(size_t i);
+
+    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
+    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  MatrixLineContext* matrixLine();
 
   class  BooleanContext : public antlr4::ParserRuleContext {
   public:

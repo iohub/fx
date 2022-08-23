@@ -55,6 +55,12 @@ public:
   virtual void enterAgnDecl(fxParser::AgnDeclContext * /*ctx*/) override { }
   virtual void exitAgnDecl(fxParser::AgnDeclContext * /*ctx*/) override { }
 
+  virtual void enterMatrixDecl(fxParser::MatrixDeclContext * /*ctx*/) override { }
+  virtual void exitMatrixDecl(fxParser::MatrixDeclContext * /*ctx*/) override { }
+
+  virtual void enterMatrixAgnDecl(fxParser::MatrixAgnDeclContext * /*ctx*/) override { }
+  virtual void exitMatrixAgnDecl(fxParser::MatrixAgnDeclContext * /*ctx*/) override { }
+
   virtual void enterAgnStmt(fxParser::AgnStmtContext * /*ctx*/) override { }
   virtual void exitAgnStmt(fxParser::AgnStmtContext * /*ctx*/) override { }
 
@@ -102,6 +108,12 @@ public:
 
   virtual void enterParamList(fxParser::ParamListContext * /*ctx*/) override { }
   virtual void exitParamList(fxParser::ParamListContext * /*ctx*/) override { }
+
+  virtual void enterMatrixConst(fxParser::MatrixConstContext * /*ctx*/) override { }
+  virtual void exitMatrixConst(fxParser::MatrixConstContext * /*ctx*/) override { }
+
+  virtual void enterMatrixLine(fxParser::MatrixLineContext * /*ctx*/) override { }
+  virtual void exitMatrixLine(fxParser::MatrixLineContext * /*ctx*/) override { }
 
   virtual void enterBoolean(fxParser::BooleanContext * /*ctx*/) override { }
   virtual void exitBoolean(fxParser::BooleanContext * /*ctx*/) override { }

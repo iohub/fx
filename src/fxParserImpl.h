@@ -46,6 +46,12 @@ public:
     virtual antlrcpp::Any visitForStmt(fxParser::ForStmtContext *ctx);
     virtual antlrcpp::Any visitVarDecl(fxParser::VarDeclContext *ctx);
     virtual antlrcpp::Any visitAgnDecl(fxParser::AgnDeclContext *context);
+    virtual antlrcpp::Any visitMatrixDecl(fxParser::MatrixDeclContext *context);
+    virtual antlrcpp::Any visitMatrixAgnDecl(fxParser::MatrixAgnDeclContext *context);
+    virtual antlrcpp::Any visitMatrixConst(fxParser::MatrixConstContext *context);
+    virtual antlrcpp::Any visitMatrixLine(fxParser::MatrixLineContext *context);
+
+
 
 public:
     Decls *ast;

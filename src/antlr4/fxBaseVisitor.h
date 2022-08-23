@@ -67,6 +67,14 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual antlrcpp::Any visitMatrixDecl(fxParser::MatrixDeclContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitMatrixAgnDecl(fxParser::MatrixAgnDeclContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual antlrcpp::Any visitAgnStmt(fxParser::AgnStmtContext *ctx) override {
     return visitChildren(ctx);
   }
@@ -128,6 +136,14 @@ public:
   }
 
   virtual antlrcpp::Any visitParamList(fxParser::ParamListContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitMatrixConst(fxParser::MatrixConstContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitMatrixLine(fxParser::MatrixLineContext *ctx) override {
     return visitChildren(ctx);
   }
 

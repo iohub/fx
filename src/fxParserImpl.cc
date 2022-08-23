@@ -205,6 +205,25 @@ antlrcpp::Any AstVisitor::visitAgnDecl(fxParser::AgnDeclContext *ctx) {
     return (AstNode*) n;
 }
 
+antlrcpp::Any AstVisitor::visitMatrixDecl(fxParser::MatrixDeclContext *ctx) {
+    uint16_t x = std::atoi(ctx->INT(0)->getText().c_str());
+    uint16_t y = std::atoi(ctx->INT(1)->getText().c_str());
+    std::string tname = ctx->type_()->getText();
+    Matrix *n = new Matrix(loc(ctx), tname, x, y);
+    return (AstNode*) n;
+}
+
+antlrcpp::Any AstVisitor::visitMatrixAgnDecl(fxParser::MatrixAgnDeclContext *context) {
+    return (AstNode*) nullptr;
+}
+
+antlrcpp::Any AstVisitor::visitMatrixConst(fxParser::MatrixConstContext *context) {
+    return (AstNode*) nullptr;
+}
+
+antlrcpp::Any AstVisitor::visitMatrixLine(fxParser::MatrixLineContext *context) {
+    return (AstNode*) nullptr;
+}
 
 
 

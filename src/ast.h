@@ -26,9 +26,10 @@ using json = nlohmann::json;
 
 struct AstNode : std::enable_shared_from_this<AstNode> {
     enum class Kind : uint8_t {
-        Invalid, Nil, CallFunc, Constant,
-        FuncDecl, VarRef, Value, VarDecl, Expr, BinaryOperator, BinaryCmp, UnaryOperator,
-        ReturnStmt, If, Assign, LetAssign, For, DeclList, Undefine
+        Invalid, Nil, Undefine,
+        CallFunc, Constant, FuncDecl, VarRef, Value, VarDecl,
+        Expr, BinaryOperator, BinaryCmp, UnaryOperator, ReturnStmt,
+        If, Assign, LetAssign, For, DeclList, Matrix
     };
     enum class OpKind: uint8_t {
         Invalid,
@@ -225,6 +226,21 @@ struct AssignStmt: public AstNode {
     AssignStmt(Loc loc, AstNode* var, AstNode* val) :
         AstNode(loc, Kind::Assign), var_(var), val_(val) {}
     ~AssignStmt();
+
+    virtual std::string dump();
+    virtual json tojson(json parent);
+};
+
+struct Matrix: public AstNode {
+    // x0, x1, x3 ;
+    // r0, r1, r3 ;
+    // x == 3, y == 2
+    uint16_t xsize_ = 0;
+    uint16_t ysize_ = 0;
+
+    Matrix(Loc loc, std::string tname, uint16_t xsize, uint16_t ysize) :
+        AstNode(loc, Kind::Matrix, Ty(tname)), xsize_(xsize), ysize_(ysize) {}
+    ~Matrix() {}
 
     virtual std::string dump();
     virtual json tojson(json parent);

@@ -258,8 +258,18 @@ json AssignStmt::tojson(json parent) {
     return parent;
 }
 
+std::string Matrix::dump() {
+    return _f("Matrix<{},{}x{}>", TyStr(), xsize_, ysize_);
+}
 
-
+json Matrix::tojson(json parent) {
+    json child;
+    child["xsize"] = xsize_;
+    child["ysize"] = ysize_;
+    child["type"] = TyStr();
+    parent["matrix"] = child;
+    return parent;
+}
 
 }
 

@@ -45,6 +45,10 @@ public:
 
     virtual antlrcpp::Any visitAgnDecl(fxParser::AgnDeclContext *context) = 0;
 
+    virtual antlrcpp::Any visitMatrixDecl(fxParser::MatrixDeclContext *context) = 0;
+
+    virtual antlrcpp::Any visitMatrixAgnDecl(fxParser::MatrixAgnDeclContext *context) = 0;
+
     virtual antlrcpp::Any visitAgnStmt(fxParser::AgnStmtContext *context) = 0;
 
     virtual antlrcpp::Any visitReturnStmt(fxParser::ReturnStmtContext *context) = 0;
@@ -76,6 +80,10 @@ public:
     virtual antlrcpp::Any visitOrExpr(fxParser::OrExprContext *context) = 0;
 
     virtual antlrcpp::Any visitParamList(fxParser::ParamListContext *context) = 0;
+
+    virtual antlrcpp::Any visitMatrixConst(fxParser::MatrixConstContext *context) = 0;
+
+    virtual antlrcpp::Any visitMatrixLine(fxParser::MatrixLineContext *context) = 0;
 
     virtual antlrcpp::Any visitBoolean(fxParser::BooleanContext *context) = 0;
 

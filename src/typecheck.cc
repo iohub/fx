@@ -95,6 +95,7 @@ TypeCheckResult TypeChecker::check(AstNodePtr any) {
         case Kind::FuncDecl: return check(static_cast<FuncDecl*>(any.get()));
         case Kind::Value: return check(static_cast<Val*>(any.get()));
         case Kind::LetAssign: return check(static_cast<LetAssign*>(any.get()));
+        case Kind::Matrix: return TypeOk;
         case Kind::Nil: return TypeOk;
         default:
             return TypeCheckResult(_f("{} check Unknown kind:{},{}",

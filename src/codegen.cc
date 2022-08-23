@@ -235,6 +235,7 @@ llvm::Value* CodeGen::emit(AstNodePtr n) {
         case Kind::LetAssign: return emit(static_cast<LetAssign*>(n.get()));
         case Kind::If: return emit(static_cast<IfStmt*>(n.get()));
         case Kind::For: return emit(static_cast<ForStmt*>(n.get()));
+        case Kind::Matrix: return nullptr;
         case Kind::Nil: return nullptr;
         default:
             Logging::info("emit unknown AstNode {} {}\n", n->loc(), n->dump());
