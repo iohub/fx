@@ -1,5 +1,6 @@
 #include "typecheck.h"
 #include "util.h"
+#include "exception.h"
 
 namespace fx {
 
@@ -29,7 +30,7 @@ TypeCheckResult TypeChecker::check(Call *call) {
     if (!fndecl) {
         return TypeCheckResult(_f("{} Undefine Call:{}", call->loc(), call->nominal()));
     }
-    FuncDecl *fn = dynamic_cast<FuncDecl*>(fndecl.get());
+    FuncDecl *fn = static_cast<FuncDecl*>(fndecl.get());
     auto sArgs = fn->args(), dArgs = nn->args();
     if (sArgs.size() != dArgs.size()) {
         return TypeCheckResult(_f("{} Call {} incompatible params", nn->loc(), nn->nominal()));
@@ -80,20 +81,20 @@ TypeCheckResult TypeChecker::check(Val *val) {
 TypeCheckResult TypeChecker::check(AstNodePtr any) {
     if (!any) return TypeOk;
     switch(any->kind) {
-        case Kind::DeclList: return check(dynamic_cast<Decls*>(any.get()));
-        case Kind::CallFunc: return check(dynamic_cast<Call*>(any.get()));
-        case Kind::ReturnStmt: return check(dynamic_cast<ReturnStmt*>(any.get()));
+        case Kind::DeclList: return check(static_cast<Decls*>(any.get()));
+        case Kind::CallFunc: return check(static_cast<Call*>(any.get()));
+        case Kind::ReturnStmt: return check(static_cast<ReturnStmt*>(any.get()));
         case Kind::VarDecl: return TypeOk;
         case Kind::Constant: return TypeOk;
-        case Kind::BinaryOperator: return check(dynamic_cast<BinaryExpr*>(any.get()));
-        case Kind::BinaryCmp: return check(dynamic_cast<BinaryExpr*>(any.get()));
-        case Kind::If: return check(dynamic_cast<IfStmt*>(any.get()));
-        case Kind::Assign: return check(dynamic_cast<AssignStmt*>(any.get()));
-        case Kind::For: return check(dynamic_cast<ForStmt*>(any.get()));
-        case Kind::VarRef: return check(dynamic_cast<Val*>(any.get()));
-        case Kind::FuncDecl: return check(dynamic_cast<FuncDecl*>(any.get()));
-        case Kind::Value: return check(dynamic_cast<Val*>(any.get()));
-        case Kind::LetAssign: return check(dynamic_cast<LetAssign*>(any.get()));
+        case Kind::BinaryOperator: return check(static_cast<BinaryExpr*>(any.get()));
+        case Kind::BinaryCmp: return check(static_cast<BinaryExpr*>(any.get()));
+        case Kind::If: return check(static_cast<IfStmt*>(any.get()));
+        case Kind::Assign: return check(static_cast<AssignStmt*>(any.get()));
+        case Kind::For: return check(static_cast<ForStmt*>(any.get()));
+        case Kind::VarRef: return check(static_cast<Val*>(any.get()));
+        case Kind::FuncDecl: return check(static_cast<FuncDecl*>(any.get()));
+        case Kind::Value: return check(static_cast<Val*>(any.get()));
+        case Kind::LetAssign: return check(static_cast<LetAssign*>(any.get()));
         case Kind::Nil: return TypeOk;
         default:
             return TypeCheckResult(_f("{} check Unknown kind:{},{}",
@@ -109,7 +110,7 @@ TypeCheckResult TypeChecker::check(Decls *declList) {
     for (auto n : decls->decls) {
         switch (n->kind) {
             case Kind::FuncDecl:
-                if (!(fn = dynamic_cast<FuncDecl*>(n.get()))) break;
+                if ((fn = static_cast<FuncDecl*>(n.get())) == nullptr) break;
                 env.put_func(n->nominal(), n);
                 if ((result = check(n)) != TypeOk) {
                     Logging::info("[error]: {}\n", result.errmsg);
@@ -196,7 +197,7 @@ TypeCheckResult TypeChecker::check(FuncDecl *fn) {
                     return TypeCheckResult(_f("{} incompatible type", n->loc()));
                 break;
             case Kind::LetAssign:
-                if ((let = dynamic_cast<LetAssign*>(n.get())) != nullptr) {
+                if ((let = static_cast<LetAssign*>(n.get())) != nullptr) {
                     env.put_var(let->var->nominal(), let->var);
                 }
                 result = check(n);
@@ -252,17 +253,23 @@ Ty TypeChecker::synthesize(BinaryExpr *n) {
 }
 
 Ty TypeChecker::synthesize(AstNodePtr n) {
-    if (Call* nn = dynamic_cast<Call*>(n.get())) {
-        return synthesize(nn);
-    }
-    if (ReturnStmt *nn = dynamic_cast<ReturnStmt*>(n.get())) {
-        return synthesize(nn);
-    }
-    if (Val* nn = dynamic_cast<Val*>(n.get())) {
-        return synthesize(nn);
-    }
-    if (BinaryExpr * nn = dynamic_cast<BinaryExpr*>(n.get())) {
-        return synthesize(nn);
+    switch (n->kind) {
+        case Kind::CallFunc:
+            return synthesize(static_cast<Call*>(n.get()));
+        case Kind::ReturnStmt:
+            return synthesize(static_cast<ReturnStmt*>(n.get()));
+        case Kind::Value:
+            return synthesize(static_cast<Val*>(n.get()));
+        case Kind::Constant:
+            return synthesize(static_cast<Val*>(n.get()));
+        case Kind::VarRef:
+            return synthesize(static_cast<Val*>(n.get()));
+        case Kind::BinaryCmp:
+            return synthesize(static_cast<BinaryExpr*>(n.get()));
+        case Kind::BinaryOperator:
+            return synthesize(static_cast<BinaryExpr*>(n.get()));
+        default:
+            throw new TypeCheckException(_f("{} synthesize unknown type {}\n", n->loc(), n->dump()));
     }
     return TypeID::UnResolved;
 }
