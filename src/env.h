@@ -18,7 +18,7 @@ public:
 
     T lookup(std::string const &k) {
         if (scope_.size() == 0) return T();
-        for (size_t i = scope_.size()-1; i >= 0; i--){
+        for (int i = scope_.size()-1; i >= 0; i--){
             std::map<std::string, T> &current = scope_[i];
             if (current.find(k) != current.end()) {
                 return current[k];

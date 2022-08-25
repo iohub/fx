@@ -31,6 +31,7 @@ struct Ty {
     bool unresolved() const { return id == ID::UnResolved; }
     bool nil() const { return id == ID::Nil; }
     bool is(ID tid) const { return tid == id; }
+    bool isVoid() const { return id == ID::Void; }
     ID kind() const { return id; }
     static Ty from_typename(std::string tname);
 };

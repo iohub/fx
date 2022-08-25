@@ -9,11 +9,14 @@ int fib(int x) {
   return fib(x-1) + fib(x-2);
 }
 
-@kernel int add(int y) {
+@kernel void add(int y) {
     matrix m<int>(100, 2);
     int y1 = y + 10;
     y1 = y1 + 100;
-    return y1;
+}
+
+@kernel void sub(int y2) {
+    y2 = y2 - 100;
 }
 
 int main() {

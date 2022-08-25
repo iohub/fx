@@ -210,8 +210,10 @@ TypeCheckResult TypeChecker::check(FuncDecl *fn) {
         }
         if (result != TypeOk) return result;
     }
-    return foundReturn && !fn->Type().is(TypeID::Void) ?
-        TypeOk : TypeCheckResult("No Value return in non-void function");
+    if (!fn->Type().isVoid() && !foundReturn) {
+        return TypeCheckResult("No Value return in non-void function");
+    }
+    return TypeOk;
 }
 
 Ty TypeChecker::synthesize(ReturnStmt *n) {

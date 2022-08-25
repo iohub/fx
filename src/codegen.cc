@@ -55,8 +55,12 @@ llvm::Value* CodeGen::emit(FuncDecl *fn) {
         Fn->eraseFromParent(); return nullptr;
     }
     Defer defer([&]() { env_.enter(); }, [&]() { env_.leave(); });
-    FunctionIR ir(Fn, llvm::BasicBlock::Create(*ctx_, "_ret", Fn));
-    ir.retvar = builder_->CreateAlloca(lltypeof(fn->Type()), 0, fn->nominal() + "_retvar");
+    llvm::BasicBlock *retB = fn->ty.isVoid() ? nullptr :
+        llvm::BasicBlock::Create(*ctx_, "_ret", Fn);
+    FunctionIR ir(Fn, retB);
+    if (!fn->ty.isVoid()) {
+         ir.retvar = builder_->CreateAlloca(lltypeof(fn->Type()), 0, fn->nominal() + "_retvar");
+    }
     env_.put_func(fn->nominal(), &ir);
 
     auto FArgs = fn->args();
@@ -74,10 +78,13 @@ llvm::Value* CodeGen::emit(FuncDecl *fn) {
         }
     }
     emit(fn->body_);
-    if (ir.terminator) {
+    if (fn->ty.isVoid()) {
+        builder_->CreateRetVoid();
+    } else if (ir.terminator) {
         builder_->SetInsertPoint(ir.retblock);
         builder_->CreateRet(builder_->CreateLoad(ir.retvar));
     }
+    llvm::verifyFunction(*Fn);
     return nullptr;
 }
 
