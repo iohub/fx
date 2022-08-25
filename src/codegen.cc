@@ -295,13 +295,21 @@ llvm::Value* CodeGen::emit(Call *call) {
 llvm::Function* CodeGen::emit_func_prototype(FuncDecl *fn) {
     std::vector<llvm::Type*> argsTy;
     auto args  = fn->args();
-    for (AstNodePtr arg: args) {
-        argsTy.push_back(lltypeof(arg->Type()));
-    }
+    for (AstNodePtr arg: args) argsTy.push_back(lltypeof(arg->Type()));
+
     llvm::Type *retTy = lltypeof(fn->Type());
     llvm::FunctionType *fnTy = llvm::FunctionType::get(retTy, argsTy, false);
     llvm::Function *F = llvm::Function::Create(fnTy,
             llvm::Function::ExternalLinkage, fn->nominal(), *mod_);
+    if (fn->is_kernel()) {
+        llvm::Metadata *md_args[] = {
+            llvm::ValueAsMetadata::get(F),
+            llvm::MDString::get(*ctx_, "kernel"),
+            llvm::ValueAsMetadata::get(llvm::ConstantInt::get(*ctx_, llvm::APInt(32, 1))),
+        };
+        llvm::MDNode *md = llvm::MDNode::get(*ctx_, md_args);
+        mod_->getOrInsertNamedMetadata("nvvm.annotations")->addOperand(md);
+    }
     unsigned idx = 0;
     for (auto &arg : F->args()) {
         arg.setName((args[idx++])->nominal());

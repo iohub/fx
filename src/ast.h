@@ -165,6 +165,7 @@ struct FuncDecl: public AstNode {
 
     Stmts body() const { return body_ ? *body_ : Stmts(); }
     Args args() const { return args_ ? *args_ : Args(); }
+    bool is_kernel() { return tty == TargetTy::DEVICE; }
 
     Args *args_ = nullptr;
     Stmts *body_ = nullptr;

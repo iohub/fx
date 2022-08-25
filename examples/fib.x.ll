@@ -71,3 +71,7 @@ _ret:                                             ; preds = %entry
   %1 = load i32, i32* %main_retvar
   ret i32 %1
 }
+
+!nvvm.annotations = !{!0}
+
+!0 = !{i32 (i32)* @add, !"kernel", i32 1}
