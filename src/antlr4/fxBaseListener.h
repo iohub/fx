@@ -25,6 +25,9 @@ public:
   virtual void enterFuncDef(fxParser::FuncDefContext * /*ctx*/) override { }
   virtual void exitFuncDef(fxParser::FuncDefContext * /*ctx*/) override { }
 
+  virtual void enterTargetType(fxParser::TargetTypeContext * /*ctx*/) override { }
+  virtual void exitTargetType(fxParser::TargetTypeContext * /*ctx*/) override { }
+
   virtual void enterClassDef(fxParser::ClassDefContext * /*ctx*/) override { }
   virtual void exitClassDef(fxParser::ClassDefContext * /*ctx*/) override { }
 

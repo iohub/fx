@@ -17,17 +17,17 @@ public:
     T__14 = 15, T__15 = 16, T__16 = 17, T__17 = 18, T__18 = 19, T__19 = 20, 
     T__20 = 21, T__21 = 22, T__22 = 23, T__23 = 24, T__24 = 25, T__25 = 26, 
     T__26 = 27, T__27 = 28, T__28 = 29, T__29 = 30, T__30 = 31, T__31 = 32, 
-    T__32 = 33, T__33 = 34, T__34 = 35, COMMENT = 36, MULTICOMMENT = 37, 
-    INT = 38, ID = 39, WS = 40, STR = 41
+    T__32 = 33, T__33 = 34, T__34 = 35, T__35 = 36, T__36 = 37, COMMENT = 38, 
+    MULTICOMMENT = 39, INT = 40, ID = 41, WS = 42, STR = 43
   };
 
   enum {
-    RuleProgram = 0, RuleTopDef = 1, RuleFuncDef = 2, RuleClassDef = 3, 
-    RuleClassItem = 4, RuleArg = 5, RuleVarDef = 6, RuleBlock = 7, RuleStmt = 8, 
-    RuleForStmt = 9, RuleVarAssignDef = 10, RuleAssignStmt = 11, RuleReturnStmt = 12, 
-    RuleIfStmt = 13, RuleType_ = 14, RuleExpr = 15, RuleParamList = 16, 
-    RuleMatrixConst = 17, RuleMatrixLine = 18, RuleBoolean = 19, RuleConstant = 20, 
-    RuleBinOp = 21, RuleRelOp = 22
+    RuleProgram = 0, RuleTopDef = 1, RuleFuncDef = 2, RuleTargetType = 3, 
+    RuleClassDef = 4, RuleClassItem = 5, RuleArg = 6, RuleVarDef = 7, RuleBlock = 8, 
+    RuleStmt = 9, RuleForStmt = 10, RuleVarAssignDef = 11, RuleAssignStmt = 12, 
+    RuleReturnStmt = 13, RuleIfStmt = 14, RuleType_ = 15, RuleExpr = 16, 
+    RuleParamList = 17, RuleMatrixConst = 18, RuleMatrixLine = 19, RuleBoolean = 20, 
+    RuleConstant = 21, RuleBinOp = 22, RuleRelOp = 23
   };
 
   fxParser(antlr4::TokenStream *input);
@@ -43,6 +43,7 @@ public:
   class ProgramContext;
   class TopDefContext;
   class FuncDefContext;
+  class TargetTypeContext;
   class ClassDefContext;
   class ClassItemContext;
   class ArgContext;
@@ -103,6 +104,7 @@ public:
     Type_Context *type_();
     antlr4::tree::TerminalNode *ID();
     BlockContext *block();
+    TargetTypeContext *targetType();
     ArgContext *arg();
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
@@ -113,6 +115,20 @@ public:
   };
 
   FuncDefContext* funcDef();
+
+  class  TargetTypeContext : public antlr4::ParserRuleContext {
+  public:
+    TargetTypeContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+
+    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
+    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  TargetTypeContext* targetType();
 
   class  ClassDefContext : public antlr4::ParserRuleContext {
   public:

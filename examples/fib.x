@@ -9,11 +9,11 @@ int fib(int x) {
   return fib(x-1) + fib(x-2);
 }
 
-int add(int x) {
-    matrix m(int, 100 * 2);
-    int val = x + 10;
-    val = val + 100;
-    return val;
+@kernel int add(int y) {
+    matrix m<int>(100, 2);
+    int y1 = y + 10;
+    y1 = y1 + 100;
+    return y1;
 }
 
 int main() {

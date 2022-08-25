@@ -10,7 +10,12 @@ topDef
     ;
 
 funcDef
-    : type_ ID '(' arg? ')' block
+    : targetType? type_ ID '(' arg? ')' block
+    ;
+
+targetType
+    : '@kernel'
+    | '@host'
     ;
 
 classDef
@@ -49,10 +54,10 @@ forStmt
     ;
 
 varAssignDef
-    : type_ ID ';'                                     # VarDecl
-    | type_ ID '=' expr ';'                            # AgnDecl
-    | 'matrix' ID '(' type_ ',' INT '*' INT ')' ';'    # MatrixDecl
-    | 'matrix' ID '=' '[' matrixConst ']' ';'          # MatrixAgnDecl
+    : type_ ID ';'                                             # VarDecl
+    | type_ ID '=' expr ';'                                    # AgnDecl
+    | 'matrix' ID '<' type_ '>' '(' INT ',' INT ')' ';'        # MatrixDecl
+    | 'matrix' ID '=' '[' matrixConst ']' ';'                  # MatrixAgnDecl
     ;
 
 assignStmt

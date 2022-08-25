@@ -148,6 +148,10 @@ namespace detail {
 };
 
 struct FuncDecl: public AstNode {
+    enum class TargetTy : uint8_t {
+        HOST, // cpu
+        DEVICE // gput kernel
+    };
     FuncDecl(Loc loc, std::string name, std::string type)
         : AstNode(loc, Kind::FuncDecl, Ty(type)), name(name) { }
 
@@ -165,6 +169,7 @@ struct FuncDecl: public AstNode {
     Args *args_ = nullptr;
     Stmts *body_ = nullptr;
     std::string name;
+    TargetTy tty = TargetTy::HOST;
 };
 
 struct Call: public AstNode {

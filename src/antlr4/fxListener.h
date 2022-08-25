@@ -23,6 +23,9 @@ public:
   virtual void enterFuncDef(fxParser::FuncDefContext *ctx) = 0;
   virtual void exitFuncDef(fxParser::FuncDefContext *ctx) = 0;
 
+  virtual void enterTargetType(fxParser::TargetTypeContext *ctx) = 0;
+  virtual void exitTargetType(fxParser::TargetTypeContext *ctx) = 0;
+
   virtual void enterClassDef(fxParser::ClassDefContext *ctx) = 0;
   virtual void exitClassDef(fxParser::ClassDefContext *ctx) = 0;
 

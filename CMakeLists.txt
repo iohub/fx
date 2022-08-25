@@ -5,6 +5,7 @@ project(fx LANGUAGES CXX C)
 include(FetchContent)
 set(CMAKE_TLS_VERIFY true)
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Wno-reorder -Wno-attributes")
 
 set(LLVM_PKG clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz)
 set(LLVM_BUILT_URL https://releases.llvm.org/9.0.0/${LLVM_PKG})

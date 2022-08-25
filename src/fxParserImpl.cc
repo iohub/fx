@@ -18,11 +18,15 @@ antlrcpp::Any AstVisitor::visitFuncDef(fxParser::FuncDefContext *ctx) {
     std::string ident = ctx->ID()->toString();
     std::string tyname = ctx->type_()->getText();
     FuncDecl *fn = new FuncDecl(loc(ctx), ident, tyname);
-    // has args
-    if (ctx->children.size() == 6) {
-        fn->args_ = visit(ctx->children.at(3));
+    if (ctx->targetType() != nullptr) {
+        if (ctx->targetType()->getText() == "@kernel") {
+            fn->tty = FuncDecl::TargetTy::DEVICE;
+        }
     }
-    fn->body_ = visit(ctx->children.back());
+    if (ctx->arg() != nullptr) {
+        fn->args_ = visit(ctx->arg());
+    }
+    fn->body_ = visit(ctx->block());
     return (AstNode*) fn;
 }
 
@@ -225,6 +229,8 @@ antlrcpp::Any AstVisitor::visitMatrixLine(fxParser::MatrixLineContext *context) 
     return (AstNode*) nullptr;
 }
 
-
+antlrcpp::Any AstVisitor::visitTargetType(fxParser::TargetTypeContext *context) {
+    return (AstNode*) nullptr;
+}
 
 

@@ -27,6 +27,10 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual antlrcpp::Any visitTargetType(fxParser::TargetTypeContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual antlrcpp::Any visitClassDef(fxParser::ClassDefContext *ctx) override {
     return visitChildren(ctx);
   }

@@ -1,5 +1,5 @@
-; ModuleID = 'examples/fib.c'
-source_filename = "examples/fib.c"
+; ModuleID = 'examples/fib.x'
+source_filename = "examples/fib.x"
 
 define i32 @fib(i32 %x) {
 entry:
@@ -39,19 +39,19 @@ _ret:                                             ; preds = %_end3, %_then2, %_t
   ret i32 %8
 }
 
-define i32 @add(i32 %x) {
+define i32 @add(i32 %y) {
 entry:
-  %val = alloca i32
-  %x1 = alloca i32
+  %y12 = alloca i32
+  %y1 = alloca i32
   %add_retvar = alloca i32
-  store i32 %x, i32* %x1
-  %0 = load i32, i32* %x1
+  store i32 %y, i32* %y1
+  %0 = load i32, i32* %y1
   %add = add i32 %0, 10
-  store i32 %add, i32* %val
-  %1 = load i32, i32* %val
-  %add2 = add i32 %1, 100
-  store i32 %add2, i32* %val
-  %2 = load i32, i32* %val
+  store i32 %add, i32* %y12
+  %1 = load i32, i32* %y12
+  %add3 = add i32 %1, 100
+  store i32 %add3, i32* %y12
+  %2 = load i32, i32* %y12
   store i32 %2, i32* %add_retvar
   br label %_ret
 

@@ -50,6 +50,7 @@ public:
     virtual antlrcpp::Any visitMatrixAgnDecl(fxParser::MatrixAgnDeclContext *context);
     virtual antlrcpp::Any visitMatrixConst(fxParser::MatrixConstContext *context);
     virtual antlrcpp::Any visitMatrixLine(fxParser::MatrixLineContext *context);
+    virtual antlrcpp::Any visitTargetType(fxParser::TargetTypeContext *context);
 
 
 

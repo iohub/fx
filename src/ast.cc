@@ -118,7 +118,7 @@ BinaryExpr::BinaryExpr(Loc loc, Kind nodeKind, Ty ty, std::string opname, AstNod
 }
 
 std::string FuncDecl::dump() {
-    std::string str = "FuncDecl@" + name;
+    std::string str = _f("FuncDecl@{}@{}", name, tty == TargetTy::DEVICE ? "kernel" : "cpu");
     for (auto itr: args()) str += itr->sexp();
     for (auto itr: body()) str +=  itr->sexp();
     return _f("({})", str);
@@ -127,6 +127,7 @@ std::string FuncDecl::dump() {
 json FuncDecl::tojson(json parent) {
     json child;
     child["name"] = name;
+    child["tty"] = tty;
     child["args"] = vec_tojson(args_);
     child["body"] = vec_tojson(body_);
     parent["FuncDecl"] = child;

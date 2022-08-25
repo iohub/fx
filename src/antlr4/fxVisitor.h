@@ -25,6 +25,8 @@ public:
 
     virtual antlrcpp::Any visitFuncDef(fxParser::FuncDefContext *context) = 0;
 
+    virtual antlrcpp::Any visitTargetType(fxParser::TargetTypeContext *context) = 0;
+
     virtual antlrcpp::Any visitClassDef(fxParser::ClassDefContext *context) = 0;
 
     virtual antlrcpp::Any visitFieldDecl(fxParser::FieldDeclContext *context) = 0;
