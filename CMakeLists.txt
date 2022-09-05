@@ -7,14 +7,14 @@ set(CMAKE_TLS_VERIFY true)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Wno-reorder -Wno-attributes")
 
+find_package(CUDA REQUIRED)
+message(STATUS "Found CUDA ${CUDA_VERSION_STRING} at ${CUDA_TOOLKIT_ROOT_DIR}")
+find_package(CUDAToolkit REQUIRED)
+
 set(LLVM_PKG clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz)
 set(LLVM_BUILT_URL https://releases.llvm.org/9.0.0/${LLVM_PKG})
 set(JSONLIB_URL https://github.com/nlohmann/json/releases/download/v3.10.5/json.tar.xz)
 set(ANTLR_URL https://www.antlr.org/download/antlr4-cpp-runtime-4.7.2-source.zip)
-
-find_package(CUDA REQUIRED)
-message(STATUS "Found CUDA ${CUDA_VERSION_STRING} at ${CUDA_TOOLKIT_ROOT_DIR}")
-find_package(CUDAToolkit REQUIRED)
 
 FetchContent_Declare(json URL ${JSONLIB_URL} URL_HASH MD5=4b67aba51ddf17c798e80361f527f50e)
 FetchContent_MakeAvailable(json)
@@ -92,11 +92,8 @@ add_executable(fx
 
 include_directories(${CMAKE_SOURCE_DIR}/src)
 include_directories("${CUDA_INCLUDE_DIRS}")
-include_directories(${CMAKE_SOURCE_DIR}/src/antlr4)
-include_directories(${ANTLR_DIR}/runtime/src)
-include_directories(${CMAKE_SOURCE_DIR}/third_party/CLI11/include)
-include_directories(${LLVM_INCDIR})
-include_directories(/usr/include)
+include_directories(${CMAKE_SOURCE_DIR}/src/antlr4 ${ANTLR_DIR}/runtime/src)
+include_directories(${CMAKE_SOURCE_DIR}/third_party/CLI11/include ${LLVM_INCDIR})
 
 add_subdirectory(${CMAKE_SOURCE_DIR}/third_party/fmt)
 add_subdirectory(${CMAKE_SOURCE_DIR}/third_party/CLI11)

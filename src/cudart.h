@@ -31,7 +31,12 @@ public:
     };
 
     CudaRTResult Init();
-    CudaRTResult Launch(const std::string &ptxFile);
+    CudaRTResult Launch(const char *ptxFile, const char *kernelName,
+                           int blocksX, int blocksY, int blocksZ,
+                           int threadsX, int threadsY, int threadsZ,
+                           int shared_mem_bytes,
+                           size_t arg_sizes[],
+                           void *args[]);
 
 private:
     CUdevice dev_;
