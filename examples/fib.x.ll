@@ -1,5 +1,5 @@
-; ModuleID = 'examples/fib.x'
-source_filename = "examples/fib.x"
+; ModuleID = '../../examples/fib.x'
+source_filename = "../../examples/fib.x"
 
 define i32 @fib(i32 %x) {
 entry:
